@@ -1,0 +1,12 @@
+:root {
+  --bg-dark: #0a0a0a;
+  --bg-card: #1a1a1a;
+}
+
+* { box-sizing: border-box; }
+body { 
+  margin: 0; 
+  background: var(--bg-dark); 
+  color: white; 
+  font-family: system-ui; 
+}

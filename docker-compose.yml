@@ -1,0 +1,30 @@
+services:
+  load-balancer:
+    build: ./load-balancer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+    networks:
+      - hellwatch
+
+  # Only to build the image hellwatch-server:latest
+  dyn-server-template:
+    build: ./server
+    image: hellwatch-server:latest
+    profiles:
+      - template
+    networks:
+      - hellwatch
+
+  client:
+    build: ./client
+    ports:
+      - "3001:3000"
+    networks:
+      - hellwatch
+
+networks:
+  hellwatch:
+    driver: bridge
