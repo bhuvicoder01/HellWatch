@@ -3,9 +3,9 @@ import VideoCard from "@/components/video/VideoCard";
 import VideoGrid from "@/components/video/VideoGrid";
 import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
-export default function VideoDetailsPage() {
+function VideoDetailsContent() {
     const [videos,setVideos]=useState([]);
     const [video,setVideo]=useState(null);
     const [windowWidth, setWindowWidth] = useState(0);
@@ -60,5 +60,13 @@ export default function VideoDetailsPage() {
         </div>
         
         </>
+    )
+}
+
+export default function VideoDetailsPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <VideoDetailsContent />
+        </Suspense>
     )
 }
