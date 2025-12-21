@@ -1,7 +1,7 @@
 import { API_URL } from "@/services/api";
 import Link from "next/link";
 
-export default function VideoCard({Key, video, controls=false, detailPage=false }: {key?: any, video: any, controls?: boolean, detailPage?: boolean }) {
+export default function VideoCard({Key, video, controls=false, detailPage=false }: {Key?: any, video: any, controls?: boolean, detailPage?: boolean }) {
     const handleMouseOver = async (e: React.MouseEvent<HTMLVideoElement>) => {
         if (!detailPage) {
             try {
