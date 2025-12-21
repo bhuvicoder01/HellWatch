@@ -7,7 +7,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Streaming Platform',
+  icon: '/favicon.png',
+  title: 'HellWatch',
   description: 'Your video streaming app'
 };
 
