@@ -1,0 +1,64 @@
+'use client'
+import VideoCard from "@/components/video/VideoCard";
+import VideoGrid from "@/components/video/VideoGrid";
+import { api } from "@/services/api";
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react";
+
+export default function VideoDetailsPage() {
+    const [videos,setVideos]=useState([]);
+    const [video,setVideo]=useState(null);
+    const [windowWidth, setWindowWidth] = useState(0);
+    const id=useSearchParams().get('id');
+    // console.log("Video ID:", id);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        const loadVideos = async () => {
+      const res = await api.get("/videos");
+      setVideos(res.data);
+      
+    };
+    loadVideos();
+
+        if (id) {
+            getVideoData(id);
+        }
+    }, [id]);
+
+
+    const getVideoData = async (id: string) => {
+        try {
+            const res=await api.get(`/videos/${id}`);
+            setVideo(res.data);
+            return res.data;
+        } catch (error) {
+            console.error('Error fetching video data:', error);
+            return null;
+            
+        }
+    }
+    if(!video){
+        return <div>Loading...</div>
+    }
+    return (<>
+        <div className="d-flex flex-column flex-lg-row p-4" style={{gap: '20px'}}>
+            
+            <div className="flex-grow-1">
+            <VideoCard controls={true} detailPage={true} video={video} />
+            </div>
+            <div className="col-lg-4" style={{maxWidth: '100%'}}>
+           {videos.length!==0 && <VideoGrid detailsPage={true} mobileDisplay={windowWidth<=768} videos={videos} />}
+
+        </div>
+        </div>
+        
+        </>
+    )
+}

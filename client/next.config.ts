@@ -1,32 +1,23 @@
 import type { NextConfig } from "next";
+// require('dotenv').config();
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output:'standalone',
+  // output:'standalone',
    // ✅ Force PostCSS (No LightningCSS)
-  experimental: {
-    useLightningcss:true
-  },
   async rewrites() {
-    return process.env.NODE_ENV === 'production'
-      ? [
-          {
-            source: '/api/:path*',
-            destination: 'http://load-balancer:8080/api/:path*' // Docker service name
-          }
-        ]
-      : [
-          {
-            source: '/api/:path*',
-            destination: 'http://localhost:8080/api/:path*'
-          }
-        ];
-  },
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: '**' } // Video thumbnails
-    ]
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5000/:path*'
+      }
+    ];
   }
+  // images: {
+  //   remotePatterns: [
+  //     { protocol: 'https', hostname: '**' } // Video thumbnails
+  //   ]
+  // }
 };
 
 export default nextConfig;

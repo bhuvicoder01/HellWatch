@@ -1,9 +1,27 @@
 const express = require('express');
+require('dotenv').config();
 const cors = require('cors');
 
+
+
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin:'*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+  
+));
 app.use(express.json());
+app.use(express.static('public'));
+
+//file and service paths
+const videoRoutes = require('./routes/videos');
+const MongoDB = require('./services/db');
+
+MongoDB.connect(process.env.MONGODB_URI);
 
 // Health check — used by LB
 app.get('/health', (req, res) => {
@@ -15,15 +33,9 @@ app.get('/health', (req, res) => {
 });
 
 // Videos API (no /api prefix here)
-app.get('/videos', (req, res) => {
-  res.json([
-    { id: 1, title: 'HellWatch Trailer', thumbnail: 'https://via.placeholder.com/300x200?text=Trailer' },
-    { id: 2, title: 'Action Movie',     thumbnail: 'https://via.placeholder.com/300x200?text=Action' },
-    { id: 3, title: 'Horror Flick',     thumbnail: 'https://via.placeholder.com/300x200?text=Horror' }
-  ]);
-});
+app.use('/videos', videoRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });

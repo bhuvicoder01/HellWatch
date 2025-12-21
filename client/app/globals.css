@@ -6,7 +6,149 @@
 * { box-sizing: border-box; }
 body { 
   margin: 0; 
-  background: var(--bg-dark); 
-  color: white; 
+  background: whitesmoke; 
+  color: rgb(0, 0, 0); 
   font-family: system-ui; 
+}
+
+.navbar{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background: #000000;
+  padding-inline: 5;
+
+}
+.navbar_logo img{
+  display: flexbox;
+  color: var(--bg-dark);
+  width: 20vh;
+}
+.navbar_link{
+  display: flex;
+  
+
+}
+
+.navbar_link a{
+  text-decoration: none;
+  color: white;
+  font-size: 20px;
+  margin-right: 15px;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+.play_icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    color: #fff;
+    opacity: 0.7;
+    animation: fadeInOut 0.5s;
+    pointer-events: none;
+}
+.pause_icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    color: #fff;
+    opacity: 0.7;
+    animation: fadeInOut 0.5s;
+    pointer-events: none;
+}
+.video-grid {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 80vh;
+  gap: 20px;
+  padding: 20px;
+  /* background: var(--bg-dark); */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.video-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.video-card {
+  position: relative;
+  flex: 0 0 280px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.video-card.no-hover:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: none;
+}
+
+.video-card video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  display: block;
+}
+
+.video-card .video-info {
+  padding: 15px;
+}
+
+.video-card .title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-card .description {
+  font-size: 14px;
+  color: #ccc;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .video-grid {
+    padding: 10px;
+    gap: 15px;
+  }
+  
+  .video-card {
+    flex: 0 0 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-card {
+    flex: 0 0 220px;
+  }
+  
+  .video-card .title {
+    font-size: 14px;
+  }
+  
+  .video-card .description {
+    font-size: 12px;
+  }
 }
