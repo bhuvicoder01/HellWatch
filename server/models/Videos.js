@@ -2,7 +2,12 @@ const mongoose=require('mongoose')
 
 const videoSchema=mongoose.Schema({
 
-    key:String
+    key:String,
+    thumbnail:String,
+    title:String,
+    description:String,
+    duration:String,
+    genre:String
 },
 {timestamps:true})
 

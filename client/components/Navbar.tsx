@@ -10,6 +10,7 @@ export default function Navbar() {
             </div>
             <div className="navbar-link">
                 <a href="/videos">Videos</a>
+                <a href="/videos/upload">Upload</a>
                 <a href="#">About</a>
                 <a href="#">Contact</a>
             </div>

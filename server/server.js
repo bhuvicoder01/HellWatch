@@ -12,10 +12,10 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
-  
 ));
 app.use(express.json());
 app.use(express.static('public'));
+// app.use(express.urlencoded({ extended: true }));
 
 //file and service paths
 const videoRoutes = require('./routes/videos');

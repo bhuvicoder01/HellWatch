@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Video = require('../models/Videos'); // your model file
 const { S3Client, HeadObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { getUploadUrl, getUploadRate, completeUpload } = require("../services/s3");
+const { getUploadUrl, getUploadRate, completeUpload, thumbnailUpload } = require("../services/s3");
 
 const s3=new S3Client(
     {
@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
     const formatted = videos.map(v => ({
       id: v._id,
       key: v.key,
+      thumbnail: v.thumbnail,
       createdAt: v.createdAt
     }));
     res.json(formatted);
@@ -36,7 +37,28 @@ router.get("/", async (req, res) => {
 
 router.get('/upload-url', getUploadUrl)
 router.get('/upload-rate/:key', getUploadRate)
-router.post('/complete-upload', completeUpload)
+router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeUpload)
+router.get('/:id/thumbnail', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const video = await Video.findById(id);
+    if (!video || !video.thumbnail) {
+      return res.sendStatus(404);
+    }
+    
+    const command = new GetObjectCommand({
+      Bucket: BUCKET,
+      Key: video.thumbnail
+    });
+    
+    const data = await s3.send(command);
+    res.setHeader('Content-Type', 'image/jpeg');
+    data.Body.pipe(res);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 
 router.get("/:id", async (req, res) => {
   try {
@@ -46,6 +68,7 @@ router.get("/:id", async (req, res) => {
     const formatted = {
       id: videoDoc._id,
       key: videoDoc.key,
+      thumbnail: videoDoc.thumbnail,
       createdAt: videoDoc.createdAt
     };
     res.json(formatted);
@@ -73,7 +96,7 @@ router.get("/stream/:id", async (req, res) => {
     );
     const videoSize = headData.ContentLength;
 
-    const CHUNK_SIZE = 3 * 1024 * 1024; // 3 MB
+    const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB
     const start = Number(range.replace(/\D/g, ""));
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
     const contentLength = end - start + 1;

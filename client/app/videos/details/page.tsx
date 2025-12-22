@@ -13,14 +13,7 @@ function VideoDetailsContent() {
     // console.log("Video ID:", id);
 
     useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    useEffect(() => {
-        const loadVideos = async () => {
+          const loadVideos = async () => {
       const res = await api.get("/videos");
       setVideos(res.data);
       
@@ -30,6 +23,11 @@ function VideoDetailsContent() {
         if (id) {
             getVideoData(id);
         }
+
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, [id]);
 
 
