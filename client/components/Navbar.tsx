@@ -26,7 +26,7 @@ export default function Navbar() {
                 </div> */}
             <div className="navbar-auth">
                 <div className="navbar-profile" onClick={() => setShowDropdown(!showDropdown)}>
-                    <img src={user.avatar || '/default-avatar.png'} alt="profile" style={{ cursor: 'pointer' }} />
+                    <img src={'/default-avatar.png'} alt="profile" style={{ cursor: 'pointer' }} />
                     {showDropdown &&( user===undefined ? (
                         <div className="profile-dropdown">
                             <Link href="/auth/login" className="dropdown-item">Login</Link>
