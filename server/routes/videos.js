@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Video = require('../models/Videos'); // your model file
-const { S3Client, HeadObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { getUploadUrl, getUploadRate, completeUpload, thumbnailUpload } = require("../services/s3");
 
 const s3=new S3Client(
@@ -24,6 +24,7 @@ router.get("/", async (req, res) => {
     // send only what React needs
     const formatted = videos.map(v => ({
       id: v._id,
+      title: v?.title,
       key: v.key,
       thumbnail: v.thumbnail,
       createdAt: v.createdAt
@@ -67,6 +68,7 @@ router.get("/:id", async (req, res) => {
 
     const formatted = {
       id: videoDoc._id,
+      title: videoDoc.title,
       key: videoDoc.key,
       thumbnail: videoDoc.thumbnail,
       createdAt: videoDoc.createdAt
@@ -116,6 +118,59 @@ router.get("/stream/:id", async (req, res) => {
 
     const data = await s3.send(command);
     data.Body.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+// DELETE /videos/:id -> delete video and its S3 objects
+router.delete("/:id", async (req, res) => {
+  try {
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.sendStatus(404);
+
+    // Delete video from S3
+    await s3.send(new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: video.key
+    }));
+
+    // Delete thumbnail from S3 if exists
+    if (video.thumbnail) {
+      await s3.send(new DeleteObjectCommand({
+        Bucket: BUCKET,
+        Key: video.thumbnail
+      }));
+    }
+
+    // Delete from database
+    await Video.findByIdAndDelete(req.params.id);
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+// PUT /videos/:id -> update video metadata
+router.put("/:id", async (req, res) => {
+  try {
+    const { title } = req.body;
+    const video = await Video.findByIdAndUpdate(
+      req.params.id,
+      { title },
+      { new: true }
+    );
+    if (!video) return res.sendStatus(404);
+    
+    res.json({
+      id: video._id,
+      title: video?.title,
+      key: video.key,
+      thumbnail: video?.thumbnail,
+      createdAt: video.createdAt
+    });
   } catch (err) {
     console.error(err);
     res.sendStatus(500);

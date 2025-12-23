@@ -12,6 +12,7 @@ function VideoDetailsContent() {
     const [videos,setVideos]=useState(Videos);
     const [video,setVideo]=useState(null);
     const [windowWidth, setWindowWidth] = useState(0);
+    const [showEdit, setShowEdit] = useState(true);
     
     const id=useSearchParams().get('id');
     // console.log("Video ID:", id);
@@ -49,7 +50,7 @@ function VideoDetailsContent() {
         <div className="d-flex flex-column flex-lg-row p-4" style={{gap: '20px'}}>
             
             <div className="flex-grow-1">
-            <VideoCard controls={true} detailPage={true} video={video} />
+            <VideoCard mainVideo={true} showEdit={showEdit} controls={true} detailPage={true} video={video} />
             </div>
             <div className="col-lg-4" style={{maxWidth: '100%'}}>
            {videos.length!==0 && <VideosPage />}

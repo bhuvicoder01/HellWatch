@@ -2,7 +2,7 @@
 import { api } from "@/services/api";
 import { createContext, useContext, useEffect, useState } from "react";
 
-const VideoContext=createContext({Videos: []});
+const VideoContext=createContext({Videos: [], refreshVideos: () => {}});
 export interface VideoContextType {
 videos: any;
 }
@@ -24,13 +24,17 @@ const loadVideos = async () => {
       setVideos(res.data);
       console.log(res.data);
     };
+    
+    const refreshVideos = () => {
+        loadVideos();
+    };
     useEffect(() => {
 
         loadVideos();
     }, []);
 
     return (
-        <VideoContext.Provider value={{ Videos }}>
+        <VideoContext.Provider value={{ Videos, refreshVideos }}>
 
             {children}
         </VideoContext.Provider>
