@@ -1,29 +1,29 @@
 'use client'
 import VideoCard from "@/components/video/VideoCard";
 import VideoGrid from "@/components/video/VideoGrid";
+import { useVideo } from "@/contexts/VideoContext";
 import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
+import VideosPage from "../page";
 
 function VideoDetailsContent() {
-    const [videos,setVideos]=useState([]);
+    const {Videos}=useVideo()
+    const [videos,setVideos]=useState(Videos);
     const [video,setVideo]=useState(null);
     const [windowWidth, setWindowWidth] = useState(0);
+    
     const id=useSearchParams().get('id');
     // console.log("Video ID:", id);
-
+    // setVideos(Videos);
+    useMemo(() => {
+      setVideos(Videos);
+    }, [Videos]);
     useEffect(() => {
-          const loadVideos = async () => {
-      const res = await api.get("/videos");
-      setVideos(res.data);
       
-    };
-    loadVideos();
-
         if (id) {
             getVideoData(id);
         }
-
         const handleResize = () => setWindowWidth(window.innerWidth);
         setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
@@ -52,7 +52,7 @@ function VideoDetailsContent() {
             <VideoCard controls={true} detailPage={true} video={video} />
             </div>
             <div className="col-lg-4" style={{maxWidth: '100%'}}>
-           {videos.length!==0 && <VideoGrid detailsPage={true} mobileDisplay={windowWidth<=768} videos={videos} />}
+           {videos.length!==0 && <VideosPage />}
 
         </div>
         </div>

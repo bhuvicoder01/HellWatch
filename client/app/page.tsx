@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from "react";
-import Video from "./videos/page";
 import {api} from "@/services/api"
+import VideosPage from "./videos/page";
 
 export default function Home() {
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function Home() {
           🚀 HellWatch Streaming
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-         <Video/>
+         <VideosPage/>
         </div>
       </div>
     </main>

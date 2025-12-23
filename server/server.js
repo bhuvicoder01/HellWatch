@@ -11,12 +11,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+  preflightContinue: false}
 ));
 app.use(express.json());
 app.use(express.static('public'));
 // app.use(express.urlencoded({ extended: true }));
-
 //file and service paths
 const videoRoutes = require('./routes/videos');
 const MongoDB = require('./services/db');
@@ -36,6 +35,8 @@ app.get('/health', (req, res) => {
 app.use('/videos', videoRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
+
+server.setMaxListeners(1000);

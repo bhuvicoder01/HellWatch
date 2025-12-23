@@ -1,11 +1,13 @@
 'use client'
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext, useMemo, Suspense } from "react";
 import { api } from "../../services/api";
 import axios from "axios";
 import VideoGrid from "@/components/video/VideoGrid";
+import { useVideo } from "@/contexts/VideoContext";
 
 function Videos() {
-  const [videos, setVideos] = useState([]);
+  const {Videos}=useVideo()
+  const [videos, setVideos] = useState(Videos);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showIcon, setShowIcon] = useState(false);
@@ -17,15 +19,21 @@ function Videos() {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  useEffect(() => {
-    const loadVideos = async () => {
-      const res = await api.get("/videos");
-      setVideos(res.data);
+useMemo(() => {
+  setVideos(Videos);
+}, [Videos]);
+
+
+  // useEffect(() => {
+  //   console.log(Videos)
+  //   const loadVideos = async () => {
+  //     // const res = await api.get("/videos");
+  //     setVideos(Videos);
       
-      console.log(API_URL)
-    };
-    loadVideos();
-  }, []);
+  //     console.log(API_URL)
+  //   };
+  //   loadVideos();
+  // }, [Videos]);
 
  return(<>
     <div className="container-fluid">
@@ -35,5 +43,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  
  </>)
 };
+export default function VideosPage({autoplay=false}: {autoplay?: boolean}) {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Videos />
+        </Suspense>
+    )
+}
 
-export default Videos;

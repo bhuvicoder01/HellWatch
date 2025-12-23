@@ -6,10 +6,22 @@ export default function VideoCard({Key, video, controls=false, detailPage=false 
 
     const [videoData, setVideoData] = useState(video);
     const [showThumbnail, setShowThumbnail] = useState(true);
+    const [thumbnail,setThumbnail]=useState<string|Blob|null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    
-    useEffect(() => {
-         const getVideoData = async (id: string) => {
+
+    const fetchThumbnail = async () => {
+            try {
+                const res = await api.get(`/videos/${video.id}/thumbnail`, {
+                    responseType: 'blob',
+                });
+                const blob = res.data;
+                const url = URL.createObjectURL(blob);
+                setThumbnail(url);
+            } catch (error) {
+                console.error('Error fetching thumbnail:', error);
+            }
+        };
+    const getVideoData = async (id: string) => {
                 try {
                     const res=await api.get(`/videos/${id}`);
                     setVideoData(res.data);
@@ -20,7 +32,11 @@ export default function VideoCard({Key, video, controls=false, detailPage=false 
                     
                 }
             }
-            getVideoData(video.id);
+    
+    useEffect(() => {
+        fetchThumbnail();
+        getVideoData(video.id);
+
     }, [video.id]);
     
     useEffect(() => {
@@ -61,7 +77,7 @@ export default function VideoCard({Key, video, controls=false, detailPage=false 
                     <div className="video-container" onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
                         {showThumbnail && videoData.thumbnail && (
                             <img
-                                src={`${API_URL}/videos/${videoData.id}/thumbnail`}
+                                src={thumbnail as string}
                                 alt="Video thumbnail"
                                 className="thumbnail"
                                 onError={() => setShowThumbnail(false)}

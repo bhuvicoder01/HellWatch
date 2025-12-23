@@ -9,10 +9,10 @@ export default function Navbar() {
               </Link>
             </div>
             <div className="navbar-link">
-                <a href="/videos">Videos</a>
-                <a href="/videos/upload">Upload</a>
-                <a href="#">About</a>
-                <a href="#">Contact</a>
+                <Link href="/videos">Videos</Link>
+                <Link href="/videos/upload">Upload</Link>
+                <Link href="#">About</Link>
+                <Link href="#">Contact</Link>
             </div>
         </div>
     )

@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Inter } from 'next/font/google';
+import { VideoProvider } from '@/contexts/VideoContext';
 
 
 const inter = Inter({ subsets: ['latin'] });
@@ -20,8 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <VideoProvider>
         <Navbar/>
         {children}
+        </VideoProvider>
         </body>
     </html>
   );

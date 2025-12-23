@@ -40,6 +40,10 @@ const s3=new S3Client(
         credentials:{
             accessKeyId:process.env.accessKeyId,
             secretAccessKey:process.env.secretAccessKey
+        },
+        maxAttempts: 3,
+        requestHandler: {
+            maxSockets: 1000
         }
     }
 )
