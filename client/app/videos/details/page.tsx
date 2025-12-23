@@ -47,12 +47,12 @@ function VideoDetailsContent() {
         return <div>Loading...</div>
     }
     return (<>
-        <div className="d-flex flex-column flex-lg-row p-4" style={{gap: '20px'}}>
+        <div className="d-flex flex-column flex-lg-row mb-5" style={{gap: '20px'}}>
             
             <div className="flex-grow-1">
             <VideoCard mainVideo={true} showEdit={showEdit} controls={true} detailPage={true} video={video} />
             </div>
-            <div className="col-lg-4" style={{maxWidth: '100%'}}>
+            <div className="rows-lg-4" style={{maxWidth: '100%'}}>
            {videos.length!==0 && <VideosPage />}
 
         </div>

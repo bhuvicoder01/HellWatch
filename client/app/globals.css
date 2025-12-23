@@ -3,34 +3,36 @@
   --bg-card: #1a1a1a;
 }
 
-* { box-sizing: border-box; }
-body { 
-  margin: 0; 
-  background: whitesmoke; 
-  color: rgb(0, 0, 0); 
-  font-family: system-ui; 
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: whitesmoke;
+  color: rgb(0, 0, 0);
+  font-family: system-ui;
 }
 
-.navbar{
+.navbar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   background: #000000;
   padding-inline: 5;
-
+  position:fixed;
+  width: 100%;
+  z-index: 100;
 }
-.navbar_logo img{
+.navbar_logo img {
   display: flexbox;
   color: var(--bg-dark);
   width: 20vh;
 }
-.navbar_link{
+.navbar_link {
   display: flex;
-  
-
 }
 
-.navbar-link a{
+.navbar-link a {
   text-decoration: none;
   color: rgb(254, 0, 0);
   font-size: 15px;
@@ -38,16 +40,22 @@ body {
 }
 /*add a fire ANIMATION on hover*/
 @keyframes fireAnimation {
-  0% { color: red; }
-  50% { color: orange; }
-  100% { color: red; }
+  0% {
+    color: red;
+  }
+  50% {
+    color: orange;
+  }
+  100% {
+    color: red;
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   .navbar-link a:hover {
     animation: fireAnimation 1s infinite;
   }
 }
-.navbar-link a:hover{
+.navbar-link a:hover {
   /* color: orange; */
   font-size: 17px;
   transition: all 0.8s ease-out;
@@ -68,32 +76,108 @@ body {
     margin: 5px;
   }
 }
+
+.footer {
+  background: #000000;
+  color: rgb(255, 0, 0);
+  text-align: center;
+  padding: 20px 0;
+  position: fixed;
+  bottom: 0;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.navbar-profile {
+  position: absolute;
+  top: 30%;
+  right: 1%;
+  cursor: pointer;
+  background-color: #dc3545;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  /* overflow: hidden; */
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 50px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+  z-index: 1000;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .navbar-profile {
+    /* position: absolute; */
+    top:20%;
+    right: 10px;
+  }
+  .profile-dropdown {
+    right: 0px;
+    /* left: 0; */
+  }
+}
+
+.dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #333;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item.logout {
+  color: #dc3545;
+  border-top: 1px solid #eee;
+}
+
 @keyframes fadeInOut {
-  0% { opacity: 0; }
-  50% { opacity: 0.7; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 .play_icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 60px;
-    color: #fff;
-    opacity: 0.7;
-    animation: fadeInOut 0.5s;
-    pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+  color: #fff;
+  opacity: 0.7;
+  animation: fadeInOut 0.5s;
+  pointer-events: none;
 }
 .pause_icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 60px;
-    color: #fff;
-    opacity: 0.7;
-    animation: fadeInOut 0.5s;
-    pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+  color: #fff;
+  opacity: 0.7;
+  animation: fadeInOut 0.5s;
+  pointer-events: none;
 }
 .video-grid {
   display: flex;
@@ -169,7 +253,7 @@ body {
     padding: 10px;
     gap: 15px;
   }
-  
+
   .video-card {
     flex: 0 0 250px;
   }
@@ -179,11 +263,11 @@ body {
   .video-card {
     flex: 0 0 220px;
   }
-  
+
   .video-card .title {
     font-size: 14px;
   }
-  
+
   .video-card .description {
     font-size: 12px;
   }

@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { VideoProvider } from '@/contexts/VideoContext';
+import Footer from '@/components/Footer';
 
 
 const inter = Inter({ subsets: ['latin'] });
@@ -23,7 +24,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <VideoProvider>
         <Navbar/>
+        <div className='container 'style={{padding:'150px 10px 50px 10px'}}>
         {children}
+        </div>
+        <Footer/>
         </VideoProvider>
         </body>
     </html>

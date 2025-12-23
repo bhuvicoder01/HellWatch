@@ -179,6 +179,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                 display: flex;
                 gap: 8px;
                 margin-top: 8px;
+                margin-left: 8px;
             }
             
             .edit-btn, .delete-btn {
