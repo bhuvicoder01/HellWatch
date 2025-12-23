@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function Navbar() {
-    const user = undefined;
+    const user: {avatar?: string} = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : undefined;
     const [showDropdown, setShowDropdown] = useState(false);
     return (<>
         <div className="navbar">
@@ -26,7 +26,7 @@ export default function Navbar() {
                 </div> */}
             <div className="navbar-auth">
                 <div className="navbar-profile" onClick={() => setShowDropdown(!showDropdown)}>
-                    <img src={`${user?.avatar ? user.avatar : '/default-avatar.png'}`} alt="profile" style={{ cursor: 'pointer' }} />
+                    <img src={user.avatar || '/default-avatar.png'} alt="profile" style={{ cursor: 'pointer' }} />
                     {showDropdown &&( user===undefined ? (
                         <div className="profile-dropdown">
                             <Link href="/auth/login" className="dropdown-item">Login</Link>
