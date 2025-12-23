@@ -2,15 +2,14 @@
 
 import { useEffect } from "react";
 import Video from "./videos/page";
+import {api} from "@/services/api"
 
 export default function Home() {
   useEffect(() => {
   const fetchFromServer = async () => {
     try {
-      const api=process.env.NEXT_PUBLIC_API_URL
-      console.log("API URL:", api);
-      const res = await fetch('http://localhost:5000/health');
-      const data = await res.json();
+      const res = await api.get('/health');
+      const data = await res.data;
       console.log('Health check:', data);
     } catch (error) {
       console.error('Failed to fetch health:', error);
