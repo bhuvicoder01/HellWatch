@@ -1,4 +1,5 @@
 'use client';
+import { API_URL } from '@/services/api';
 import { useState, useRef, useEffect } from 'react';
 
 interface CustomVideoPlayerProps {
@@ -19,7 +20,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [isMuted, setIsMuted] = useState(false);
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const videoUrl = `/api/videos/stream/${videoId}?quality=${quality}`;
+  const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
 
   useEffect(() => {
     const video = videoRef.current;
