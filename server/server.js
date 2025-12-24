@@ -42,4 +42,4 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
 
-server.setMaxListeners(10000);
+server.setMaxListeners(1000);
