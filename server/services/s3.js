@@ -1,4 +1,6 @@
 const {S3Client,PutObjectCommand,GetObjectCommand} =require('@aws-sdk/client-s3')
+const { NodeHttpHandler } =require( "@smithy/node-http-handler");
+const {Agent}=require('https')
 const{getSignedUrl}=require('@aws-sdk/s3-request-presigner')
 const multerS3=require('multer-s3')
 const multer=require('multer')
@@ -7,6 +9,35 @@ const path = require('path')
 const upload = require('./upload')
 const videoModel = require('../models/Videos')
 const TranscodingService = require('./transcoding')
+
+const agent=new Agent({
+    keepAlive:true,
+    maxSockets:1000
+})
+
+// 1. Configure the S3 Client
+const s3=new S3Client(
+    {
+        region:'us-east-1',
+        credentials:{
+            accessKeyId:process.env.accessKeyId,
+            secretAccessKey:process.env.secretAccessKey
+        },
+        maxAttempts: 3,
+        requestHandler:new NodeHttpHandler(
+            {
+              httpsAgent:agent,
+                requestTimeout: 3000000,
+                connectionTimeout: 3000000,
+                socketAcquisitionWarningTimeout: 3000000
+            }
+        ),
+        connectionTimeout: 3000000,
+        httpOptions: {
+            maxSockets: 1000
+        }
+    }
+)
 
 // Track upload progress
 const uploadProgress = new Map();
@@ -35,20 +66,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
 };
 
 
-// 1. Configure the S3 Client
-const s3=new S3Client(
-    {
-        region:'us-east-1',
-        credentials:{
-            accessKeyId:process.env.accessKeyId,
-            secretAccessKey:process.env.secretAccessKey
-        },
-        maxAttempts: 3,
-        requestHandler: {
-            maxSockets: 10000
-        }
-    }
-)
+
 
 
 

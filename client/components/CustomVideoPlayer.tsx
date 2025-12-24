@@ -19,6 +19,8 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isDoubleTappedSeek,setIsDoubleTappedSeek]=useState(false)
+  const [isDoubleTappedRewind,setIsDoubleTappedRewind]=useState(false)
 
   const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
 
@@ -69,12 +71,24 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     video.currentTime = newTime;
     setCurrentTime(newTime);
   };
-  const handleDoubleTapSeek=(seekTime:number=0)=>{
+  const handleDoubleTapSeek=(seekTime:number=0,action:string='seek')=>{
     const video=videoRef.current;
     if(!video) return;
     const newTime=seekTime;
     video.currentTime=newTime;
     setCurrentTime(newTime);
+    if(action==='seek'){
+      setIsDoubleTappedSeek(true)
+      setTimeout(()=>{
+        setIsDoubleTappedSeek(false)
+      },300)
+    }
+    if(action==='rewind'){
+      setIsDoubleTappedRewind(true)
+      setTimeout(()=>{
+        setIsDoubleTappedRewind(false)
+      },300)
+    }
   }
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,13 +130,16 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const toggleFullscreen = () => {
     const container = containerRef.current;
     if (!container) return;
-    
-    if (!isFullscreen) {
+    if(document.fullscreenElement===null){
       container.requestFullscreen();
-    } else {
-      document.exitFullscreen();
+      setIsFullscreen(true)
     }
-    setIsFullscreen(!isFullscreen);
+    else{
+      document.exitFullscreen();
+      setIsFullscreen(false)
+    }
+    
+   
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -161,8 +178,10 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   return (
     <div 
       ref={containerRef}
-      onMouseEnter={() => setShowControls(true)}
-      // onMouseLeave={() => setShowControls(false)}
+      onMouseMove={() => {setShowControls(true) 
+        hideControlsAfterDelay();
+      }}
+      onMouseLeave={() => setShowControls(false)}
       onTouchStart={handleTouchStart}
       // onTouchEnd={handleTouchEnd}
       onTouchStartCapture={handleTouchStart}
@@ -209,19 +228,20 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 fontSize: '50px',
                 cursor: 'pointer',
                 padding: '8px',
-                borderRadius: '50%',
+                borderRadius: '80%',
                 transition: 'background-color 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minWidth: '40px',
-                minHeight: '40px',
-                flexShrink: 0
+                minWidth: '90px',
+                minHeight: '80px',
+                flexShrink: 0,
+                zIndex:20
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.09)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isPlaying ?<text style={{maxHeight:'40px',padding:'0',overflow:'hidden'}}>||</text> : '▶'}
             </button>
       )}
       
@@ -240,7 +260,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         onClick={togglePlay}
       />
       
-      <div onDoubleClick={()=>handleDoubleTapSeek(currentTime>5?currentTime-5:0)} 
+      <div onDoubleClick={()=>handleDoubleTapSeek(currentTime>5?currentTime-5:0,'rewind')} 
       onTouchEnd={(e)=>{
         const DBL_TAP_THRESHOLD = 1000;
         const tapLength=(new Date().getTime())-lastTap;
@@ -263,17 +283,17 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 1
+        opacity:`${isDoubleTappedRewind?1:0}`
       }}>
         <div style={{
           fontSize: '24px',
           // color: 'white',
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(0, 0, 0, 0.15)',
           borderRadius: '50%',
           padding: '12px',
           opacity: showControls ? 0.7 : 0,
           transition: 'opacity 0.2s ease'
-        }}>{`<<`}</div>
+        }}>{`≪`}</div>
       </div>
       
       <div onDoubleClick={()=>handleDoubleTapSeek(duration-currentTime<5?currentTime+((duration-currentTime)):currentTime+5)} 
@@ -303,36 +323,38 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 1
+        opacity: `${isDoubleTappedSeek?1:0}`
       }}>
         <div style={{
           fontSize: '24px',
           // color: 'white',
           color:'black',
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(0, 0, 0, 0.15)',
           borderRadius: '50%',
           padding: '12px',
           opacity: showControls ? 0.7 : 0,
           transition: 'opacity 0.2s ease'
-        }}>{`>>`}</div>
+        }}>{`≫`}</div>
       </div>
       
       <div style={{
+        // display:'flex',
         position: 'absolute',
+        justifyContent:'space-between',
         bottom: 0,
         left: 0,
         right: 0,
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
-        padding: '24px 20px 16px',
+        padding: '12px 12px 16px',
         opacity: showControls ? 1 : 0,
         transition: 'opacity 0.3s ease',
         pointerEvents: 'auto',
         zIndex: 15
       }}>
-        <div style={{ marginBottom: '16px', position: 'relative', zIndex: 16 }}>
+        <div style={{ marginBottom: '10px', position: 'relative', zIndex: 16 }}>
           <div style={{
             width: '100%',
-            height: '6px',
+            height: '3px',
             backgroundColor: 'rgba(255,255,255,0.2)',
             borderRadius: '3px',
             position: 'relative',
@@ -384,7 +406,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
           justifyContent: 'space-between',
           color: 'white',
           flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap',
-          gap: window.innerWidth <= 768 ? '4px' : '8px'
+          gap: window.innerWidth <= 768 ? '8px' : '12px'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -414,7 +436,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isPlaying ? <text style={{maxHeight:'20px',padding:'0',overflow:'hidden'}}>||</text> : <text style={{maxHeight:'24px',padding:'0',overflow:'hidden'}}>▶</text>}
             </button>
             
             <span style={{ fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -464,8 +486,8 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 background: 'rgba(0,0,0,0.6)',
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '6px',
-                padding: '6px 8px',
+                borderRadius: '10px',
+                padding: '0px 0px',
                 fontSize: '12px',
                 cursor: 'pointer',
                 outline: 'none',
@@ -485,7 +507,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 color: 'white',
                 fontSize: '16px',
                 cursor: 'pointer',
-                padding: '8px',
+                padding: '0px',
                 borderRadius: '6px',
                 transition: 'background-color 0.2s ease',
                 minWidth: '40px',
@@ -494,7 +516,30 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isFullscreen ? '🗗' : '⛶'}
+              {(isFullscreen&&document.fullscreenElement!==null) ? '🗗' : '⛶'}
+            </button>
+            <button
+              onClick={()=> {
+                if (videoRef.current) {
+                  videoRef.current.requestPictureInPicture();
+                }
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '16px',
+                cursor: 'pointer',
+                padding: '0px',
+                borderRadius: '6px',
+                transition: 'background-color 0.2s ease',
+                minWidth: '40px',
+                minHeight: '40px'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              ◲
             </button>
           </div>
         </div>

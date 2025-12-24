@@ -1,21 +1,10 @@
 const { listenerCount } = require("../models/User");
 const Video = require("../models/Videos");
+const S3= require("../services/s3");
 const TranscodingService = require("../services/transcoding");
 const { S3Client, GetObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
-const s3=new S3Client(
-    {
-        region:'us-east-1',
-        credentials:{
-            accessKeyId:process.env.accessKeyId,
-            secretAccessKey:process.env.secretAccessKey
-        },
-        maxAttempts: 3,
-        requestHandler: {
-            maxSockets: 10000
-        }
-    }
-)
+const s3=S3.s3
 const BUCKET = 'bhuvistestvideosdatabucket';
 
 class videoController {
