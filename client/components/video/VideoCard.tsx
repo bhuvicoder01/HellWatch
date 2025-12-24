@@ -72,7 +72,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
     };
     
     const handleMouseOver = async () => {
-        if (!detailPage && videoRef.current) {
+        if (videoRef.current) {
             setShowThumbnail(false);
             try {
                 await videoRef.current.play();
@@ -83,7 +83,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
     };
 
     const handleMouseLeave = () => {
-        if (!detailPage && videoRef.current) {
+        if (videoRef.current) {
             setShowThumbnail(true);
             videoRef.current.pause();
             videoRef.current.currentTime = 0;
@@ -91,9 +91,9 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
     };
     
     return (<>
-        <div key={Key}  className={`video-card ${detailPage ? 'no-hover' : ''}`}>
+        <div key={Key}  className={`video-card }`}>
             {detailPage ? mainVideo ? (
-                <div>
+                <div >
                     <Link href={`/videos/details?id=${videoData.id}`}>
                     <video ref={videoRef} controls={controls}>
                         <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
@@ -110,14 +110,28 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                         </div>
                     )}
                 </div>
-            ):
-            <div>
-            <i className=""></i>
-            <video ref={videoRef} controls={controls}>
-                    <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
-                </video>
-                </div>
+            )
              : (
+                <Link href={`/videos/details?id=${videoData.id}`}>
+                    <div className="video-container" onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
+                        {showThumbnail && videoData.thumbnail && (
+                            <img
+                                src={thumbnail as string}
+                                alt="Video thumbnail"
+                                className="thumbnail"
+                                onError={() => setShowThumbnail(false)}
+                            />
+                        )}
+                        <video 
+                            ref={videoRef}
+                            style={{ display: showThumbnail ? 'none' : 'block' }}
+                            muted
+                        >
+                            <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
+                        </video>
+                    </div>
+                </Link>
+            ): (
                 <Link href={`/videos/details?id=${videoData.id}`}>
                     <div className="video-container" onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
                         {showThumbnail && videoData.thumbnail && (

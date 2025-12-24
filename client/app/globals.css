@@ -184,7 +184,7 @@ body {
   overflow-x: auto;
   overflow-y: auto;
   max-height: 80vh;
-  max-width: 25vh;
+  /* max-width: 25vh; */
   gap: 20px;
   padding: 20px;
   /* background: var(--bg-dark); */
@@ -205,6 +205,7 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: all 0.3s ease;
+  max-width: 25vh;
 }
 
 .video-card:hover {
