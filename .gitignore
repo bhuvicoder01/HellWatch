@@ -5,3 +5,7 @@ load-balancer/node_modules/.package-lock.json
 
 server/package-lock.json
 client/package-lock.json
+server/temp
+server/uploads
+server/.env
+server/.env.development
