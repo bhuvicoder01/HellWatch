@@ -45,7 +45,7 @@ const s3=new S3Client(
         },
         maxAttempts: 3,
         requestHandler: {
-            maxSockets: 1000
+            maxSockets: 10000
         }
     }
 )
