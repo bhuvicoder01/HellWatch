@@ -69,6 +69,13 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     video.currentTime = newTime;
     setCurrentTime(newTime);
   };
+  const handleDoubleTapSeek=(seekTime:number=0)=>{
+    const video=videoRef.current;
+    if(!video) return;
+    const newTime=seekTime;
+    video.currentTime=newTime;
+    setCurrentTime(newTime);
+  }
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
@@ -150,15 +157,15 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   };
 
   const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
-
+ let lastTap=0;
   return (
     <div 
       ref={containerRef}
       onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
+      // onMouseLeave={() => setShowControls(false)}
       onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onDoubleClick={handleDoubleClick}
+      // onTouchEnd={handleTouchEnd}
+      onTouchStartCapture={handleTouchStart}
       style={{
         position: 'relative',
         width: '100%',
@@ -189,8 +196,37 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
           {title}
         </div>
       )}
+      {showControls&& (
+       <button
+              onClick={togglePlay}
+              style={{
+                background: 'none',
+                position:'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                border: 'none',
+                fontSize: '50px',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: '40px',
+                minHeight: '40px',
+                flexShrink: 0
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {isPlaying ? '⏸' : '▶'}
+            </button>
+      )}
       
       <video
+        onDoubleClick={handleDoubleClick}
         ref={videoRef}
         src={videoUrl}
         style={{ 
@@ -204,7 +240,20 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         onClick={togglePlay}
       />
       
-      <div style={{
+      <div onDoubleClick={()=>handleDoubleTapSeek(currentTime>5?currentTime-5:0)} 
+      onTouchEnd={(e)=>{
+        const DBL_TAP_THRESHOLD = 1000;
+        const tapLength=(new Date().getTime())-lastTap;
+        if (tapLength < DBL_TAP_THRESHOLD && tapLength > 0) {
+        // Double tap detected
+        // console.log('Double Tapped!');
+        handleDoubleTapSeek(currentTime>5?currentTime-5:0)
+        // Prevent the default behavior (like mobile browser zoom)
+        e.preventDefault();
+
+    } 
+    lastTap = (new Date().getTime())
+      }} style={{
         position: 'absolute',
         top: 0,
         left: 0,
@@ -214,20 +263,37 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 0
+        opacity: 1
       }}>
         <div style={{
           fontSize: '24px',
-          color: 'white',
+          // color: 'white',
           background: 'rgba(0,0,0,0.5)',
           borderRadius: '50%',
           padding: '12px',
           opacity: showControls ? 0.7 : 0,
           transition: 'opacity 0.2s ease'
-        }}>⏪</div>
+        }}>{`<<`}</div>
       </div>
       
-      <div style={{
+      <div onDoubleClick={()=>handleDoubleTapSeek(duration-currentTime<5?currentTime+((duration-currentTime)):currentTime+5)} 
+      onTouchEnd={(e)=>{
+       
+        const DBL_TAP_THRESHOLD = 2000;
+        const tapLength=(new Date().getTime())-lastTap;
+        if (tapLength < DBL_TAP_THRESHOLD && tapLength > 0) {
+        // Double tap detected
+        console.log('Double Tapped!');
+        handleDoubleTapSeek(duration-currentTime<5?currentTime+((duration-currentTime)):currentTime+5)
+        // Prevent the default behavior (like mobile browser zoom)
+        e.preventDefault();
+    } else {
+        // First tap or a tap after the threshold
+        // console.log('Single Tap Detected (might be first tap)');
+    }
+    lastTap = (new Date().getTime())
+      }}
+      style={{
         position: 'absolute',
         top: 0,
         right: 0,
@@ -237,17 +303,18 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 0
+        opacity: 1
       }}>
         <div style={{
           fontSize: '24px',
-          color: 'white',
+          // color: 'white',
+          color:'black',
           background: 'rgba(0,0,0,0.5)',
           borderRadius: '50%',
           padding: '12px',
           opacity: showControls ? 0.7 : 0,
           transition: 'opacity 0.2s ease'
-        }}>⏩</div>
+        }}>{`>>`}</div>
       </div>
       
       <div style={{
@@ -347,7 +414,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isPlaying ? '⏸️' : '▶️'}
+              {isPlaying ? '⏸' : '▶'}
             </button>
             
             <span style={{ fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>
