@@ -22,7 +22,7 @@ export function VideoProvider({children }: VideoProviderProps) {
 const loadVideos = async () => {
       const res = await api.get("/videos");
       setVideos(res.data);
-      console.log(res.data);
+    //   console.log(res.data);
     };
     
     const refreshVideos = () => {
@@ -35,7 +35,6 @@ const loadVideos = async () => {
 
     return (
         <VideoContext.Provider value={{ Videos, refreshVideos }}>
-
             {children}
         </VideoContext.Provider>
     );
