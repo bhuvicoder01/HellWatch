@@ -156,7 +156,7 @@ static async deleteVideo(req, res) {
     res.sendStatus(204);
   } catch (err) {
     console.error(err);
-    res.sendStatus(500);
+    res.status(500).json({Error:err});
   }
 }
 static async updateVideo(req, res) {
