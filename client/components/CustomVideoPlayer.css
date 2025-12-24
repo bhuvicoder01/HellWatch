@@ -1,0 +1,147 @@
+/* Custom Video Player Styles */
+.video-player {
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-player video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-player:hover .video-controls {
+  opacity: 1;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+}
+
+.progress-bar::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.progress-bar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.volume-slider {
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.control-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.control-button:hover {
+  color: #3b82f6;
+}
+
+.quality-selector {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.quality-selector:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.video-title {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .video-controls {
+    padding: 12px;
+  }
+  
+  .control-button {
+    font-size: 16px;
+    padding: 6px;
+  }
+  
+  .volume-slider {
+    width: 60px;
+  }
+  
+  .quality-selector {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}

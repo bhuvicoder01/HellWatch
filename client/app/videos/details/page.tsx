@@ -1,6 +1,7 @@
 'use client'
 import VideoCard from "@/components/video/VideoCard";
 import VideoGrid from "@/components/video/VideoGrid";
+import CustomVideoPlayer from "@/components/CustomVideoPlayer";
 import { useVideo } from "@/contexts/VideoContext";
 import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
@@ -10,18 +11,17 @@ import VideosPage from "../page";
 function VideoDetailsContent() {
     const {Videos}=useVideo()
     const [videos,setVideos]=useState(Videos);
-    const [video,setVideo]=useState(null);
+    const [video,setVideo]=useState<any>(null);
     const [windowWidth, setWindowWidth] = useState(0);
     const [showEdit, setShowEdit] = useState(true);
     
     const id=useSearchParams().get('id');
-    // console.log("Video ID:", id);
-    // setVideos(Videos);
+    
     useMemo(() => {
       setVideos(Videos);
     }, [Videos]);
+    
     useEffect(() => {
-      
         if (id) {
             getVideoData(id);
         }
@@ -31,7 +31,6 @@ function VideoDetailsContent() {
         return () => window.removeEventListener('resize', handleResize);
     }, [id]);
 
-
     const getVideoData = async (id: string) => {
         try {
             const res=await api.get(`/videos/${id}`);
@@ -40,25 +39,26 @@ function VideoDetailsContent() {
         } catch (error) {
             console.error('Error fetching video data:', error);
             return null;
-            
         }
     }
+    
     if(!video){
         return <div>Loading...</div>
     }
-    return (<>
+    
+    return (
         <div className="d-flex flex-column flex-lg-row mb-5" style={{gap: '20px'}}>
-            
             <div className="flex-grow-1">
-            <VideoCard mainVideo={true} showEdit={showEdit} controls={true} detailPage={true} video={video} />
+                <CustomVideoPlayer videoId={video.id} title={video.title} />
+                <div className="mt-3">
+                    <h3>{video?.title}</h3>
+                    <p className="text-muted">Uploaded: {new Date(video.createdAt).toLocaleDateString()}</p>
+                </div>
             </div>
             <div className="rows-lg-4" style={{maxWidth: '100%'}}>
-           {videos.length!==0 && <VideosPage />}
-
+                {videos.length!==0 && <VideosPage mobileDisplay={window.innerWidth<992?true:false} detailsPage={true}/>}
+            </div>
         </div>
-        </div>
-        
-        </>
     )
 }
 

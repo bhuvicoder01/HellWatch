@@ -20,7 +20,7 @@ export default function Home() {
 }, []);
 
   return (<>
-    <main className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black py-12 p-12">
+    <main className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black py-10 ">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-6xl font-bold mb-12 bg-gradient-to-r from-red-500 to-purple-600 bg-clip-text text-transparent">
           🚀 HellWatch Streaming

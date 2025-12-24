@@ -8,6 +8,11 @@ const videoSchema=mongoose.Schema({
     duration:String,
     genre:String,
     thumbnail:String,
+    qualities: {
+        type: Map,
+        of: String,
+        default: new Map()
+    }
 },
 {timestamps:true})
 

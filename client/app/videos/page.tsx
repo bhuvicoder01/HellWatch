@@ -5,7 +5,7 @@ import axios from "axios";
 import VideoGrid from "@/components/video/VideoGrid";
 import { useVideo } from "@/contexts/VideoContext";
 
-function Videos() {
+function Videos({detailsPage=false,mobileDisplay=false}: {detailsPage?: boolean,mobileDisplay?:boolean}) {
   const {Videos}=useVideo()
   const [videos, setVideos] = useState(Videos);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,16 +37,16 @@ useMemo(() => {
 
  return(<>
     <div className="container-fluid">
-      <VideoGrid videos={videos} />
+      <VideoGrid detailsPage={detailsPage} mobileDisplay={mobileDisplay} videos={videos} />
     </div>
 
  
  </>)
 };
-export default function VideosPage({autoplay=false}: {autoplay?: boolean}) {
+export default function VideosPage({autoplay=false,detailsPage=false,mobileDisplay=false}: {autoplay?: boolean,detailsPage?:boolean,mobileDisplay?:boolean}) {
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <Videos />
+            <Videos detailsPage={detailsPage} mobileDisplay={mobileDisplay} />
         </Suspense>
     )
 }

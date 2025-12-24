@@ -4,7 +4,7 @@ const router = express.Router();
 const Video = require('../models/Videos'); // your model file
 const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { getUploadUrl, getUploadRate, completeUpload, thumbnailUpload } = require("../services/s3");
-const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo } = require("../controllers/videoController");
+const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo } = require("../controllers/videoController");
 
 
 
@@ -26,5 +26,11 @@ router.delete("/:id",deleteVideo);
 
 // PUT /videos/:id -> update video
 router.put("/:id",updateVideo);
+
+// POST /videos/:id/quality -> add quality version
+router.post("/:id/quality", addQuality);
+
+// POST /videos/transcode -> transcode video to multiple qualities
+router.post("/transcode", transcodeVideo);
 
 module.exports = router;

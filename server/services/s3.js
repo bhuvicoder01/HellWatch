@@ -3,8 +3,10 @@ const{getSignedUrl}=require('@aws-sdk/s3-request-presigner')
 const multerS3=require('multer-s3')
 const multer=require('multer')
 const fs = require('fs')
+const path = require('path')
 const upload = require('./upload')
 const videoModel = require('../models/Videos')
+const TranscodingService = require('./transcoding')
 
 // Track upload progress
 const uploadProgress = new Map();
@@ -126,7 +128,6 @@ const completeUpload = async (req, res) => {
       try {
         thumbnailKey = await uploadThumbnailToS3(req.file.path, key);
       } catch (error) {
-        // Ensure temp file is deleted even if upload fails
         if (fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
@@ -134,10 +135,48 @@ const completeUpload = async (req, res) => {
       }
     }
     
-    await videoModel.findOneAndUpdate(
+    const video = await videoModel.findOneAndUpdate(
       { key },
-      { thumbnail: thumbnailKey }
+      { thumbnail: thumbnailKey },
+      { new: true }
     );
+    
+    // Start transcoding in background
+    if (video) {
+      setTimeout(async () => {
+        try {
+          const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
+          
+          const getCommand = new GetObjectCommand({
+            Bucket: 'bhuvistestvideosdatabucket',
+            Key: video.key
+          });
+          const data = await s3.send(getCommand);
+          const writeStream = fs.createWriteStream(tempPath);
+          
+          await new Promise((resolve, reject) => {
+            data.Body.pipe(writeStream);
+            writeStream.on('finish', resolve);
+            writeStream.on('error', reject);
+          });
+          
+          const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
+          const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
+          
+          video.qualities = new Map(Object.entries(qualities));
+          if (!video.thumbnail) video.thumbnail = autoThumbnail;
+          await video.save();
+          
+          if (fs.existsSync(tempPath)) {
+            fs.unlinkSync(tempPath);
+          }
+          
+          console.log(`Transcoding completed for video ${video._id}`);
+        } catch (error) {
+          console.error('Transcoding failed:', error);
+        }
+      }, 2000);
+    }
     
     if (progress) {
       const elapsed = (Date.now() - progress.startTime) / 1000;
@@ -145,18 +184,18 @@ const completeUpload = async (req, res) => {
       uploadProgress.delete(key);
       return res.json({ 
         finalUploadRate: finalRate.toFixed(2),
-        thumbnailKey
+        thumbnailKey,
+        message: 'Upload completed, transcoding started'
       });
     }
     
-    res.json({ finalUploadRate: 0, thumbnailKey });
-    if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-        }
+    res.json({ finalUploadRate: 0, thumbnailKey, message: 'Upload completed, transcoding started' });
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
   } catch (error) {
-    console.error('Error uploading thumbnail:', error);
+    console.error('Error in completeUpload:', error);
     
-    // Cleanup temp file if it still exists
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
