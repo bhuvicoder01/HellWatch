@@ -21,10 +21,23 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isDoubleTappedSeek,setIsDoubleTappedSeek]=useState(false)
   const [isDoubleTappedRewind,setIsDoubleTappedRewind]=useState(false)
+  const [showTitle,SetShowTitle]=useState(true)
+
 
   const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
 
   useEffect(() => {
+
+    if(document.fullscreenElement!==null){
+      SetShowTitle(true)
+    }
+    else{
+      setInterval(()=>{
+        SetShowTitle(false)
+      },2000)
+
+    }
+    
     const video = videoRef.current;
     if (!video) return;
 
@@ -38,7 +51,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
       video.removeEventListener('timeupdate', updateTime);
       video.removeEventListener('loadedmetadata', updateDuration);
     };
-  }, []);
+  }, [document.fullscreenElement]);
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
@@ -198,7 +211,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         margin: '0 auto'
       }}
     >
-      {title && (
+      {title && showTitle && (
         <div style={{
           position: 'absolute',
           top: '16px',

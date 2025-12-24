@@ -40,7 +40,7 @@ function VideoDetailsContent() {
         try {
             const res=await api.get(`/videos/${id}`);
             setVideo(res.data);
-            setEditTitle(res.data.title);
+            setEditTitle(res.data.title||res.data.key);
             return res.data;
         } catch (error) {
             console.error('Error fetching video data:', error);

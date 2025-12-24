@@ -112,7 +112,7 @@ const  getUploadUrl = async (req, res) => {
   });
 
   const url = await getSignedUrl(s3, command, { expiresIn: 3600*24 }); // 24 hours
-  await videoModel.create({key})
+  await videoModel.create({key,title:fileName})
 
   return res.json({
     uploadUrl: url,
