@@ -3,7 +3,7 @@ const jwt=require('jsonwebtoken')
 
 const encrypt={
     hashPassword:async (password)=>{
-        const salt=await bcrypt.genSalt(12);
+        const salt=await bcrypt.genSalt(10);
         return await bcrypt.hash(password,salt);
     },
     comparePassword:async (password,hashPassword)=>{

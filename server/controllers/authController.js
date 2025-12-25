@@ -66,33 +66,33 @@ class authController{
     }
     static async update(req, res){
         try {
-            let {username,password,email,isAdmin}=req.body;
+            // let {username,password,email,isAdmin}=req.body;
             const user=req.user;
-            if(!username){
-                username=user.username;
-            }
-            if(!password){
-                password=user.password;
-            }
-            if(!email){
-                email=user.email;
-            }
-            if(!isAdmin){
-                isAdmin=user?.isAdmin;
-            }
-            if(!user){
-                return res.status(400).json({message:"User not found"});
-            }
-             let hashedPassword;
-            if(password){
-            hashedPassword=await encrypt.hashPassword(password);
-            }
+            // if(!username){
+            //     username=user.username;
+            // }
+            // if(!password){
+            //     password=user.password;
+            // }
+            // if(!email){
+            //     email=user.email;
+            // }
+            // if(!isAdmin){
+            //     isAdmin=user?.isAdmin;
+            // }
+            // if(!user){
+            //     return res.status(400).json({message:"User not found"});
+            // }
+            //  let hashedPassword;
+            // if(password){
+            // hashedPassword=await encrypt.hashPassword(password);
+            // }
             const avatar=req.file;
             console.log(avatar);
-            if(username===user.username && password===user.password && email===user.email && isAdmin===user.isAdmin && avatar===user.avatar){
-                return res.status(400).json({message:"No changes made"});
-            }
-            const updatedUser=await userModel.findByIdAndUpdate(user._id, {username:username, password:hashedPassword, email, isAdmin, avatar:{url:avatar?.location,bucket:avatar?.bucket,key:avatar?.key}}, {new:true});
+            // if(username===user.username && password===user.password && email===user.email && isAdmin===user.isAdmin && avatar===user.avatar){
+            //     return res.status(400).json({message:"No changes made"});
+            // }
+            const updatedUser=await userModel.findByIdAndUpdate(user._id, {avatar:{url:avatar?.location,bucket:avatar?.bucket,key:avatar?.key}}, {new:true});
             res.json({user:updatedUser, message:"Update successful"});
         } catch (error) {
             console.error(error);
