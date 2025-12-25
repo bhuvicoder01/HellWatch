@@ -8,7 +8,8 @@ const fs = require('fs')
 const path = require('path')
 const upload = require('./upload')
 const videoModel = require('../models/Videos')
-const TranscodingService = require('./transcoding')
+const TranscodingService = require('./transcoding');
+const audioModel = require('../models/Audio');
 
 const agent=new Agent({
     keepAlive:true,
@@ -72,7 +73,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
 
 
 // 2. Configure multer-s3 storage
-const s3Storage = multerS3({
+const s3Storage = new multerS3({
     s3: s3,
     bucket: 'bhuvistestvideosdatabucket',
     // acl: 'public-read', // Set appropriate access control
@@ -86,7 +87,7 @@ const s3Storage = multerS3({
 });
 
 // 3. Create the upload middleware instance
-const multerUpload = multer({
+const multerUpload =multer({
     storage: s3Storage,
     limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size (e.g., 5MB)
     // Optional: Add file filters here if needed
@@ -121,6 +122,35 @@ const  getUploadUrl = async (req, res) => {
   });
 };
 
+const  getAudioUploadUrl = async (req, res) => {
+  const { fileName, fileType, fileSize } = req.query;
+
+  const key = `songs/${Date.now()}-${fileName}`;
+  
+  // Initialize upload tracking
+  uploadProgress.set(key, {
+    startTime: Date.now(),
+    fileSize: parseInt(fileSize) || 0,
+    uploadRate: 0
+  });
+
+  const command = new PutObjectCommand({
+    Bucket: 'bhuvistestvideosdatabucket',
+    Key: key,
+    ContentType: fileType,
+  });
+
+  const url = await getSignedUrl(s3, command, { expiresIn: 3600*24 }); // 24 hours
+  await audioModel.create({key,title:fileName,owner:req.user._id})
+
+  return res.json({
+    uploadUrl: url,
+    fileKey: key,
+    fileUrl: `https://bhuvistestvideosdatabucket.s3.amazonaws.com/${key}`
+  });
+};
+
+
 const getUploadRate = async (req, res) => {
   const { key } = req.params;
   const progress = uploadProgress.get(key);
@@ -153,59 +183,59 @@ const completeUpload = async (req, res) => {
       }
     }
     
-    const video = await videoModel.findOneAndUpdate(
+    const audio = await audioModel.findOneAndUpdate(
       { key },
       { thumbnail: thumbnailKey },
       { new: true }
     );
     
     // Start transcoding in background
-    if (video) {
-      setTimeout(async () => {
-        try {
-          const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
+    // if (video) {
+    //   setTimeout(async () => {
+    //     try {
+    //       const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
           
-          const getCommand = new GetObjectCommand({
-            Bucket: 'bhuvistestvideosdatabucket',
-            Key: video.key
-          });
-          const data = await s3.send(getCommand);
-          const writeStream = fs.createWriteStream(tempPath);
+    //       const getCommand = new GetObjectCommand({
+    //         Bucket: 'bhuvistestvideosdatabucket',
+    //         Key: video.key
+    //       });
+    //       const data = await s3.send(getCommand);
+    //       const writeStream = fs.createWriteStream(tempPath);
           
-          await new Promise((resolve, reject) => {
-            data.Body.pipe(writeStream);
-            writeStream.on('finish', resolve);
-            writeStream.on('error', reject);
-          });
+    //       await new Promise((resolve, reject) => {
+    //         data.Body.pipe(writeStream);
+    //         writeStream.on('finish', resolve);
+    //         writeStream.on('error', reject);
+    //       });
           
-          const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
-          const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
+    //       const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
+    //       const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
           
-          video.qualities = new Map(Object.entries(qualities));
-          if (!video.thumbnail) video.thumbnail = autoThumbnail;
-          await video.save();
+    //       video.qualities = new Map(Object.entries(qualities));
+    //       if (!video.thumbnail) video.thumbnail = autoThumbnail;
+    //       await video.save();
           
-          if (fs.existsSync(tempPath)) {
-            fs.unlinkSync(tempPath);
-          }
+    //       if (fs.existsSync(tempPath)) {
+    //         fs.unlinkSync(tempPath);
+    //       }
           
-          console.log(`Transcoding completed for video ${video._id}`);
-        } catch (error) {
-          console.error('Transcoding failed:', error);
-        }
-      }, 2000);
-    }
+    //       console.log(`Transcoding completed for video ${video._id}`);
+    //     } catch (error) {
+    //       console.error('Transcoding failed:', error);
+    //     }
+    //   }, 2000);
+    // }
     
-    if (progress) {
-      const elapsed = (Date.now() - progress.startTime) / 1000;
-      const finalRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
-      uploadProgress.delete(key);
-      return res.json({ 
-        finalUploadRate: finalRate.toFixed(2),
-        thumbnailKey,
-        message: 'Upload completed, transcoding started'
-      });
-    }
+    // if (progress) {
+    //   const elapsed = (Date.now() - progress.startTime) / 1000;
+    //   const finalRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
+    //   uploadProgress.delete(key);
+    //   return res.json({ 
+    //     finalUploadRate: finalRate.toFixed(2),
+    //     thumbnailKey,
+    //     message: 'Upload completed, transcoding started'
+    //   });
+    // }
     
     res.json({ finalUploadRate: 0, thumbnailKey, message: 'Upload completed, transcoding started' });
     if (req.file && fs.existsSync(req.file.path)) {
@@ -229,4 +259,4 @@ const completeUpload = async (req, res) => {
   }
 };
 
-module.exports={s3,upload:multerUpload,getUploadUrl,getUploadRate,completeUpload,thumbnailUpload:upload};
+module.exports={s3,upload:multerUpload,getAudioUploadUrl,getUploadUrl,getUploadRate,completeUpload,thumbnailUpload:upload};

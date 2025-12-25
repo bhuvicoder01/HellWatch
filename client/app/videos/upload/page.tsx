@@ -137,12 +137,17 @@ export default function VideoUploader() {
       <h1>Upload Video</h1>
       
       <div className="upload-form">
+        <label htmlFor="file-input" className="btn btn-secondary file-label">
+          Select a video file 📂
+        </label>
         <input 
           type="file" 
           accept="video/*" 
+          id="file-input"
+          name="file-input"
           onChange={handleChange}
           disabled={uploading}
-          className="file-input"
+          className="d-none file-input"
         />
         
         {file && (
@@ -188,14 +193,15 @@ export default function VideoUploader() {
           max-width: 600px;
           margin: 40px auto;
           padding: 30px;
-          background: #f8f9fa;
+          background: var(--bg-card);
+          color: #ff0000e0;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
           text-align: center;
-          color: #333;
+          color: #ff0000e0;
           margin-bottom: 30px;
         }
         
@@ -206,10 +212,11 @@ export default function VideoUploader() {
         .file-input {
           width: 100%;
           padding: 12px;
-          border: 2px dashed #ddd;
+          border: 2px dashed #ffffffff;
           border-radius: 8px;
-          background: white;
+          background: #4d4d4d88;
           cursor: pointer;
+          transition: border-color 0.3s;
         }
         
         .file-input:disabled {
@@ -219,20 +226,20 @@ export default function VideoUploader() {
         
         .file-info {
           padding: 15px;
-          background: white;
+          background: #4d4d4d88;
           border-radius: 8px;
           border: 1px solid #e0e0e0;
         }
         
         .file-info p {
           margin: 5px 0;
-          color: #555;
+          color: #f31818df;
         }
         
         .upload-btn {
           width: 100%;
           padding: 15px;
-          background: #007bff;
+          background: #ff0000ff;
           color: white;
           border: none;
           border-radius: 8px;
@@ -243,7 +250,7 @@ export default function VideoUploader() {
         }
         
         .upload-btn:hover:not(:disabled) {
-          background: #0056b3;
+          background: #b30000ff;
         }
         
         .upload-btn:disabled {

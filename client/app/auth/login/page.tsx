@@ -2,19 +2,20 @@
 import { useState,useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { api } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 function Login() {
     const [email,setEmail]=useState('');
     const [password,setPassword]=useState('');
     const navigate=useRouter().push
+    const {user,login}=useAuth()
 
 
      useEffect(()=>{
-    const user=localStorage.getItem('user')
     if(user){
       navigate('/')
     }
-})
+},[user])
 
     const handleSubmit=async()=>{
         try {
@@ -22,7 +23,11 @@ function Login() {
                 email,
                 password
             })
-            localStorage.setItem('user',JSON.stringify(res.data))
+            localStorage.setItem('user',JSON.stringify(res.data.user))
+            const token = JSON.parse(res.data.token);
+            if (token) {
+                localStorage.setItem('token', token );
+            }
 
             navigate('/')
 
@@ -37,10 +42,10 @@ function Login() {
     
     <>
     <div className='container d-flex justify-content-center align-items-center'>
-            <div className='card shadow-lg p-4 rounded-4'style={{width:'100%',maxWidth:'500px'}}>
-                <h5 className='text-center mb-4 text-primary'>Login👽</h5>
+            <div className='card profile-card shadow-lg p-4 rounded-4'style={{width:'100%',maxWidth:'500px'}}>
+                <h5 className='text-center mb-4 text-danger'>Login👽</h5>
                 <div className='card-body'>
-                    <form action={handleSubmit}>
+                    <form action={()=>login({email,password})}>
                         <div className='mb-3'>
                         <label htmlFor='email' className='form-label'>Email:</label>
                         <input
@@ -60,7 +65,7 @@ function Login() {
                             />
                         </div>
                         <div className='d-grid mb-3'>
-                        <button type='submit' className='btn btn-primary my-1 w-100'>Login</button>
+                        <button type='submit' className='btn btn-danger my-1 w-100'>Login</button>
                         </div>
                     </form>
 

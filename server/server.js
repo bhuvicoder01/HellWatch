@@ -12,8 +12,7 @@ app.use(cors({
   methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   credentials: true,
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  preflightContinue: false}
+}
 ));
 app.use(express.json({ limit: '50mb' })); // increase size as needed
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +32,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Videos API (no /api prefix here)
+app.use('/songs', require('./routes/audios'));
 app.use('/videos', videoRoutes);
 app.use('/auth', require('./routes/auth'));
 

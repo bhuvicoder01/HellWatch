@@ -1,10 +1,24 @@
 'use client';
+import { useAuth} from "@/contexts/AuthContext";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
-    const user: {avatar?: string} = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : undefined;
+    const {user,logout}=useAuth() 
     const [showDropdown, setShowDropdown] = useState(false);
+    const [dropdownRef, setDropdownRef] = useState<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const handleOutsideClick = (event: MouseEvent) => {
+            if (showDropdown && dropdownRef && !dropdownRef.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('click', handleOutsideClick);
+        return () => document.removeEventListener('click', handleOutsideClick);
+    }, [showDropdown, dropdownRef]);
+    
     return (<>
         <div className="navbar">
             <div className="navbar_logo">
@@ -13,6 +27,7 @@ export default function Navbar() {
                 </Link>
             </div>
             <div className="navbar-link">
+                <Link href="/songs">Songs</Link>
                 <Link href="/videos">Videos</Link>
                 <Link href="/videos/upload">Upload</Link>
                 <Link href="#">About</Link>
@@ -25,18 +40,20 @@ export default function Navbar() {
                 </select>
                 </div> */}
             <div className="navbar-auth">
-                <div className="navbar-profile" onClick={() => setShowDropdown(!showDropdown)}>
-                    <img src={'/default-avatar.png'} alt="profile" style={{ cursor: 'pointer' }} />
-                    {showDropdown &&( user===undefined ? (
+                <div className={`${user?._id ?'navbar-profile-active':'navbar-profile-inactive'}`} 
+                     ref={setDropdownRef}
+                     onClick={() => setShowDropdown(!showDropdown)}>
+                    {user?._id?<img src={typeof user.avatar === 'string' ? user.avatar : (user.avatar && typeof user.avatar === 'object' && 'url' in user.avatar ? (user.avatar as any).url : '')} alt="profile" style={{ cursor: 'pointer' }} />:<i className="bi bi-person-fill text-danger "></i>}
+                    {showDropdown &&( (!user||user===null) ? (
                         <div className="profile-dropdown">
                             <Link href="/auth/login" className="dropdown-item">Login</Link>
                             <Link href="/auth/register" className="dropdown-item">Sign Up</Link>
                         </div>
                     ) : (   
                             <div className="profile-dropdown">
-                                <Link href="/profile" className="dropdown-item">My Profile</Link>
+                                <Link href="/profile" className="dropdown-item">{user.username}</Link>
                                 <Link href="/settings" className="dropdown-item">Settings</Link>
-                                <button className="dropdown-item logout" onClick={() => console.log('Logout')}>Logout</button>
+                                <button className="dropdown-item logout" onClick={logout}>Logout</button>
                             </div>)
 
                     )}

@@ -8,8 +8,9 @@
 }
 body {
   margin: 0;
-  background: whitesmoke;
-  color: rgb(0, 0, 0);
+  /* background: whitesmoke; */
+  background-color: var(--bg-dark);
+  color: rgb(255, 0, 0);
   font-family: system-ui;
 }
 
@@ -88,23 +89,67 @@ body {
   width: 100%;
 }
 
-.navbar-profile {
+@keyframes border-animation {
+  0% {
+    box-shadow: 0 0 8 2px #ff0000;
+  }
+  50% {
+    box-shadow: 0 0 8 4px #ff0000;
+  }
+  100% {
+    box-shadow: 0 0 8 2px #ff0000;
+  }
+}
+
+.navbar-profile-active {
   position: absolute;
   top: 30%;
-  right: 1%;
+  right: 5%;
   cursor: pointer;
   background-color: #dc3545;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  /* overflow: hidden; */
+  width: 47px;
+  height: 47px;
+  z-index: 20;
+  animation: border-animation 1s infinite;
 }
+
+.navbar-profile-inactive {
+  position: absolute;
+  top: 30%;
+  right: 5%;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-radius: 50%;
+  width: 47px;
+  height: 47px;
+  z-index: 20;
+  animation: border-animation 1s infinite;
+  text-align: center;
+}
+
+
+.navbar-profile-active img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.navbar-profile-inactive i {
+  font-size: xx-large;
+  min-width: 50px;
+  border-radius: 50%;
+  /* object-fit: cover; */
+}
+
 
 .profile-dropdown {
   position: absolute;
   top: 100%;
   right: 50px;
-  background: white;
+  background: var(--bg-dark);
+  color:#ff0000;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -112,12 +157,8 @@ body {
   z-index: 1000;
   overflow: hidden;
 }
-@media (max-width: 600px) {
-  .navbar-profile {
-    /* position: absolute; */
-    top:20%;
-    right: 10px;
-  }
+@media (max-width: 768px) {
+ 
   .profile-dropdown {
     right: 0px;
     /* left: 0; */
@@ -128,7 +169,7 @@ body {
   display: block;
   padding: 12px 16px;
   text-decoration: none;
-  color: #333;
+  color: #ff0000;
   border: none;
   background: none;
   width: 100%;
@@ -142,7 +183,7 @@ body {
 }
 
 .dropdown-item.logout {
-  color: #dc3545;
+  color: #ff0019;
   border-top: 1px solid #eee;
 }
 
@@ -274,4 +315,53 @@ body {
   .video-card .description {
     font-size: 12px;
   }
+}
+
+.upload-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color:var(--bg-card);
+  color: #FE0000;
+  margin-bottom: 10px;
+  border-color: #dc3545;
+  border-width: 0.1;
+  min-height: 200px;
+
+}
+
+.profile-card{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color:var(--bg-card);
+  color: #FE0000;
+  margin-bottom: 10px;
+  border-color: #dc3545;
+  border-width: 0.1;
+  min-height: 200px;
+}
+.profile-img{
+  background-color: #dc3545;
+  object-fit: cover;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 10px;
+}
+
+.form-control{
+  background-color: #333;
+  color:#000000;
+}
+.form-control:focus{
+background-color: #333;
+color:#000000;
+}
+.form-control:after{
+  background-color: #333;
+  color:#000000;
 }

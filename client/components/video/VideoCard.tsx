@@ -72,6 +72,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
     };
     
     const handleMouseOver = async () => {
+        if(window.innerWidth<768){return}
         if (videoRef.current) {
             setShowThumbnail(false);
             try {
@@ -126,6 +127,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                             ref={videoRef}
                             style={{ display: showThumbnail ? 'none' : 'block' }}
                             muted
+                             className="video-preview"
                         >
                             <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
                         </video>
@@ -146,6 +148,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                             ref={videoRef}
                             style={{ display: showThumbnail ? 'none' : 'block' }}
                             muted
+                            className="video-preview"
                         >
                             <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
                         </video>
@@ -195,6 +198,12 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                 margin-top: 8px;
                 margin-left: 8px;
             }
+                .video-preview{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                cursor: pointer;
+                }
             
             .edit-btn, .delete-btn {
                 padding: 4px 8px;

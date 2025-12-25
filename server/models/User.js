@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
         bucket: String,
         url: String,
         key: String
+    },
+    isActive:{
+        type:Boolean,
+        default:true
     }
 
 }

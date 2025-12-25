@@ -358,7 +358,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         left: 0,
         right: 0,
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
-        padding: '12px 12px 16px',
+        padding: '24px 20px 16px',
         opacity: showControls ? 1 : 0,
         transition: 'opacity 0.3s ease',
         pointerEvents: 'auto',
@@ -419,12 +419,13 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
           justifyContent: 'space-between',
           color: 'white',
           flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap',
-          gap: window.innerWidth <= 768 ? '8px' : '12px'
+          gap: window.innerWidth <= 768 ? '4px' : '8px'
         }}>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: window.innerWidth <= 768 ? '8px' : '12px', 
+            // justifyContent:'space-between',
+            gap: window.innerWidth <= 768 ? '2px' : '8px', 
             flex: '1', 
             minWidth: '0' 
           }}>
@@ -442,7 +443,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minWidth: '40px',
+                minWidth: '30px',
                 minHeight: '40px',
                 flexShrink: 0
               }}
@@ -466,7 +467,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                   fontSize: '16px',
                   cursor: 'pointer',
                   padding: '6px',
-                  minWidth: '32px',
+                  minWidth: '25px',
                   minHeight: '32px'
                 }}
               >
@@ -518,12 +519,12 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 background: 'none',
                 border: 'none',
                 color: 'white',
-                fontSize: '16px',
+                fontSize: '18px',
                 cursor: 'pointer',
                 padding: '0px',
                 borderRadius: '6px',
                 transition: 'background-color 0.2s ease',
-                minWidth: '40px',
+                minWidth: '20px',
                 minHeight: '40px'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
@@ -541,12 +542,12 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 background: 'none',
                 border: 'none',
                 color: 'white',
-                fontSize: '16px',
+                fontSize: '18px',
                 cursor: 'pointer',
                 padding: '0px',
                 borderRadius: '6px',
                 transition: 'background-color 0.2s ease',
-                minWidth: '40px',
+                minWidth: '20px',
                 minHeight: '40px'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
