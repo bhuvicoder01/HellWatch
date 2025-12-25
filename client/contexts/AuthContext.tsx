@@ -5,7 +5,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 export interface User {
         _id:string,
         username:string,
-        avatar:string,
+        avatar:{
+            url:string
+        },
         name:string,
         email:string,
         password:string,
@@ -38,7 +40,7 @@ if(!useAuth){
     throw new Error('useAuth must be used within an AuthProvider')
 }
 export function AuthProvider({children}:any){
-    const [user,setUser]=useState<User|null>(localStorage.getItem('user')?JSON.parse(localStorage.getItem('user')!):null)
+    const [user,setUser]=useState<User|null>(null)
     const [isAuthenticated,setIsAuthenticated]=useState(false)
 
     const checkAuth=async()=>{
@@ -52,11 +54,14 @@ export function AuthProvider({children}:any){
     }
 
     useEffect(()=>{
-        checkAuth()
-        const user=JSON.parse(localStorage.getItem('user')!)
-        if(user){
-            setUser(user)
-            setIsAuthenticated(true)
+        if (typeof window !== 'undefined') {
+            checkAuth()
+            const storedUser=localStorage.getItem('user')
+            if(storedUser){
+                const parsedUser=JSON.parse(storedUser)
+                setUser(parsedUser)
+                setIsAuthenticated(true)
+            }
         }
     },[user?._id])
 
@@ -65,7 +70,9 @@ export function AuthProvider({children}:any){
             const res=await authAPI.login(credentials)
             const data=res.data
             if(data.user){
-                localStorage.setItem('user',JSON.stringify(data.user))
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('user',JSON.stringify(data.user))
+                }
                 setUser(data.user)
                 setIsAuthenticated(true)
             }
@@ -76,7 +83,9 @@ export function AuthProvider({children}:any){
         }
     }
     const logout=()=>{
-        localStorage.removeItem('user')
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('user')
+        }
         setUser(null)
         setIsAuthenticated(false)
     }
@@ -87,7 +96,9 @@ export function AuthProvider({children}:any){
             const res=await authAPI.updateUser(formData)
             const data=res.data
             if(data.user){
-                localStorage.setItem('user', JSON.stringify(data.user))
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('user', JSON.stringify(data.user))
+                }
                 setUser(data.user)
             }
             
