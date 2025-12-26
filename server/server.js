@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const {spawn}=require('node:child_process')
+const {exec}=require('child_process')
 
 
 
@@ -24,6 +24,18 @@ const MongoDB = require('./services/db');
 
 MongoDB.connect(process.env.MONGODB_URI);
 
+setInterval(()=>{
+  return new Promise((resolve, reject) => {
+    exec(`ffmpeg -version`, (error, stdout, stderr) => {
+      if (error) return reject(error);
+      console.log(`stdout: ${stdout}`)
+      console.log(`stderr: ${stderr}`)
+
+      resolve({ stdout, stderr });
+    });
+  });
+},5000)
+
 // Health check — used by LB
 app.get('/health', (req, res) => {
   res.json({
@@ -40,9 +52,7 @@ app.use('/auth', require('./routes/auth'));
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
-  try{spawn(`ffmpeg -version`)}catch(error){
-    console.error(error)
-  }
+ 
 });
 
 server.setMaxListeners(1000);
