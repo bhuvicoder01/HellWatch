@@ -113,7 +113,6 @@ const  getUploadUrl = async (req, res) => {
   });
 
   const url = await getSignedUrl(s3, command, { expiresIn: 3600*24 }); // 24 hours
-  await videoModel.create({key,title:fileName})
 
   return res.json({
     uploadUrl: url,
@@ -260,10 +259,12 @@ const completeSongUpload = async (req, res) => {
 };
 
 const completeVideoUpload = async (req, res) => {
-  const { key } = req.body;
+  const { key,title } = req.body;
   const progress = uploadProgress.get(key);
   
   try {
+    await videoModel.create({key,title:title,owner:req.user._id})
+
     let thumbnailKey = null;
     
     if (req.file) {
@@ -287,13 +288,25 @@ const completeVideoUpload = async (req, res) => {
     if (video) {
       setTimeout(async () => {
         try {
-          const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
+          const tempDir = path.join(__dirname, '../temp');
+          const tempPath = path.join(tempDir, `${video._id}_original.mp4`);
+          
+          // Ensure temp directory exists
+          if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+          }
           
           const getCommand = new GetObjectCommand({
             Bucket: 'bhuvistestvideosdatabucket',
             Key: video.key
           });
           const data = await s3.send(getCommand);
+          
+          // Check if S3 response has Body
+          if (!data.Body) {
+            throw new Error('No data received from S3');
+          }
+          
           const writeStream = fs.createWriteStream(tempPath);
           
           await new Promise((resolve, reject) => {
@@ -301,6 +314,11 @@ const completeVideoUpload = async (req, res) => {
             writeStream.on('finish', resolve);
             writeStream.on('error', reject);
           });
+          
+          // Verify file was created successfully
+          if (!fs.existsSync(tempPath)) {
+            throw new Error(`Failed to create temp file: ${tempPath}`);
+          }
           
           const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
           const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);

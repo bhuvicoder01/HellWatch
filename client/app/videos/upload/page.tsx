@@ -107,6 +107,7 @@ export default function VideoUploader() {
       // Complete upload and send thumbnail as FormData
       const formData = new FormData();
       formData.append('key', key);
+      formData.append('title', file.name);
       if (thumbnailBlob) {
         formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
       }

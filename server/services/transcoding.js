@@ -49,8 +49,14 @@ class TranscodingService {
     const results = {};
     const tempDir = path.join(__dirname, '../temp');
 
+    // Ensure temp directory exists
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    // Verify input file exists
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Input file does not exist: ${inputPath}`);
     }
 
     for (const quality of qualities) {
@@ -105,8 +111,15 @@ class TranscodingService {
     }
 
     const tempDir = path.join(__dirname, '../temp');
+    
+    // Ensure temp directory exists
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    // Verify input file exists
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Input file does not exist: ${inputPath}`);
     }
 
     const thumbnailPath = path.join(tempDir, `${videoId}_thumb.jpg`);
