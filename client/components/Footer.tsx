@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const {currentSong} = useSong();
+    const { currentSong } = useSong();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -78,18 +78,18 @@ export default function Footer() {
                         >
                             <source src={`${API_URL}/songs/stream/${currentSong.id}`} type="audio/mpeg" />
                         </audio>
-                        
+
                         <div className="player-container">
                             <div className="song-info">
                                 <div className="song-title">{currentSong.title}</div>
                                 <div className="song-artist">{currentSong.artist}</div>
                             </div>
-                            
+
                             <div className="player-controls">
-                                <button className="control-btn" onClick={togglePlay}>
-                                    {isPlaying ? '⏸' : '▶'}
+                                <div className="control-btn "style={{background:'none'}}>
+                                <button className={` ${isPlaying?'pause-btn':'play-btn'}`}  onClick={togglePlay}>
                                 </button>
-                                
+</div>
                                 <div className="progress-container">
                                     <span className="time">{formatTime(currentTime)}</span>
                                     <input
@@ -102,7 +102,7 @@ export default function Footer() {
                                     />
                                     <span className="time">{formatTime(duration)}</span>
                                 </div>
-                                
+
                                 <div className="volume-container">
                                     <span>🔊</span>
                                     <input
@@ -123,6 +123,35 @@ export default function Footer() {
                     <p>&copy; 2023 My Website. All rights reserved.</p>
                 </div>
             </footer>
+            <style jsx>
+                {`
+                .play-btn {
+  /* Creates a triangle using borders */
+  width: 0;
+  height: 0;
+  border-top: 18px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-left: 32px solid red; /* The "play" arrow */
+  border-right:transparent;
+  background: none;
+  cursor: pointer;
+  border-radius: 2px;
+ 
+}
+
+.pause-btn {
+  /* Creates two vertical bars */
+  width: 0;
+  height: 25px;
+  border-top:transparent;
+  border-left: 7px solid red;
+  border-right: 7px solid red;
+  border-bottom:transparent;
+  background: none;
+  cursor: pointer;
+  box-sizing: border-box; /* Ensures padding/border are included in width/height */
+}`}
+            </style>
         </>
     );
 }

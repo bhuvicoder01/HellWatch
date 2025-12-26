@@ -399,14 +399,14 @@ body {
 .player-controls {
   display: flex;
   align-items: center;
-  gap: 0px;
+  gap: 8px;
   flex: 1;
 }
 
 .control-btn {
   background: #ff0000;
-  border: none;
-  border-radius: 50%;
+  /* border: none; */
+  /* border-radius: 50%; */
   width: 30px;
   height: 30px;
   color: white;
