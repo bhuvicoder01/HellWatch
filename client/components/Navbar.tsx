@@ -29,7 +29,7 @@ export default function Navbar() {
             <div className="navbar-link">
                 <Link href="/songs">Songs</Link>
                 <Link href="/videos">Videos</Link>
-                <Link href="/videos/upload">Upload</Link>
+                {/* <Link href="/videos/upload">VideoUpload</Link> */}
                 <Link href="#">About</Link>
                 <Link href="#">Contact</Link>
             </div>

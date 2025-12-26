@@ -544,7 +544,7 @@ color:#000000;
   /* max-width: 25vh; */
   gap: 20px;
   padding: 20px;
-  /* background: var(--bg-dark); */
+  background: #2a2a2a;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

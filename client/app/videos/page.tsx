@@ -4,6 +4,7 @@ import { api } from "../../services/api";
 import axios from "axios";
 import VideoGrid from "@/components/video/VideoGrid";
 import { useVideo } from "@/contexts/MediaContext";
+import Link from "next/link";
 
 function Videos({detailsPage=false,mobileDisplay=false}: {detailsPage?: boolean,mobileDisplay?:boolean}) {
   const {Videos}=useVideo()
@@ -37,6 +38,9 @@ useMemo(() => {
 
  return(<>
     <div className="container-fluid">
+      <button className="btn btn-danger">
+     <Link href="/videos/upload" className="nav-link">Upload videos</Link>
+</button>
       <VideoGrid detailsPage={detailsPage} mobileDisplay={mobileDisplay} videos={videos} />
     </div>
 
