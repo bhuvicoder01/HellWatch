@@ -73,6 +73,10 @@ export function AuthProvider({children}:any){
                 if (typeof window !== 'undefined') {
                     localStorage.setItem('user',JSON.stringify(data.user))
                 }
+                const token = JSON.parse(res.data.token);
+                if (token) {
+                    localStorage.setItem('token', token );
+                }
                 setUser(data.user)
                 setIsAuthenticated(true)
             }
