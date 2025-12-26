@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const {spawn}=require('node:child_process')
 
 
 
@@ -39,6 +40,9 @@ app.use('/auth', require('./routes/auth'));
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
+  try{spawn(`ffmpeg -version`)}catch(error){
+    console.error(error)
+  }
 });
 
 server.setMaxListeners(1000);
