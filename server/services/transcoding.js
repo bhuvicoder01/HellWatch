@@ -23,6 +23,8 @@ function runCommand(cmd) {
         console.error('FFmpeg stderr:', stderr);
         return reject(error);
       }
+      // log stdout for debugging
+      console.log('FFmpeg stdout:', stdout);
       resolve({ stdout, stderr });
     });
   });
@@ -85,6 +87,7 @@ class TranscodingService {
 
         // cleanup
         fs.unlinkSync(outputPath);
+        console.log(`transcoding done for ${quality.name}`)
       } catch (error) {
         console.error(`Error transcoding ${quality.name}:`, error.message);
       }
