@@ -6,16 +6,44 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const { currentSong } = useSong();
+    const { Songs, currentSong, setCurrentSong } = useSong();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
+    const [showFullView, setShowFullView] = useState(false)
+    const [thumbnail, setThumbnail] = useState<string | undefined>(undefined)
+    const thumbnailUrlRef = useRef<string | undefined>(undefined);
 
+    //fetch thumbnail early to render quick
+    useEffect(() => {
+        if (currentSong) {
+            fetch(`${API_URL}/songs/${currentSong?.id}/thumbnail`)
+                .then((res) => res.blob())
+                .then((blob) => {
+                    if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
+                    const url = URL.createObjectURL(blob);
+                    thumbnailUrlRef.current = url;
+                    setThumbnail(url);
+                })
+        } else {
+            if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
+            thumbnailUrlRef.current = undefined;
+            setThumbnail(undefined);
+        }
+    }, [currentSong])
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
+        };
+    }, []);
     useEffect(() => {
         if (audioRef.current && currentSong) {
             audioRef.current.load();
-            setIsPlaying(false);
+            audioRef.current.play();
+            setIsPlaying(true);
         }
     }, [currentSong]);
 
@@ -64,10 +92,34 @@ export default function Footer() {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
+    const skipToNext = () => {
+        if (!currentSong) return;
+        const currentIndex = Songs.findIndex((song: any) => song.id === currentSong.id);
+        const nextIndex = currentIndex + 1 < Songs.length ? currentIndex + 1 : 0;
+        setCurrentSong(Songs[nextIndex] as any);
+    };
+
+    const skipToPrevious = () => {
+        if (!currentSong) return;
+        const currentIndex = Songs.findIndex((song: any) => song.id === currentSong.id);
+        const prevIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : Songs.length - 1;
+        setCurrentSong(Songs[prevIndex] as any);
+    };
+
     return (
         <>
             <footer className="footer py-4">
-                {currentSong && (
+                {currentSong && (<>
+                    {showFullView && <div className="fullview-song">
+                        <div className="fullview-img-container">
+                            <img src={thumbnail} />
+                        </div>
+
+                        {/* <div className="info">
+                    <div className="title">{currentSong?.title}</div>
+                    <div className="artist">{currentSong?.artist}</div>
+                </div> */}
+                    </div>}
                     <div className="audio-player">
                         <audio
                             ref={audioRef}
@@ -75,21 +127,24 @@ export default function Footer() {
                             onLoadedMetadata={handleLoadedMetadata}
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
+                            onEnded={skipToNext}
                         >
                             <source src={`${API_URL}/songs/stream/${currentSong.id}`} type="audio/mpeg" />
                         </audio>
 
                         <div className="player-container">
-                            <div className="song-info">
+                            <div className="song-info" onClick={() => setShowFullView(!showFullView)}>
                                 <div className="song-title">{currentSong.title}</div>
                                 <div className="song-artist">{currentSong.artist}</div>
                             </div>
 
                             <div className="player-controls">
-                                <div className="control-btn "style={{background:'none'}}>
-                                <button className={` ${isPlaying?'pause-btn':'play-btn'}`}  onClick={togglePlay}>
-                                </button>
-</div>
+                                <div className="control-btn">
+                                    <button className="control-btn" onClick={skipToPrevious}>≪</button>
+                                    <button className={` ${isPlaying ? 'pause-btn' : 'play-btn'}`} onClick={togglePlay}>
+                                    </button>
+                                    <button className="control-btn" onClick={skipToNext}>≫</button>
+                                </div>
                                 <div className="progress-container">
                                     <span className="time">{formatTime(currentTime)}</span>
                                     <input
@@ -118,14 +173,23 @@ export default function Footer() {
                             </div>
                         </div>
                     </div>
-                )}
+                </>)}
                 <div className="container mx-auto text-center">
                     <p>&copy; 2023 My Website. All rights reserved.</p>
                 </div>
             </footer>
             <style jsx>
                 {`
-                .play-btn {
+                .control-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.play-btn {
   /* Creates a triangle using borders */
   width: 0;
   height: 0;

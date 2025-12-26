@@ -95,7 +95,7 @@ const multerUpload =multer({
 
 
 const  getUploadUrl = async (req, res) => {
-  const { fileName, fileType, fileSize } = req.query;
+ try{ const { fileName, fileType, fileSize } = req.query;
 
   const key = `videos/${Date.now()}-${fileName}`;
   
@@ -118,11 +118,15 @@ const  getUploadUrl = async (req, res) => {
     uploadUrl: url,
     fileKey: key,
     fileUrl: `https://bhuvistestvideosdatabucket.s3.amazonaws.com/${key}`
-  });
+  });}
+  catch(error){
+    console.error(error)
+    res.status(500).json({error:error})
+  }
 };
 
 const  getAudioUploadUrl = async (req, res) => {
-  const { fileName, fileType, fileSize } = req.query;
+ try{ const { fileName, fileType, fileSize } = req.query;
 
   const key = `songs/${Date.now()}-${fileName}`;
   
@@ -146,7 +150,11 @@ const  getAudioUploadUrl = async (req, res) => {
     uploadUrl: url,
     fileKey: key,
     fileUrl: `https://bhuvistestvideosdatabucket.s3.amazonaws.com/${key}`
-  });
+  });}
+  catch(error){
+    console.error(error)
+    res.status(500).json({error:error})
+  }
 };
 
 

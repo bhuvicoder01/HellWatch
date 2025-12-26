@@ -7,7 +7,7 @@ class MongoDB{
            .then(()=>{console.log(`MongoDB Connection Successful😎`)})
            .catch((error)=>{
             console.error(`Database connection failed😵 due to error:${error}`)
-            setInterval(()=>MongoDB.connect(uri),5000)
+            MongoDB.connect(process.env.MONGODB_URI)
 }
         )  
     }

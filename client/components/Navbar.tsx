@@ -1,5 +1,7 @@
 'use client';
 import { useAuth} from "@/contexts/AuthContext";
+import { useSong } from "@/contexts/MediaContext";
+import { API_URL } from "@/services/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -7,6 +9,7 @@ export default function Navbar() {
     const {user,logout}=useAuth() 
     const [showDropdown, setShowDropdown] = useState(false);
     const [dropdownRef, setDropdownRef] = useState<HTMLDivElement | null>(null);
+    const {currentSong}=useSong()
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
@@ -59,7 +62,9 @@ export default function Navbar() {
                     )}
                 </div>
             </div>
-        </div>
+            
+            </div>
+ 
 
     </>
     );

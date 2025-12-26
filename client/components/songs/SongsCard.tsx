@@ -33,7 +33,7 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
         console.log(currentSong)
     }
     return (
-        <div className="song-card flex flex-col items-center justify-center w-full h-full" >
+        <div className="song-card flex flex-col items-center justify-center w-full h-full"style={{transform:`scale(${currentSong===song?'1.5':'1'})`}} >
             <Link href='#' onClick={handleSongStart}>
 {showThumbnail && song.thumbnail&& <img src={thumbnail as string} alt={song.title} className="thumbnail" onError={()=>setShowThumbnail(false)} />}
 </Link>
