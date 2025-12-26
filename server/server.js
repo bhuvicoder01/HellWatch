@@ -24,17 +24,6 @@ const MongoDB = require('./services/db');
 
 MongoDB.connect(process.env.MONGODB_URI);
 
-setInterval(()=>{
-  return new Promise((resolve, reject) => {
-    exec(`ffmpeg -version`, (error, stdout, stderr) => {
-      if (error) return reject(error);
-      console.log(`stdout: ${stdout}`)
-      console.log(`stderr: ${stderr}`)
-
-      resolve({ stdout, stderr });
-    });
-  });
-},5000)
 
 // Health check — used by LB
 app.get('/health', (req, res) => {
