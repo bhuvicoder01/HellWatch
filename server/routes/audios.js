@@ -1,12 +1,9 @@
 // video.routes.js
 const express = require("express");
 const router = express.Router();
-const Video = require('../models/Videos'); // your model file
-const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getUploadUrl,getAudioUploadUrl, getUploadRate, completeUpload, thumbnailUpload } = require("../services/s3");
-const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo } = require("../controllers/videoController");
+const { getAudioUploadUrl, getUploadRate,  thumbnailUpload, completeSongUpload } = require("../services/s3");
 const authMiddleware = require("../middleware/Auth");
-const { listAudios } = require("../controllers/songController");
+const { listAudios, getSongThumbnail, streamAudio } = require("../controllers/songController");
 
 
 
@@ -15,24 +12,9 @@ router.get("/", listAudios);
 
 router.get('/upload-url',authMiddleware, getAudioUploadUrl)
 router.get('/upload-rate/:key', getUploadRate)
-router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeUpload)
-router.get('/:id/thumbnail', getThumbnail);
+router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeSongUpload)
+router.get('/:id/thumbnail', getSongThumbnail);
+router.get("/stream/:id",streamAudio);
 
-router.get("/:id",getVideoById);
-
-// GET /api/videos/stream/:id  -> stream a specific video with chunks
-router.get("/stream/:id",streamVideo);
-
-// DELETE /videos/:id -> delete video and its S3 objects
-router.delete("/:id",deleteVideo);
-
-// PUT /videos/:id -> update video
-router.put("/:id",updateVideo);
-
-// POST /videos/:id/quality -> add quality version
-router.post("/:id/quality", addQuality);
-
-// POST /videos/transcode -> transcode video to multiple qualities
-router.post("/transcode", transcodeVideo);
 
 module.exports = router;

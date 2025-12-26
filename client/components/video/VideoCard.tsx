@@ -1,7 +1,7 @@
 import { api, API_URL } from "@/services/api";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useVideo } from "@/contexts/VideoContext";
+import { useVideo } from "@/contexts/MediaContext";
 
 export default function VideoCard({Key,mainVideo=false,showEdit, video, controls=false, detailPage=false }: {Key?: any, mainVideo?: boolean, showEdit?: boolean, video: any, controls?: boolean, detailPage?: boolean }) {
 

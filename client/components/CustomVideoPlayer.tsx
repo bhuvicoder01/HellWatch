@@ -1,4 +1,5 @@
 'use client';
+import { useSong } from '@/contexts/MediaContext';
 import { API_URL } from '@/services/api';
 import { useState, useRef, useEffect } from 'react';
 
@@ -22,6 +23,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [isDoubleTappedSeek,setIsDoubleTappedSeek]=useState(false)
   const [isDoubleTappedRewind,setIsDoubleTappedRewind]=useState(false)
   const [showTitle,SetShowTitle]=useState(true)
+  const {currentSong,setCurrentSong}=useSong()
 
 
   const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
@@ -72,6 +74,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
       video.pause();
     } else {
       video.play();
+      setCurrentSong(null)
     }
     setIsPlaying(!isPlaying);
   };

@@ -1,3 +1,4 @@
+const audioModel = require("../models/Audio");
 const { listenerCount } = require("../models/User");
 const Video = require("../models/Videos");
 const S3= require("../services/s3");
@@ -48,27 +49,27 @@ class videoController {
         res.sendStatus(500);
       }
     }
-
-     static async getVideoById(req, res) {
-  try {
-    const videoDoc = await Video.findById(req.params.id);
-    if (!videoDoc) return res.sendStatus(404);
-
-    const formatted = {
-      id: videoDoc._id,
-      owner: videoDoc?.owner,
-      title: videoDoc.title,
-      key: videoDoc.key,
-      thumbnail: videoDoc.thumbnail,
-      qualities: Object.fromEntries(videoDoc.qualities || new Map()),
-      createdAt: videoDoc.createdAt
-    };
-    res.json(formatted);
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-}
+    
+    static async getVideoById(req, res) {
+      try {
+        const videoDoc = await Video.findById(req.params.id);
+        if (!videoDoc) return res.sendStatus(404);
+    
+        const formatted = {
+          id: videoDoc._id,
+          owner: videoDoc?.owner,
+          title: videoDoc.title,
+          key: videoDoc.key,
+          thumbnail: videoDoc.thumbnail,
+          qualities: Object.fromEntries(videoDoc.qualities || new Map()),
+          createdAt: videoDoc.createdAt
+        };
+        res.json(formatted);
+      } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+      }
+    }
 
  static async streamVideo(req, res) {
   try {

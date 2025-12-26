@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useContext, useMemo, Suspense } from "reac
 import { api } from "../../services/api";
 import axios from "axios";
 import VideoGrid from "@/components/video/VideoGrid";
-import { useVideo } from "@/contexts/VideoContext";
+import { useVideo } from "@/contexts/MediaContext";
 
 function Videos({detailsPage=false,mobileDisplay=false}: {detailsPage?: boolean,mobileDisplay?:boolean}) {
   const {Videos}=useVideo()

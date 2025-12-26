@@ -2,7 +2,7 @@
 import VideoCard from "@/components/video/VideoCard";
 import VideoGrid from "@/components/video/VideoGrid";
 import CustomVideoPlayer from "@/components/CustomVideoPlayer";
-import { useVideo } from "@/contexts/VideoContext";
+import { useVideo } from "@/contexts/MediaContext";
 import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense, useMemo } from "react";

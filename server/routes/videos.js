@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Video = require('../models/Videos'); // your model file
 const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getUploadUrl, getUploadRate, completeUpload, thumbnailUpload } = require("../services/s3");
+const { getUploadUrl, getUploadRate, thumbnailUpload, completeVideoUpload } = require("../services/s3");
 const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo } = require("../controllers/videoController");
 
 
@@ -13,7 +13,7 @@ router.get("/", listVideos);
 
 router.get('/upload-url', getUploadUrl)
 router.get('/upload-rate/:key', getUploadRate)
-router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeUpload)
+router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeVideoUpload)
 router.get('/:id/thumbnail', getThumbnail);
 
 router.get("/:id",getVideoById);

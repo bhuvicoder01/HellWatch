@@ -165,7 +165,7 @@ const getUploadRate = async (req, res) => {
   res.json({ uploadRate: uploadRate.toFixed(2) });
 };
 
-const completeUpload = async (req, res) => {
+const completeSongUpload = async (req, res) => {
   const { key } = req.body;
   const progress = uploadProgress.get(key);
   
@@ -259,4 +259,99 @@ const completeUpload = async (req, res) => {
   }
 };
 
-module.exports={s3,upload:multerUpload,getAudioUploadUrl,getUploadUrl,getUploadRate,completeUpload,thumbnailUpload:upload};
+const completeVideoUpload = async (req, res) => {
+  const { key } = req.body;
+  const progress = uploadProgress.get(key);
+  
+  try {
+    let thumbnailKey = null;
+    
+    if (req.file) {
+      try {
+        thumbnailKey = await uploadThumbnailToS3(req.file.path, key);
+      } catch (error) {
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        throw error;
+      }
+    }
+    
+    const video = await videoModel.findOneAndUpdate(
+      { key },
+      { thumbnail: thumbnailKey },
+      { new: true }
+    );
+    
+    // Start transcoding in background
+    if (video) {
+      setTimeout(async () => {
+        try {
+          const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
+          
+          const getCommand = new GetObjectCommand({
+            Bucket: 'bhuvistestvideosdatabucket',
+            Key: video.key
+          });
+          const data = await s3.send(getCommand);
+          const writeStream = fs.createWriteStream(tempPath);
+          
+          await new Promise((resolve, reject) => {
+            data.Body.pipe(writeStream);
+            writeStream.on('finish', resolve);
+            writeStream.on('error', reject);
+          });
+          
+          const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
+          const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
+          
+          video.qualities = new Map(Object.entries(qualities));
+          if (!video.thumbnail) video.thumbnail = autoThumbnail;
+          await video.save();
+          
+          if (fs.existsSync(tempPath)) {
+            fs.unlinkSync(tempPath);
+          }
+          
+          console.log(`Transcoding completed for video ${video._id}`);
+        } catch (error) {
+          console.error('Transcoding failed:', error);
+        }
+      }, 2000);
+    }
+    
+    if (progress) {
+      const elapsed = (Date.now() - progress.startTime) / 1000;
+      const finalRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
+      uploadProgress.delete(key);
+      return res.json({ 
+        finalUploadRate: finalRate.toFixed(2),
+        thumbnailKey,
+        message: 'Upload completed, transcoding started'
+      });
+    }
+    
+    res.json({ finalUploadRate: 0, thumbnailKey, message: 'Upload completed, transcoding started' });
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+  } catch (error) {
+    console.error('Error in completeUpload:', error);
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    
+    if (progress) {
+      const elapsed = (Date.now() - progress.startTime) / 1000;
+      const finalRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
+      uploadProgress.delete(key);
+      return res.json({ finalUploadRate: finalRate.toFixed(2) });
+    }
+    
+    res.json({ finalUploadRate: 0 });
+  }
+};
+
+
+module.exports={s3,upload:multerUpload,getAudioUploadUrl,getUploadUrl,getUploadRate,completeSongUpload,completeVideoUpload,thumbnailUpload:upload};

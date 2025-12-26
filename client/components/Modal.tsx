@@ -40,7 +40,7 @@ export const Modal = ({
         className="modal fade show d-block" 
         tabIndex={-1} 
         role="dialog"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        // style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
         onClick={onClose}
       >
         <div 

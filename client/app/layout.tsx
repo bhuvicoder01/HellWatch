@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { VideoProvider } from '@/contexts/VideoContext';
+import { SongProvider, VideoProvider } from '@/contexts/MediaContext';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -26,11 +26,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
         <VideoProvider>
+          <SongProvider>
         <Navbar/>
         <div className='container 'style={{padding:'150px 10px 50px 10px'}}>
         {children}
         </div>
         <Footer/>
+        </SongProvider>
         </VideoProvider>
         </AuthProvider>
         </body>
