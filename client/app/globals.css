@@ -317,6 +317,7 @@ body {
   opacity: 0.7;
   animation: fadeInOut 0.5s;
   pointer-events: none;
+  
 }
 .pause_icon {
   position: absolute;
@@ -466,17 +467,18 @@ body {
 .audio-player {
   background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
   border-top: 2px solid #ff0000;
-  padding: 15px;
+  padding: 15px 0px 15px 0px;
   /* margin-bottom: 10px; */
   border-top-left-radius: 20;
   border-top-right-radius: 25;
+  max-width: 100%;
 }
 
 .player-container {
   display: flex;
   align-items: center;
-  gap: 18px;
-  max-width: 1200px;
+  /* gap: 18px; */
+  max-width: inherit;
   margin: 0 auto;
 }
 
@@ -498,8 +500,11 @@ body {
 
 .player-controls {
   display: flex;
+  /* justify-content: space-around; */
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  /* gap: 8px; */
+  max-width: inherit;
   flex: 1;
 }
 
@@ -507,10 +512,12 @@ body {
   background: #ff0000;
   /* border: none; */
   /* border-radius: 50%; */
-  width: 30px;
+  display:flex;
+  flex-direction: row;
+  /* width: 30px; */
   height: 30px;
   color: white;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -523,7 +530,7 @@ body {
 .progress-container {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 2px;
   flex: 1;
 }
 
@@ -563,7 +570,9 @@ body {
 .volume-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  max-width: inherit;
+  /* gap: 8px; */
+  padding-right: 10px;
 }
 
 .volume-bar {

@@ -53,7 +53,7 @@ export default function SongsUploader() {
           const {common} = await parseBlob(e.target.files[0]);
           console.log(common)
           let metadata = {
-                    title: common.title || "Unknown Title",
+                    title: common.title || (e.target.files[0].name).split(".")[0]  ||"Unknown Title",
                     artist: common.artist || "Unknown Artist",
                     album: common.album || "Unknown Album",
                     albumartist: common?.albumartist || "Unknown Album"

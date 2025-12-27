@@ -3,7 +3,9 @@
 import { useSong } from "@/contexts/MediaContext";
 import { API_URL } from "@/services/api";
 import { useEffect, useRef, useState } from "react";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
+import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const { Songs, currentSong, setCurrentSong } = useSong();
@@ -133,18 +135,21 @@ export default function Footer() {
                         </audio>
 
                         <div className="player-container">
-                            <div className="song-info" onClick={() => setShowFullView(!showFullView)}>
+                              <div className="song-info" onClick={() => setShowFullView(!showFullView)}>
                                 <div className="song-title">{currentSong.title}</div>
                                 <div className="song-artist">{currentSong.artist}</div>
                             </div>
+                            <div className="control-btn">
+                                    <button className="control-btn" onClick={skipToPrevious}><FontAwesomeIcon icon={faStepBackward}/> </button>
+                                    <button className="control-btn " onClick={togglePlay}><FontAwesomeIcon icon={isPlaying?faPause:faPlay}/>
+                                    </button>
+                                    <button className="control-btn" onClick={skipToNext}><FontAwesomeIcon icon={faStepForward}/></button>
+                                    {/* <i >{FaPlay}</i> */}
+                                </div>
 
                             <div className="player-controls">
-                                <div className="control-btn">
-                                    <button className="control-btn" onClick={skipToPrevious}>≪</button>
-                                    <button className={` ${isPlaying ? 'pause-btn' : 'play-btn'}`} onClick={togglePlay}>
-                                    </button>
-                                    <button className="control-btn" onClick={skipToNext}>≫</button>
-                                </div>
+                               
+                               
                                 <div className="progress-container">
                                     <span className="time">{formatTime(currentTime)}</span>
                                     <input
@@ -184,22 +189,22 @@ export default function Footer() {
   background: none;
   border: none;
   color: red;
-  font-size: 20px;
+  font-size: 27px;
   cursor: pointer;
-  margin: 0 5px;
+  margin: 0 5px 0 0;
+  padding: 0 5 0 2;
+
 }
 
 .play-btn {
   /* Creates a triangle using borders */
-  width: 0;
-  height: 0;
-  border-top: 18px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-left: 32px solid red; /* The "play" arrow */
-  border-right:transparent;
-  background: none;
+//   width: 0;
+//   height: 0;
+font-size:5px;
+ 
+//   background: none;
   cursor: pointer;
-  border-radius: 2px;
+//   border-radius: 2px;
  
 }
 
@@ -207,6 +212,8 @@ export default function Footer() {
   /* Creates two vertical bars */
   width: 0;
   height: 25px;
+   margin-right: 10px;
+  padding-right: 5px;
   border-top:transparent;
   border-left: 7px solid red;
   border-right: 7px solid red;
