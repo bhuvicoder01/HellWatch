@@ -23,7 +23,8 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
         };
     useEffect(()=>{
         fetchThumbnail()
-    },[song.id])
+        console.log(song,currentSong)
+    },[song.id,currentSong])
 
     const handleSongStart=async()=>{
         const foundSong = Songs.find((s:SongContextType) => s.id === song.id);
@@ -33,7 +34,7 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
         console.log(currentSong)
     }
     return (
-        <div className="song-card flex flex-col items-center justify-center w-full h-full"style={{transform:`scale(${currentSong===song?'1.5':'1'})`}} >
+        <div className="song-card flex flex-col items-center justify-center w-full h-full"style={{transform:`scale(${song.id===currentSong?.id?'1.07':'1'})`,  boxShadow:`${song.id===currentSong?.id?'0 2px 12px rgba(255, 0, 0, 1)':'none'}`}} >
             <Link href='#' onClick={handleSongStart}>
 {showThumbnail && song.thumbnail&& <img src={thumbnail as string} alt={song.title} className="thumbnail" onError={()=>setShowThumbnail(false)} />}
 </Link>

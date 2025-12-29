@@ -59,7 +59,8 @@ export const useSong = () => {
 };
 export function SongProvider({children }: SongProviderProps) {
     const [Songs,setSongs]=useState([]);
-    const [currentSong,setCurrentSong]=useState<SongContextType|null>(null)
+    const [currentSong,setCurrentSong]=useState<SongContextType|null>(typeof window!==undefined ? JSON.parse(localStorage.getItem('currentSong') || 'null') : null)
+    const [lastPlayedTime,setLastPlayedTime]=useState()
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +76,9 @@ const loadSongs = async () => {
     useEffect(() => {
 
         loadSongs();
+        if(currentSong){
+            localStorage.setItem('currentSong',JSON.stringify(currentSong))
+        }
     }, [currentSong]);
 
     return (

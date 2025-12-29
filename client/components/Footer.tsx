@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
 import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
+import Link from "next/link";
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const { Songs, currentSong, setCurrentSong } = useSong();
@@ -16,6 +17,7 @@ export default function Footer() {
     const [showFullView, setShowFullView] = useState(false)
     const [thumbnail, setThumbnail] = useState<string | undefined>(undefined)
     const thumbnailUrlRef = useRef<string | undefined>(undefined);
+    const [isPageReloaded,setIsPageReloaded]=useState(true)
 
     //fetch thumbnail early to render quick
     useEffect(() => {
@@ -44,8 +46,14 @@ export default function Footer() {
     useEffect(() => {
         if (audioRef.current && currentSong) {
             audioRef.current.load();
+            if(localStorage.getItem('currentTime')!==null && isPageReloaded){
+            setIsPageReloaded(false)
+            audioRef.current.currentTime=localStorage.getItem('currentTime')?parseFloat(localStorage.getItem('currentTime') as string):0;
+            }
+            else{
             audioRef.current.play();
             setIsPlaying(true);
+            }
         }
     }, [currentSong]);
 
@@ -63,6 +71,7 @@ export default function Footer() {
     const handleTimeUpdate = () => {
         if (audioRef.current) {
             setCurrentTime(audioRef.current.currentTime);
+            localStorage.setItem('currentTime', audioRef.current.currentTime.toString());
         }
     };
 
@@ -139,9 +148,9 @@ export default function Footer() {
                                 <div className="song-title">{currentSong.title}</div>
                                 <div className="song-artist">{currentSong.artist}</div>
                             </div>
-                            <div className="control-btn">
+                            <div className="d-flex rows"style={{justifyContent:'center',alignItems:'center'}}>
                                     <button className="control-btn" onClick={skipToPrevious}><FontAwesomeIcon icon={faStepBackward}/> </button>
-                                    <button className="control-btn " onClick={togglePlay}><FontAwesomeIcon icon={isPlaying?faPause:faPlay}/>
+                                    <button className="control-btn play-pause-btn" onClick={togglePlay}><FontAwesomeIcon icon={isPlaying?faPause:faPlay}/>
                                     </button>
                                     <button className="control-btn" onClick={skipToNext}><FontAwesomeIcon icon={faStepForward}/></button>
                                     {/* <i >{FaPlay}</i> */}
@@ -179,49 +188,41 @@ export default function Footer() {
                         </div>
                     </div>
                 </>)}
-                <div className="container mx-auto text-center">
-                    <p>&copy; 2023 My Website. All rights reserved.</p>
+                <div className="footer-links text-center">
+                    <Link href={`/`}>Home</Link>
+                    <Link href={`/videos`}>Videos</Link>
+                    <Link href={`/songs`}>Songs</Link>
+
                 </div>
             </footer>
             <style jsx>
                 {`
                 .control-btn {
+                display: flex;
   background: none;
   border: none;
   color: red;
   font-size: 27px;
   cursor: pointer;
-  margin: 0 5px 0 0;
-  padding: 0 5 0 2;
+//   margin: 0 5px 0 0;
+//   padding: 0 5 0 2;
+align-items:center;
+justify-content:center;
 
 }
 
-.play-btn {
+.play-pause-btn {
   /* Creates a triangle using borders */
-//   width: 0;
-//   height: 0;
-font-size:5px;
- 
-//   background: none;
-  cursor: pointer;
-//   border-radius: 2px;
+  background-color:rgba(255, 255, 255, 0.76);
+  align-items:center;
+  width: 50px;
+  height: 50px;
+  border-radius:60%;
+
  
 }
 
-.pause-btn {
-  /* Creates two vertical bars */
-  width: 0;
-  height: 25px;
-   margin-right: 10px;
-  padding-right: 5px;
-  border-top:transparent;
-  border-left: 7px solid red;
-  border-right: 7px solid red;
-  border-bottom:transparent;
-  background: none;
-  cursor: pointer;
-  box-sizing: border-box; /* Ensures padding/border are included in width/height */
-}`}
+`}
             </style>
         </>
     );

@@ -9,7 +9,7 @@
 body {
   margin: 0;
   /* background: whitesmoke; */
-  /* background-color: var(--bg-dark); */
+  background-color: var(--bg-dark);
   color: rgb(255, 0, 0);
   font-family: system-ui;
 }
@@ -96,6 +96,7 @@ body {
 .fullview-song-info {
   text-align: center;
   margin-bottom: 40px;
+  cursor: pointer;
 }
 
 .fullview-song-title {
@@ -175,7 +176,10 @@ body {
 
 
 
-.footer {
+.footer {display: flex;
+  gap:1;
+  flex-direction: column;
+    align-items: center;
   background: #000000;
   color: rgb(255, 0, 0);
   text-align: center;
@@ -185,6 +189,7 @@ body {
   margin-top: 20px;
   width: 100%;
   z-index: 100;
+
 }
 
 .footer .audio-player{
@@ -484,13 +489,15 @@ body {
 
 .song-info {
   min-width: 200px;
+  cursor: pointer;
 }
 
 .song-title {
-  color: #ff0000;
+  color: #ffffff;
   font-weight: bold;
   font-size: 16px;
   margin-bottom: 4px;
+  font-family:monospace;
 }
 
 .song-artist {
@@ -537,7 +544,7 @@ body {
 .progress-bar {
   flex: 1;
   height: 6px;
-  background: #333;
+  background: #ff0000;
   border-radius: 3px;
   outline: none;
   cursor: pointer;
@@ -675,7 +682,7 @@ color:#000000;
   color: #f8f9fa;
 }
 
-.song-card:hover {
+/* .song-card:hover {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   transform: scale(1.05);
 }
@@ -683,7 +690,7 @@ color:#000000;
 .song-card.no-hover:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: none;
-}
+} */
 
 
 .song-card img {
@@ -737,3 +744,53 @@ color:#000000;
   }
 }
 
+
+.fullview-song{
+  display: flex;
+  max-width: 100%;
+  overflow: hidden;
+  /* justify-content: center; */
+  align-items: center;
+  /* border:60%;
+  object-fit: cover; */
+
+}
+.fullview-img-container{
+  display:flex;
+  justify-content: center;
+
+  /* border-radius:60%; */
+  align-items: center;
+  max-width: 100%;
+  align-items: center;
+}
+.fullview-img-container img{
+  /* border-radius:60%; */
+  max-width: inherit;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  height: inherit; /* Adjust height as needed for full vertical lines */
+}
+.footer-links a{
+  text-decoration: none;
+  color: rgb(255, 0, 0);
+  position: relative;
+  padding: 0 10px;
+  margin-inline: 50;
+}
+.footer-links a:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  /* height: 100px; */
+  /* margin-left: 250%; */
+  background-color: rgb(255, 0, 0);
+}
