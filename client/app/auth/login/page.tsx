@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
+export const dynamic = 'force-dynamic'
+
 function Login() {
     const [email,setEmail]=useState('');
     const [password,setPassword]=useState('');
@@ -23,14 +25,15 @@ function Login() {
                 email,
                 password
             })
+            if(typeof window !== 'undefined'){
             localStorage.setItem('user',JSON.stringify(res.data.user))
             const token = JSON.parse(res.data.token);
-            if (token) {
+            if (token && typeof window !== 'undefined') {
                 localStorage.setItem('token', token );
             }
 
             navigate('/')
-
+}
             
         } catch (error) {
             console.error(error);

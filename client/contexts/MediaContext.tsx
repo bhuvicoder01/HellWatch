@@ -48,6 +48,11 @@ owner: string;
 key: string;
 title: string;
 artist: string;
+attributes:{
+    name: string;
+    artistName: string;
+    albumName: string;
+}
 thumbnail: string;
 }
 
@@ -59,7 +64,7 @@ export const useSong = () => {
 };
 export function SongProvider({children }: SongProviderProps) {
     const [Songs,setSongs]=useState([]);
-    const [currentSong,setCurrentSong]=useState<SongContextType|null>(typeof window!==undefined ? JSON.parse(localStorage.getItem('currentSong') || 'null') : null)
+    const [currentSong,setCurrentSong]=useState<SongContextType|null>(typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentSong') || 'null') : null)
     const [lastPlayedTime,setLastPlayedTime]=useState()
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -76,7 +81,7 @@ const loadSongs = async () => {
     useEffect(() => {
 
         loadSongs();
-        if(currentSong){
+        if(typeof window !== 'undefined' && currentSong){
             localStorage.setItem('currentSong',JSON.stringify(currentSong))
         }
     }, [currentSong]);

@@ -3,6 +3,8 @@ import React, { useState,useEffect, use, } from 'react'
 import { useRef } from 'react';
 import { api } from '@/services/api';
 import { useRouter } from 'next/navigation';
+
+export const dynamic = 'force-dynamic'
 function Register() {
     
     const toastRef = useRef<HTMLDivElement>(null);
@@ -21,9 +23,11 @@ function Register() {
     
     
     useEffect(()=>{
-    const user=localStorage.getItem('user')
-    if(user){
-      navigate('/')
+    if (typeof window !== 'undefined') {
+        const user=localStorage.getItem('user')
+        if(user){
+          navigate('/')
+        }
     }
     })
 
