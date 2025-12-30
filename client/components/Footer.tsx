@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
 import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
 import Link from "next/link";
+
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const { Songs, currentSong, setCurrentSong } = useSong();
@@ -43,16 +44,21 @@ export default function Footer() {
             if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
         };
     }, []);
+
     useEffect(() => {
         if (audioRef.current && currentSong) {
             audioRef.current.load();
-            if(localStorage.getItem('currentTime')!==null && isPageReloaded){
-            setIsPageReloaded(false)
-            audioRef.current.currentTime=localStorage.getItem('currentTime')?parseFloat(localStorage.getItem('currentTime') as string):0;
-            }
-            else{
-            audioRef.current.play();
-            setIsPlaying(true);
+
+            // Guard localStorage access with typeof window !== 'undefined' for SSR/type-safety
+            const savedTime = (typeof window !== 'undefined') ? localStorage.getItem('currentTime') : null;
+
+            if (savedTime !== null && isPageReloaded) {
+                setIsPageReloaded(false)
+                audioRef.current.currentTime = savedTime ? parseFloat(savedTime) : 0;
+            } else {
+                // try to play when no saved time to resume
+                audioRef.current.play();
+                setIsPlaying(true);
             }
         }
     }, [currentSong]);
@@ -71,7 +77,9 @@ export default function Footer() {
     const handleTimeUpdate = () => {
         if (audioRef.current) {
             setCurrentTime(audioRef.current.currentTime);
-            localStorage.setItem('currentTime', audioRef.current.currentTime.toString());
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('currentTime', audioRef.current.currentTime.toString());
+            }
         }
     };
 
