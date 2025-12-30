@@ -6,12 +6,17 @@
 * {
   box-sizing: border-box;
 }
+html {
+  overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+}
+
 body {
   margin: 0;
   /* background: whitesmoke; */
   background-color: var(--bg-dark);
   color: rgb(255, 0, 0);
   font-family: system-ui;
+  overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
 }
 
 .navbar {
