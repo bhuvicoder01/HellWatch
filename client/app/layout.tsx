@@ -6,7 +6,6 @@ import { Inter } from 'next/font/google';
 import { SongProvider, VideoProvider } from '@/contexts/MediaContext';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
-import PreventPullToRefresh from '@/components/PreventPullToRefresh';
 
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,7 +24,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <PreventPullToRefresh />
         <AuthProvider>
         <VideoProvider>
           <SongProvider>
