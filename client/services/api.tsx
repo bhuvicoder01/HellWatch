@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getGlobalAbortSignal } from '@/hooks/useAbortOnNavigate';
 
 // API Base URL - Change this when you have a backend
 export const API_URL = process.env.NODE_ENV === 'production' ? 'https://hellwatch-ffus.onrender.com' : 'http://localhost:5000';
@@ -45,6 +46,11 @@ api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       config.headers.Authorization = localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '';
+    }
+    // Add global abort signal
+    const signal = getGlobalAbortSignal();
+    if (signal) {
+      config.signal = signal;
     }
     return config;
   },

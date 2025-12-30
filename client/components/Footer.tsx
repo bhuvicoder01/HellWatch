@@ -6,7 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
 import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
+import { faHome, faVideo, faMusic } from '@fortawesome/free-solid-svg-icons'
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -19,6 +21,7 @@ export default function Footer() {
     const [thumbnail, setThumbnail] = useState<string | undefined>(undefined)
     const thumbnailUrlRef = useRef<string | undefined>(undefined);
     const [isPageReloaded,setIsPageReloaded]=useState(true)
+    const pathname = usePathname();
 
     //fetch thumbnail early to render quick
     useEffect(() => {
@@ -125,6 +128,8 @@ export default function Footer() {
         setCurrentSong(Songs[prevIndex] as any);
     };
 
+    const isMainPage = ['/', '/videos', '/songs'].includes(pathname) || pathname.startsWith('/videos/') || pathname.startsWith('/songs/') || pathname.startsWith('/profile');
+
     return (
         <>
             <footer className="footer py-4">
@@ -196,12 +201,22 @@ export default function Footer() {
                         </div>
                     </div>
                 </>)}
-                <div className="footer-links text-center">
-                    <Link href={`/`}>Home</Link>
-                    <Link href={`/videos`}>Videos</Link>
-                    <Link href={`/songs`}>Songs</Link>
-
-                </div>
+                {isMainPage && (
+                    <div className="footer-links">
+                        <Link href={`/`} className={`footer-link ${pathname === '/' ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faHome} />
+                            <span>Home</span>
+                        </Link>
+                        <Link href={`/videos`} className={`footer-link ${pathname === '/videos' ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faVideo} />
+                            <span>Videos</span>
+                        </Link>
+                        <Link href={`/songs`} className={`footer-link ${pathname === '/songs' ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faMusic} />
+                            <span>Songs</span>
+                        </Link>
+                    </div>
+                )}
             </footer>
             <style jsx>
                 {`
