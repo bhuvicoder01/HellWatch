@@ -7,8 +7,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
 import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
 import { faHome, faVideo, faMusic } from '@fortawesome/free-solid-svg-icons'
+import { faVolumeUp, faVolumeDown, faVolumeMute } from '@fortawesome/free-solid-svg-icons'
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+
 
 export default function Footer() {
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -113,6 +115,11 @@ export default function Footer() {
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
+    const getVolumeIcon = () => {
+        if (volume === 0) return faVolumeMute;
+        if (volume < 0.5) return faVolumeDown;
+        return faVolumeUp;
+    }
 
     const skipToNext = () => {
         if (!currentSong) return;
@@ -186,7 +193,7 @@ export default function Footer() {
                                 </div>
 
                                 <div className="volume-container">
-                                    <span>🔊</span>
+                                    <FontAwesomeIcon icon={getVolumeIcon()} />
                                     <input
                                         type="range"
                                         className="volume-bar"

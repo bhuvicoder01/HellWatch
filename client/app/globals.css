@@ -486,9 +486,10 @@ body {
 
 .player-container {
   display: flex;
+  justify-content: center;
   align-items: center;
-  /* gap: 18px; */
-  max-width: inherit;
+  gap: 18px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -512,12 +513,13 @@ body {
 
 .player-controls {
   display: flex;
-  /* justify-content: space-around; */
+  /* justify-content: center; */
   flex-direction: row;
-  align-items: center;
+  /* align-items: center; */
   /* gap: 8px; */
+  align-items: center;
   max-width: inherit;
-  flex: 1;
+  /* flex: 1; */
 }
 
 .control-btn {
@@ -544,6 +546,7 @@ body {
   align-items: center;
   gap: 2px;
   flex: 1;
+  max-width: max-content;
 }
 
 .progress-bar {
@@ -590,7 +593,7 @@ body {
 .volume-bar {
   width: 80px;
   height: 4px;
-  background: #333;
+  background: #ff0000;
   border-radius: 2px;
   outline: none;
 }
@@ -809,4 +812,60 @@ color:#000000;
   .footer-link.active{
     font-size:large
   }
+}
+
+/* Custom progress bar and volume bar styling */
+.progress-bar, .volume-bar {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ff0000;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.progress-bar::-webkit-slider-thumb, .volume-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff0000;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+}
+
+.progress-bar::-webkit-slider-thumb:hover, .volume-bar::-webkit-slider-thumb:hover {
+  background: #cc0000;
+  box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);
+}
+
+.progress-bar::-moz-range-thumb, .volume-bar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff0000;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+}
+
+.progress-bar::-moz-range-thumb:hover, .volume-bar::-moz-range-thumb:hover {
+  background: #cc0000;
+  box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);
+}
+
+.progress-bar::-webkit-slider-track, .volume-bar::-webkit-slider-track {
+  background: #333;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.progress-bar::-moz-range-track, .volume-bar::-moz-range-track {
+  background: #333;
+  height: 6px;
+  border-radius: 3px;
+  border: none;
 }

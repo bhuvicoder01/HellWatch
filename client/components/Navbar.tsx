@@ -29,13 +29,13 @@ export default function Navbar() {
                     <img src="/logo1.png" alt="logo" />
                 </Link>
             </div>
-            <div className="navbar-link">
+            {/* <div className="navbar-link">
                 <Link href="/songs">Songs</Link>
                 <Link href="/videos">Videos</Link>
-                {/* <Link href="/videos/upload">VideoUpload</Link> */}
+                <Link href="/videos/upload">VideoUpload</Link>
                 <Link href="#">About</Link>
                 <Link href="#">Contact</Link>
-            </div>
+            </div> */}
             {/* <div className="navbar-actions">
                 <select className="toogle-service">
                     <option value="video">Video</option>
