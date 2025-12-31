@@ -72,7 +72,7 @@ export function SongProvider({children }: SongProviderProps) {
 const loadSongs = async () => {
       const res = await api.get("/songs");
       setSongs(res.data);
-      console.log(res.data);
+    //   console.log(res.data);
     };
 
     const refreshSongs = async() => {

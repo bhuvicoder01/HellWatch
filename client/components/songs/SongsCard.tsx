@@ -23,7 +23,7 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
         };
     useEffect(()=>{
         fetchThumbnail()
-        console.log(song,currentSong)
+        // console.log(song,currentSong)
     },[song.id,currentSong])
 
     const handleSongStart=async()=>{
@@ -31,7 +31,7 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
         if (foundSong) {
             setCurrentSong(foundSong);
         }
-        console.log(currentSong)
+        // console.log(currentSong)
     }
     return (
         <div className="song-card flex flex-col items-center justify-center w-full h-full"style={{transform:`scale(${song.id===currentSong?.id?'1.07':'1'})`,  boxShadow:`${song.id===currentSong?.id?'0 2px 12px rgba(255, 0, 0, 1)':'none'}`}} >
