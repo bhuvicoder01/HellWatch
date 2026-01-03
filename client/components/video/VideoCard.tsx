@@ -83,7 +83,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
         }
     };
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = async() => {
         if (videoRef.current) {
             setShowThumbnail(true);
             videoRef.current.pause();

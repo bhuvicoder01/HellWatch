@@ -161,8 +161,9 @@ export default function Footer() {
   const progressPct = duration ? (currentTime / duration) * 100 : 0;
   const volumePct = volume * 100;
 
-  const sliderFill = (pct: number) =>
+ const sliderFill = (pct: number) =>
     `linear-gradient(to right, #ff0000 ${pct}%, #333 ${pct}%)`;
+  const getPlayButtonBorderColor = () => isPlaying ? `red` : 'white';
   return (
     <>
       <footer className="footer py-4">
@@ -193,7 +194,7 @@ export default function Footer() {
                   src={`${API_URL}/songs/stream/${currentSong.id}`}
                   type="audio/mpeg"
                 />
-              </audio>
+              </audio> 
 
               <div className="player-container">
                 <div
@@ -201,7 +202,8 @@ export default function Footer() {
                   onClick={() => setShowFullView(!showFullView)}
                 >
                   <div className="song-title">{currentSong.title}</div>
-                  <div className="song-artist">{currentSong.artist}</div>
+                  {/* <div className="song-artist">{currentSong.artist}</div> */}
+                  {/* <div className="song-cover"><img src={`${API_URL}/songs/${currentSong.id}/thumbnail`}/></div> */}
                 </div>
                 <div
                   className="d-flex rows"
@@ -210,9 +212,16 @@ export default function Footer() {
                   <button className="control-btn" onClick={skipToPrevious}>
                     <FontAwesomeIcon icon={faStepBackward} />{" "}
                   </button>
+
                   <button
                     className="control-btn play-pause-btn"
                     onClick={togglePlay}
+                    style={{
+                      backgroundImage: thumbnail ? `url(${thumbnail})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      borderColor: getPlayButtonBorderColor()
+                    }}
                   >
                     <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
                   </button>
@@ -300,10 +309,27 @@ export default function Footer() {
 
           .play-pause-btn {
             /* Creates a triangle using borders */
-            background-color: rgba(255, 255, 255, 0.76);
+            background-color: rgba(255, 255, 255, 1);
+            color:red;
             align-items: center;
             width: 50px;
             height: 50px;
+            border-radius: 60%;
+            border: 1px solid transparent;
+            }
+          .song-cover{
+          width:50px
+          max-wdith:50px;
+          object-fit:cover;
+          border: 1px solid #ccc;
+          border-radius: 60%;
+          z-index: 1000;
+          }
+          .song-cover img{
+            max-width: 50px;
+            max-height: 60px;
+            height: 50px;
+            // object-fit: cover;
             border-radius: 60%;
           }
         `}
