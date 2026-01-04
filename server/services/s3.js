@@ -11,15 +11,15 @@ const videoModel = require('../models/Videos')
 const TranscodingService = require('./transcoding');
 const audioModel = require('../models/Audio');
 
+
 const agent=new Agent({
     keepAlive:true,
     maxSockets:1000
 })
-
 // 1. Configure the S3 Client
 const s3=new S3Client(
     {
-        region:'us-east-1',
+        region:'ap-south-1',
         credentials:{
             accessKeyId:process.env.accessKeyId,
             secretAccessKey:process.env.secretAccessKey
@@ -49,7 +49,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
     const fileBuffer = fs.readFileSync(filePath);
     
     const uploadCommand = new PutObjectCommand({
-      Bucket: 'bhuvistestvideosdatabucket',
+      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
       Key: thumbnailKey,
       Body: fileBuffer,
       ContentType: 'image/jpeg'
@@ -75,7 +75,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
 // 2. Configure multer-s3 storage
 const s3Storage = new multerS3({
     s3: s3,
-    bucket: 'bhuvistestvideosdatabucket',
+    bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
     // acl: 'public-read', // Set appropriate access control
     metadata: (req, file, cb) => {
         cb(null, { fieldName: file.fieldname });
@@ -107,7 +107,7 @@ const  getUploadUrl = async (req, res) => {
   });
 
   const command = new PutObjectCommand({
-    Bucket: 'bhuvistestvideosdatabucket',
+    Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
     Key: key,
     ContentType: fileType,
   });
@@ -117,7 +117,7 @@ const  getUploadUrl = async (req, res) => {
   return res.json({
     uploadUrl: url,
     fileKey: key,
-    fileUrl: `https://bhuvistestvideosdatabucket.s3.amazonaws.com/${key}`
+    fileUrl: `https://bhuvisvbhuvistestvideosdatabucketmumbairegion.s3.amazonaws.com/${key}`
   });}
   catch(error){
     console.error(error)
@@ -138,7 +138,7 @@ const  getAudioUploadUrl = async (req, res) => {
   });
 
   const command = new PutObjectCommand({
-    Bucket: 'bhuvistestvideosdatabucket',
+    Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
     Key: key,
     ContentType: fileType,
   });
@@ -149,7 +149,7 @@ const  getAudioUploadUrl = async (req, res) => {
   return res.json({
     uploadUrl: url,
     fileKey: key,
-    fileUrl: `https://bhuvistestvideosdatabucket.s3.amazonaws.com/${key}`
+    fileUrl: `https://bhuvisvbhuvistestvideosdatabucketmumbairegion.s3.amazonaws.com/${key}`
   });}
   catch(error){
     console.error(error)
@@ -203,7 +203,7 @@ const completeSongUpload = async (req, res) => {
     //       const tempPath = path.join(__dirname, '../temp', `${video._id}_original.mp4`);
           
     //       const getCommand = new GetObjectCommand({
-    //         Bucket: 'bhuvistestvideosdatabucket',
+    //         Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion ',
     //         Key: video.key
     //       });
     //       const data = await s3.send(getCommand);
@@ -305,7 +305,7 @@ const completeVideoUpload = async (req, res) => {
           }
           
           const getCommand = new GetObjectCommand({
-            Bucket: 'bhuvistestvideosdatabucket',
+            Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
             Key: video.key
           });
           const data = await s3.send(getCommand);

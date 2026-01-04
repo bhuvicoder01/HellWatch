@@ -11,7 +11,7 @@ const s3 = new S3Client({
   }
 });
 
-const BUCKET = 'bhuvistestvideosdatabucket';
+const BUCKET = 'bhuvisvbhuvistestvideosdatabucketmumbairegion';
 
 // small helper to promisify exec
 function runCommand(cmd) {

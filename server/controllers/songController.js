@@ -3,7 +3,7 @@ const audioModel = require("../models/Audio");
 const S3 = require("../services/s3");
 
 const s3=S3.s3
-const BUCKET = 'bhuvistestvideosdatabucket';
+const BUCKET = 'bhuvisvbhuvistestvideosdatabucketmumbairegion';
 
 class songController{
     static async listAudios(req, res) {
