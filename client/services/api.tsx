@@ -2,7 +2,8 @@ import axios from 'axios';
 import { getGlobalAbortSignal } from '@/hooks/useAbortOnNavigate';
 
 // API Base URL - Change this when you have a backend
-export const API_URL = process.env.NODE_ENV === 'production' ? 'https://hellwatch-ffus.onrender.com' : 'http://localhost:5000';
+// export const API_URL = process.env.NODE_ENV === 'production' ? 'https://hellwatch-ffus.onrender.com' : 'http://localhost:5000';
+export const API_URL='http://localhost:8080/api';
 
 // Create axios instance with default config
 const createApiInstance = () => {
