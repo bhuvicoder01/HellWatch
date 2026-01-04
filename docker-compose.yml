@@ -18,12 +18,12 @@ services:
     networks:
       - hellwatch
 
-  client:
-    build: ./client
-    ports:
-      - "3000:3000"
-    networks:
-      - hellwatch
+  # client:
+  #   build: ./client
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - hellwatch
 
 networks:
   hellwatch:
