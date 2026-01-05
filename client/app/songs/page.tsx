@@ -7,15 +7,8 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export default function SongsPage() {
-const {Songs,currentSong}=useSong()
+const {Songs}=useSong()
 
-useEffect(() => {
-    if (currentSong) {
-      document.title = `${currentSong.title} by ${currentSong.artist} | HellWatch`;
-    } else {
-      document.title = 'HellWatch';
-    }
-  }, [currentSong]);
     
 
     return(<>

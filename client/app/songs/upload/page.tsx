@@ -13,6 +13,12 @@ export default function SongsUploader() {
   const [fileKey, setFileKey] = useState('');
   const [fileUrl, setFileUrl] = useState<string|null>(null);
   const [coverFile,setCoverFile]=useState<File>()
+  const [fileMetaData,setFileMetaData]=useState({
+    title: "",
+    artist: "",
+    album: "",
+    albumartist: ""
+  })
 
 //   const generateVideoThumbnail = (file: File): Promise<Blob> => {
 //     return new Promise((resolve, reject) => {
@@ -60,7 +66,7 @@ export default function SongsUploader() {
                 };
 
            console.log(metadata);
-          
+          setFileMetaData(metadata)
           // Extract and display album art
                 if (common.picture && common.picture.length > 0) {
                     
@@ -147,6 +153,10 @@ export default function SongsUploader() {
       // Complete upload and send thumbnail as FormData
       const formData = new FormData();
       formData.append('key', key);
+      formData.append('title', fileMetaData.title);
+      formData.append('artist',fileMetaData.artist)
+      formData.append('album', fileMetaData.album )
+      formData.append('albumartist', fileMetaData.albumartist)
       if (coverFile) {
         formData.append('thumbnail', coverFile, 'thumbnail.jpg');
       }

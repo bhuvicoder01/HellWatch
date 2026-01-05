@@ -148,7 +148,6 @@ const getAudioUploadUrl = async (req, res) => {
     });
 
     const url = await getSignedUrl(s3, command, { expiresIn: 3600 * 24 }); // 24 hours
-    await audioModel.create({ key, title: fileName, owner: req.user._id })
 
     return res.json({
       uploadUrl: url,
@@ -178,12 +177,12 @@ const getUploadRate = async (req, res) => {
 };
 
 const completeSongUpload = async (req, res) => {
-  const { key } = req.body;
+  const { key, title,artist,album,albumartist } = req.body;
   const progress = uploadProgress.get(key);
 
   try {
     const owner = await userModel.findById(req.user._id)
-    await audioModel.create({ key, title: title, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
+    await audioModel.create({ key,title,album,artist,albumartist, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
 
     let thumbnailKey = null;
 

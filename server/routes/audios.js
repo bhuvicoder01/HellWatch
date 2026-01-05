@@ -12,7 +12,7 @@ router.get("/", listAudios);
 
 router.get('/upload-url',authMiddleware, getAudioUploadUrl)
 router.get('/upload-rate/:key', getUploadRate)
-router.post('/complete-upload', thumbnailUpload.single('thumbnail'), completeSongUpload)
+router.post('/complete-upload',authMiddleware, thumbnailUpload.single('thumbnail'), completeSongUpload)
 router.get('/:id/thumbnail', getSongThumbnail);
 router.get("/stream/:id",streamAudio);
 
