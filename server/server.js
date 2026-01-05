@@ -14,6 +14,8 @@ app.use(cors({
   methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   credentials: true,
+  optionsSuccessStatus: 200,
+  preflightContinue:false
 }
 ));
 app.use(express.json({ limit: '50mb' })); // increase size as needed

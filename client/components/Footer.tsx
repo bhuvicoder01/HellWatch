@@ -31,6 +31,7 @@ export default function Footer() {
   const [isPageReloaded, setIsPageReloaded] = useState(true);
   const pathname = usePathname();
 
+  
   //fetch thumbnail early to render quick
   useEffect(() => {
     if (currentSong) {
@@ -47,6 +48,14 @@ export default function Footer() {
       if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
       thumbnailUrlRef.current = undefined;
       setThumbnail(undefined);
+    }
+  }, [currentSong]);
+
+  useEffect(() => {
+    if (currentSong) {
+      document.title = `${currentSong.title} by ${currentSong.artist} | HellWatch`;
+    } else {
+      document.title = 'HellWatch';
     }
   }, [currentSong]);
 

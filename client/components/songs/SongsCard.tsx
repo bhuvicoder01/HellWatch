@@ -38,9 +38,9 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
             <Link href='#' onClick={handleSongStart}>
 {showThumbnail && song.thumbnail&& <img src={thumbnail as string} alt={song.title} className="thumbnail" onError={()=>setShowThumbnail(false)} />}
 </Link>
-        <div className="song-info">
+        <div className="song-info"style={{justifyContent:'center',alignItems:'center'}}>
                 <h1 className="title">{song.title}</h1>
-                <p className="description">{song.owner}</p>
+                <p className="description d-flex"style={{flexDirection:'column',alignItems:'center'}} >Published by {<img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={song?.owner?.pic?song?.owner?.pic:undefined}/>}<Link className='text-decoration-none text-white'style={{fontFamily:'-moz-initial'}} href={`/public/profile?id=${song?.owner?.id}`}>{song.owner?.username}</Link></p>
             </div>
         </div>
     )

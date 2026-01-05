@@ -44,7 +44,12 @@ const loadVideos = async () => {
 const SongsContext=createContext({Songs: [],currentSong:null as SongContextType|null,setCurrentSong:(song: SongContextType|null)=>{}, refreshSongs: () => {}});
 export interface SongContextType {
 id: string;
-owner: string;
+owner: {
+    id: string;
+    username: string;
+    email:string;
+    pic:string;
+};
 key: string;
 title: string;
 artist: string;

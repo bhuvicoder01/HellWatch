@@ -2,12 +2,13 @@
 import VideoCard from "@/components/video/VideoCard";
 import VideoGrid from "@/components/video/VideoGrid";
 import CustomVideoPlayer from "@/components/CustomVideoPlayer";
-import { useVideo } from "@/contexts/MediaContext";
+import { useSong, useVideo } from "@/contexts/MediaContext";
 import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense, useMemo } from "react";
 import VideosPage from "../page";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 function VideoDetailsContent() {
     const {Videos}=useVideo()
@@ -18,6 +19,8 @@ function VideoDetailsContent() {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(video?.title);
     const { refreshVideos } = useVideo();
+    const {user}=useAuth()
+    const {currentSong,setCurrentSong}=useSong()
 
 
     
@@ -26,10 +29,23 @@ function VideoDetailsContent() {
     useMemo(() => {
       setVideos(Videos);
     }, [Videos]);
+
+     useEffect(() => {
+    if (video) {
+      document.title = `${video.title} by ${video?.owner?.username} | HellWatch`;
+    } else {
+      document.title = 'HellWatch';
+    }
+  }, [video]);
     
     useEffect(() => {
         if (id) {
             getVideoData(id);
+            setCurrentSong(null)
+            if(typeof window!=='undefined'){
+                localStorage.removeItem('currentSong')
+                localStorage.removeItem('currentTime')
+            }
         }
         const handleResize = () => setWindowWidth(window.innerWidth);
         setWindowWidth(window.innerWidth);
@@ -73,13 +89,14 @@ function VideoDetailsContent() {
     if(!video){
         return <div>Loading...</div>
     }
+   
     
     return (<>
         <div className="d-flex flex-column flex-lg-row mb-5" style={{gap: '20px'}}>
             <div className="flex-grow-1">
                 <CustomVideoPlayer videoId={video.id} title={video.title} />
                 <div className="mt-3">
-                    {showEdit && (
+                    {showEdit&&video?.owner?.id===user?._id && (
                         <div className="edit-controls">
                             <button onClick={() => setIsEditing(!isEditing)} className="edit-btn">
                                 ✏️

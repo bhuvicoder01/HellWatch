@@ -63,6 +63,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     
     const video = videoRef.current;
     if (!video) return;
+    
 
     const updateTime = () => setCurrentTime(video.currentTime);
     const updateDuration = () => setDuration(video.duration);
@@ -75,6 +76,13 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
       video.removeEventListener('loadedmetadata', updateDuration);
     };
   }, [document.fullscreenElement]);
+
+  useEffect(()=>{
+    const video=videoRef.current;
+    if(!video) return;
+    video.play()
+    setIsPlaying(true)
+  },[videoId])
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
@@ -100,6 +108,10 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     } else {
       video.play();
       setCurrentSong(null)
+      if(typeof window!=='undefined'){
+        localStorage.removeItem('currentSong')
+        localStorage.removeItem('currentTime')
+      }
     }
     setIsPlaying(!isPlaying);
   };

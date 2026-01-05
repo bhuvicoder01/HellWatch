@@ -51,7 +51,7 @@ function ProfilePageContent() {
             <text style={{fontFamily:'-apple-system'}}>{user?.username}</text>
              <p>{user?.email}</p>
         </div>
-        <div className="card profile-card overflow-scroll px-2 py-2">
+        <div className="card profile-card  px-2 py-2">
             <h1>Video Posts</h1>
             <div className="card-body video-grid ">
               {userVideos &&

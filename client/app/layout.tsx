@@ -28,7 +28,7 @@ export default function RootLayout({
         <VideoProvider>
           <SongProvider>
         <Navbar/>
-        <div className='container 'style={{padding:'100px 10px 50px 10px'}}>
+        <div className='container 'style={{padding:'100px 10px 100px 10px'}}>
         {children}
         </div>
         <Footer/>
