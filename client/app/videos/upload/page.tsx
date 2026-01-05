@@ -125,8 +125,8 @@ export default function VideoUploader() {
       setUploadRate(0);
       setFileKey('');
       
-    } catch (error) {
-      console.error('Upload error:', error);
+    } catch (error:any) {
+      console.error('Upload error:', error?.message);
       setMessage('Upload failed');
     } finally {
       setUploading(false);

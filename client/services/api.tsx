@@ -92,3 +92,8 @@ export const authAPI = {
   resetPassword: async (credentials: any) => api.post('/auth/reset-password', credentials),
   verifyEmail: async (credentials: any) => api.post('/auth/verify-email', credentials)
 }
+
+export const publicAPI={
+  getUser: async(id:any)=>api.get(`/public/user?id=${id}`),
+  getUserVideos:async(id:any)=>api.get(`/public/user/videos?id=${id}`)
+}

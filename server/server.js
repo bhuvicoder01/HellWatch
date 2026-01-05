@@ -53,6 +53,8 @@ app.use('/songs', require('./routes/audios'));
 app.use('/videos', videoRoutes);
 app.use('/auth', require('./routes/auth'));
 
+app.use('/public',require('./routes/public'));
+
 // Apple Music search route
 app.get('/apple-music/search', async (req, res) => {
   const query = req.query.term;

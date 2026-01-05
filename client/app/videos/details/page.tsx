@@ -7,6 +7,7 @@ import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense, useMemo } from "react";
 import VideosPage from "../page";
+import Link from "next/link";
 
 function VideoDetailsContent() {
     const {Videos}=useVideo()
@@ -103,7 +104,7 @@ function VideoDetailsContent() {
                     </div>
                 ) : (
                     <>
-                    <h3>{video?.owner?.id}</h3>
+                    <span className="d-flex " style={{alignItems:'center',fontSize:'14px',maxHeight:'30px'}}>Uploaded by:{<img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={video?.owner?.pic?video?.owner?.pic:undefined}/>}<Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link></span>
                     <h2 className="title">{video?.title}</h2>
                         {/* <h3 className="title">{video.key}</h3> */}
                         <p className="description">{new Date(video.createdAt).toLocaleDateString()}</p>

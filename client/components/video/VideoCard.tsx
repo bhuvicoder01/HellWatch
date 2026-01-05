@@ -93,26 +93,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
     
     return (<>
         <div key={Key}  className={`video-card }`}>
-            {detailPage ? mainVideo ? (
-                <div >
-                    <Link href={`/videos/details?id=${videoData.id}`}>
-                    <video ref={videoRef} controls={controls}>
-                        <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
-                    </video>
-                    </Link>
-                    {showEdit && (
-                        <div className="edit-controls">
-                            <button onClick={() => setIsEditing(!isEditing)} className="edit-btn">
-                                ✏️
-                            </button>
-                            <button onClick={handleDelete} className="delete-btn">
-                                🗑️
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )
-             : (
+            {detailPage ?  (
                 <Link href={`/videos/details?id=${videoData.id}`}>
                     <div className="video-container" onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
                         {showThumbnail && videoData.thumbnail && (
@@ -127,13 +108,14 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                             ref={videoRef}
                             style={{ display: showThumbnail ? 'none' : 'block' }}
                             muted
-                             className="video-preview"
+                            className="video-preview"
                         >
                             <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
                         </video>
                     </div>
                 </Link>
-            ): (
+            )
+             :  (
                 <Link href={`/videos/details?id=${videoData.id}`}>
                     <div className="video-container" onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}>
                         {showThumbnail && videoData.thumbnail && (

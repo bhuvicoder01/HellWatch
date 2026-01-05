@@ -3,13 +3,13 @@ const userModel = require('../models/User')
 
 async function authMiddleware(req,res,next){
     const token=req.headers.authorization.split(" ")[1]
-    console.log(token)
+    // console.log(token)
     if(!token){
         return res.status(401).json({message:"No token provided"})
     }
     try {
         const decoded=jwt.verify(token,process.env.JWT_SECRET)
-        console.log(decoded)
+        // console.log(decoded)
         const userData={_id:decoded.id,username:decoded.username}
         const user=await userModel.findById(userData._id)
         req.user=user
