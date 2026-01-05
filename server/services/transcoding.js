@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const s3 = new S3Client({
-  region: 'us-east-1',
+  region: 'ap-south-1',
   credentials: {
     accessKeyId: process.env.accessKeyId,
     secretAccessKey: process.env.secretAccessKey
@@ -51,7 +51,7 @@ class TranscodingService {
 
     const results = {};
     const tempDir = path.join(__dirname, '../temp');
-    console.log(`Temp directory: ${tempDir}`);
+    // console.log(`Temp directory: ${tempDir}`);
 
     // Ensure temp directory exists
     if (!fs.existsSync(tempDir)) {

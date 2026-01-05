@@ -4,7 +4,12 @@ const encrypt = require("../services/encrypt");
 class authController{
     static async me(req,res){
         try {
-            const user=req.user;
+            let user=req.user;
+            if(!user){
+                return res.status(400).json({message:"User not found"});
+            }
+            user.password=undefined;
+            user.__v=undefined;
             res.json({user});
             
         } catch (error) {

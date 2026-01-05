@@ -535,7 +535,7 @@ body {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  min-width: max-content;
+  min-width: min-content;
   height: 16px;
   border-radius: 999px;
   outline: none;

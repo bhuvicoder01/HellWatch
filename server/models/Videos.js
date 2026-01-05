@@ -1,7 +1,15 @@
 const mongoose=require('mongoose')
 
 const videoSchema=mongoose.Schema({
-    owner: {type:mongoose.Schema.Types.ObjectId,ref:'users'},
+    owner: {
+        id:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'users'
+        },
+        username:String,
+        pic:String,
+        email:String},
+    views:Number,
     key:String,
     title:String,
     description:String,

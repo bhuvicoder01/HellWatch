@@ -103,6 +103,7 @@ function VideoDetailsContent() {
                     </div>
                 ) : (
                     <>
+                    <h3>{video?.owner?.id}</h3>
                     <h2 className="title">{video?.title}</h2>
                         {/* <h3 className="title">{video.key}</h3> */}
                         <p className="description">{new Date(video.createdAt).toLocaleDateString()}</p>
@@ -114,7 +115,7 @@ function VideoDetailsContent() {
                 </div>
             </div>
             <div className="rows-lg-4" style={{maxWidth: '100%'}}>
-                {videos.length!==0 && <VideosPage mobileDisplay={window.innerWidth<992?true:false} detailsPage={true}/>}
+                {videos?.length!==0 && <VideosPage mobileDisplay={window.innerWidth<992?true:false} detailsPage={true}/>}
             </div>
         </div>
         <style jsx>{
@@ -171,7 +172,22 @@ function VideoDetailsContent() {
             .cancel-btn {
                 background: #6c757d;
                 color: white;
-            }`
+            }
+            .video-info {
+                margin-top: 20px;
+            }
+
+            .title {
+                font-size: 24px;
+                margin-bottom: 8px;
+                color: #ffffffff;
+            }
+
+            .description {
+                font-size: 16px;
+                color: #6c757d;
+            }
+                `
         }</style>
   </>  )
 }

@@ -1,11 +1,14 @@
 const mongoose=require('mongoose');
 
 const AudioSchema=new mongoose.Schema({
-    owner:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'users',
-        required:true
-    },
+    owner: {
+            id:{
+                type:mongoose.Schema.Types.ObjectId,
+                ref:'users'
+            },
+            username:String,
+            pic:String,
+            email:String},
     key:String,
     title:String,
     description:String,

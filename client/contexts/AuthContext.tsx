@@ -44,7 +44,7 @@ export function AuthProvider({children}:any){
     const [isAuthenticated,setIsAuthenticated]=useState(false)
 
     const checkAuth=async()=>{
-        const res=await api.get('/auth/check-auth')
+        const res=await api.get('/auth/me')
         const data=await res.data
         if(data.user){
             setUser(data.user)

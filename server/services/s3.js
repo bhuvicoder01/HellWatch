@@ -10,6 +10,7 @@ const upload = require('./upload')
 const videoModel = require('../models/Videos')
 const TranscodingService = require('./transcoding');
 const audioModel = require('../models/Audio');
+const userModel = require('../models/User');
 
 
 const agent=new Agent({
@@ -177,6 +178,9 @@ const completeSongUpload = async (req, res) => {
   const progress = uploadProgress.get(key);
   
   try {
+        const owner=await userModel.findById(req.user._id)
+    await videoModel.create({key,title:title,'owner.id':req.user._id,'owner.username':owner?.username,'owner.pic':owner?.avatar?.url,'owner.email':owner?.email})
+
     let thumbnailKey = null;
     
     if (req.file) {
@@ -271,7 +275,8 @@ const completeVideoUpload = async (req, res) => {
   const progress = uploadProgress.get(key);
   
   try {
-    await videoModel.create({key,title:title,owner:req.user._id})
+    const owner=await userModel.findById(req.user._id)
+    await videoModel.create({key,title:title,'owner.id':req.user._id,'owner.username':owner?.username,'owner.pic':owner?.avatar?.url,'owner.email':owner?.email})
 
     let thumbnailKey = null;
     

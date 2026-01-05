@@ -2,6 +2,27 @@
 import { useSong } from '@/contexts/MediaContext';
 import { API_URL } from '@/services/api';
 import { useState, useRef, useEffect } from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFastBackward,
+  faFastForward,
+  faStepForward,
+  faStepBackward,
+  faWindowMaximize,
+  faWindowMinimize,
+  faWindowRestore,
+  faHouseChimneyWindow,
+  faMinimize,
+  faMaximize,
+} from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faVideo, faMusic } from "@fortawesome/free-solid-svg-icons";
+import {
+  faVolumeUp,
+  faVolumeDown,
+  faVolumeMute,
+} from "@fortawesome/free-solid-svg-icons";
+
 
 interface CustomVideoPlayerProps {
   videoId: string;
@@ -22,7 +43,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isDoubleTappedSeek,setIsDoubleTappedSeek]=useState(false)
   const [isDoubleTappedRewind,setIsDoubleTappedRewind]=useState(false)
-  const [showTitle,SetShowTitle]=useState(true)
+  const [showTitle,setShowTitle]=useState(true)
   const {currentSong,setCurrentSong}=useSong()
 
 
@@ -30,15 +51,15 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
 
   useEffect(() => {
 
-    if(document.fullscreenElement!==null){
-      SetShowTitle(true)
-    }
-    else{
-      setInterval(()=>{
-        SetShowTitle(false)
-      },2000)
+    // if(document.fullscreenElement!==null){
+    //   setShowTitle(true)
+    // }
+    // else{
+    //   setInterval(()=>{
+    //     setShowTitle(false)
+    //   },10000)
 
-    }
+    // }
     
     const video = videoRef.current;
     if (!video) return;
@@ -57,12 +78,16 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
-    const timeout = setTimeout(() => setShowControls(false), 3000);
+    const timeout = setTimeout(() =>{
+      setShowControls(false)
+      setShowTitle(false)
+    }, 3000);
     setControlsTimeout(timeout);
   };
 
   const showControlsTemporarily = () => {
     setShowControls(true);
+    setShowTitle(true)
     hideControlsAfterDelay();
   };
 
@@ -122,10 +147,13 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     if (!video) return;
     
     if (isMuted) {
-      video.volume = volume;
+      setVolume(1);
       setIsMuted(false);
+      video.volume = 1;
+      
     } else {
       video.volume = 0;
+      setVolume(0);
       setIsMuted(true);
     }
   };
@@ -189,15 +217,24 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
+  const progressPercentage=duration?(currentTime/duration)*100:0;
+  const sliderFill = (pct: number) =>
+    `linear-gradient(to right, #ff0000 ${pct}%, #333 ${pct}%)`;
  let lastTap=0;
   return (
     <div 
       ref={containerRef}
-      onMouseMove={() => {setShowControls(true) 
-        hideControlsAfterDelay();
+      onMouseMove={() => {
+        // setShowControls(true)
+        // setShowTitle(true) 
+        // hideControlsAfterDelay();
+        showControlsTemporarily()
       }}
-      onMouseLeave={() => setShowControls(false)}
+      onMouseLeave={() => {
+        setShowControls(false)
+        setShowTitle(false)
+
+      }}
       onTouchStart={handleTouchStart}
       // onTouchEnd={handleTouchEnd}
       onTouchStartCapture={handleTouchStart}
@@ -220,20 +257,28 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
           top: '16px',
           left: '16px',
           zIndex: 20,
-          background: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(8px)',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500'
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.8))',
+          backdropFilter: 'blur(12px)',
+          padding: '10px 18px',
+          borderRadius: '12px',
+          color: '#ffffff',
+          fontSize: '16px',
+          fontWeight: '600',
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          maxWidth: '70%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
         }}>
           {title}
         </div>
       )}
-      {showControls&& (
+      {showControls && (
        <button
               onClick={togglePlay}
+              title={isPlaying ? "Pause" : "Play"}
               style={{
                 background: 'none',
                 position:'absolute',
@@ -257,7 +302,8 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.09)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isPlaying ?<text style={{maxHeight:'40px',padding:'0',overflow:'hidden'}}>||</text> : '▶'}
+              {/* {isPlaying ?<text style={{maxHeight:'40px',padding:'0',overflow:'hidden'}}>||</text> : '▶'} */}
+              {isPlaying?<FontAwesomeIcon style={{color:'red'}} icon={faPause}/>:<FontAwesomeIcon style={{color:'red'}}  icon={faPlay}/>}
             </button>
       )}
       
@@ -304,12 +350,12 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         <div style={{
           fontSize: '24px',
           // color: 'white',
-          background: 'rgba(0, 0, 0, 0.15)',
+          background: 'rgba(0, 0, 0, 0.27)',
           borderRadius: '50%',
           padding: '12px',
-          opacity: showControls ? 0.7 : 0,
+          opacity: showControls ? 0.9 : 0,
           transition: 'opacity 0.2s ease'
-        }}>{`≪`}</div>
+        }}>{<FontAwesomeIcon icon={faFastBackward}/>}</div>
       </div>
       
       <div onDoubleClick={()=>handleDoubleTapSeek(duration-currentTime<5?currentTime+((duration-currentTime)):currentTime+5)} 
@@ -344,13 +390,13 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         <div style={{
           fontSize: '24px',
           // color: 'white',
-          color:'black',
-          background: 'rgba(0, 0, 0, 0.15)',
+          color:'red',
+          background: 'rgba(0, 0, 0, 0.27)',
           borderRadius: '50%',
           padding: '12px',
-          opacity: showControls ? 0.7 : 0,
+          opacity: showControls ? 0.9 : 0,
           transition: 'opacity 0.2s ease'
-        }}>{`≫`}</div>
+        }}>{<FontAwesomeIcon icon={faFastForward}/>}</div>
       </div>
       
       <div style={{
@@ -361,7 +407,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         left: 0,
         right: 0,
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
-        padding: '24px 20px 16px',
+        padding: '24px 24px 16px',
         opacity: showControls ? 1 : 0,
         transition: 'opacity 0.3s ease',
         pointerEvents: 'auto',
@@ -379,7 +425,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
             <div style={{
               width: `${progressPercentage}%`,
               height: '100%',
-              backgroundColor: '#ff0050',
+              backgroundColor: 'red',
               borderRadius: '3px',
               position: 'relative'
             }}>
@@ -390,7 +436,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                 transform: 'translateY(-50%)',
                 width: '16px',
                 height: '16px',
-                backgroundColor: '#ff0050',
+                backgroundColor: 'red',
                 borderRadius: '50%',
                 opacity: showControls ? 1 : 0,
                 transition: 'opacity 0.2s ease'
@@ -403,6 +449,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
             max={duration || 0}
             value={currentTime}
             onChange={handleSeek}
+            title="Seek"
             style={{
               position: 'absolute',
               top: '-2px',
@@ -434,6 +481,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
           }}>
             <button
               onClick={togglePlay}
+              title={isPlaying ? "Pause" : "Play"}
               style={{
                 background: 'none',
                 border: 'none',
@@ -453,16 +501,18 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {isPlaying ? <text style={{maxHeight:'20px',padding:'0',overflow:'hidden'}}>||</text> : <text style={{maxHeight:'24px',padding:'0',overflow:'hidden'}}>▶</text>}
+              {/* {isPlaying ? <text style={{maxHeight:'20px',padding:'0',overflow:'hidden'}}>||</text> : <text style={{maxHeight:'24px',padding:'0',overflow:'hidden'}}>▶</text>} */}
+             {isPlaying?<FontAwesomeIcon style={{color:'white'}} icon={faPause}/>:<FontAwesomeIcon style={{color:'white'}}  icon={faPlay}/>}
             </button>
             
             <span style={{ fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px',minWidth:'auto',width:'auto'}}>
               <button
                 onClick={toggleMute}
+                title="Mute/Unmute"
                 style={{
                   background: 'none',
                   border: 'none',
@@ -474,22 +524,21 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                   minHeight: '32px'
                 }}
               >
-                {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
+                {isMuted || volume === 0 ? <FontAwesomeIcon style={{color:'white'}} icon={faVolumeMute}/> : volume < 0.5 ? <FontAwesomeIcon style={{color:'white'}} icon={faVolumeDown}/> : <FontAwesomeIcon style={{color:'white'}} icon={faVolumeUp}/>}
               </button>
               <input
                 type="range"
+                className="volume-bar"
                 min="0"
                 max="1"
                 step="0.1"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
+                title="Volume"
                 style={{
-                  width: '60px',
-                  height: '4px',
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: '2px',
-                  outline: 'none',
-                  cursor: 'pointer'
+                  background: sliderFill(volume * 100),
+                  // maxWidth:'30px'
+
                 }}
               />
             </div>
@@ -499,6 +548,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
             <select
               value={quality}
               onChange={(e) => changeQuality(e.target.value)}
+              title="Change Quality"
               style={{
                 background: 'rgba(0,0,0,0.6)',
                 color: 'white',
@@ -517,7 +567,9 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
             </select>
             
             <button
+              aria-placeholder='Toogle screen'
               onClick={toggleFullscreen}
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               style={{
                 background: 'none',
                 border: 'none',
@@ -533,7 +585,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              {(isFullscreen&&document.fullscreenElement!==null) ? '🗗' : '⛶'}
+              {(isFullscreen&&document.fullscreenElement!==null) ? <FontAwesomeIcon icon={faMinimize}/> : <FontAwesomeIcon icon={faMaximize}/>}
             </button>
             <button
               onClick={()=> {
@@ -541,6 +593,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
                   videoRef.current.requestPictureInPicture();
                 }
               }}
+              title="Picture-in-Picture"
               style={{
                 background: 'none',
                 border: 'none',
@@ -556,7 +609,8 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              ◲
+              {/* ◲ */}
+              <FontAwesomeIcon icon={faWindowRestore}/>
             </button>
           </div>
         </div>
