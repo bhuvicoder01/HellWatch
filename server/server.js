@@ -26,7 +26,7 @@ const videoRoutes = require('./routes/videos');
 const MongoDB = require('./services/db');
 const authMiddleware = require('./middleware/Auth');
 
-MongoDB.connect(process.env.MONGODB_URI);
+
 
 // Function to generate Apple Music developer token
 function generateAppleMusicToken() {
@@ -102,6 +102,7 @@ res.writeHead(206, {
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
+  MongoDB.connect(process.env.MONGODB_URI);
  
 });
 

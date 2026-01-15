@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useState } from "react";
 import {api} from "@/services/api";
+import MultipartUpload from "@/services/multipartUpload";
 
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
@@ -10,6 +11,8 @@ export default function VideoUploader() {
   const [uploadRate, setUploadRate] = useState(0);
   const [message, setMessage] = useState('');
   const [fileKey, setFileKey] = useState('');
+
+  const MULTIPART_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
   const generateVideoThumbnail = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -55,46 +58,61 @@ export default function VideoUploader() {
 
     setUploading(true);
     setProgress(0);
-    setMessage('Getting upload URL...');
+    setMessage('Starting upload...');
 
     try {
-      // Get presigned URL with file size
-      const res = await api.get("/videos/upload-url", {
-        params: { 
-          fileName: file.name, 
-          fileType: file.type,
-          fileSize: file.size
-        }
-      });
-
-      const { uploadUrl, fileKey: key } = res.data;
-      setFileKey(key);
-      setMessage('Uploading video...');
-
-      // Track upload rate
-      const rateInterval = setInterval(async () => {
-        try {
-          const rateRes = await api.get(`/videos/upload-rate/${encodeURIComponent(key)}`);
-          setUploadRate(parseFloat(rateRes.data.uploadRate));
-        } catch (err) {
-          console.error('Error getting upload rate:', err);
-        }
-      }, 1000);
-
-      // Upload to S3
-      await axios.put(uploadUrl, file, {
-        headers: { "Content-Type": file.type },
-        onUploadProgress: (evt) => {
-          if (evt.total) {
-            setProgress(Math.round((evt.loaded * 100) / evt.total));
+      let key: string;
+      
+      // Use multipart upload for large files
+      if (file.size > MULTIPART_THRESHOLD) {
+        setMessage('Preparing multipart upload...');
+        const multipartUpload = new MultipartUpload(file);
+        
+        const result = await multipartUpload.upload((partNumber: number, totalParts: number) => {
+          const progressPercent = (partNumber / totalParts) * 100;
+          setProgress(progressPercent);
+          setMessage(`Uploading part ${partNumber}/${totalParts}...`);
+        });
+        
+        key = multipartUpload.key!;
+      } else {
+        // Use regular upload for smaller files
+        const res = await api.get("/videos/upload-url", {
+          params: { 
+            fileName: file.name, 
+            fileType: file.type,
+            fileSize: file.size
           }
-        }
-      });
+        });
 
-      clearInterval(rateInterval);
+        const { uploadUrl, fileKey } = res.data;
+        key = fileKey;
+        setFileKey(key);
+        setMessage('Uploading video...');
+
+        const rateInterval = setInterval(async () => {
+          try {
+            const rateRes = await api.get(`/videos/upload-rate/${encodeURIComponent(key)}`);
+            setUploadRate(parseFloat(rateRes.data.uploadRate));
+          } catch (err) {
+            console.error('Error getting upload rate:', err);
+          }
+        }, 1000);
+
+        await axios.put(uploadUrl, file, {
+          headers: { "Content-Type": file.type },
+          onUploadProgress: (evt) => {
+            if (evt.total) {
+              setProgress(Math.round((evt.loaded * 100) / evt.total));
+            }
+          }
+        });
+
+        clearInterval(rateInterval);
+      }
+
       setMessage('Generating thumbnail...');
       
-      // Generate thumbnail from video
       let thumbnailBlob = null;
       try {
         thumbnailBlob = await generateVideoThumbnail(file);
@@ -104,7 +122,6 @@ export default function VideoUploader() {
       
       setMessage('Processing video...');
 
-      // Complete upload and send thumbnail as FormData
       const formData = new FormData();
       formData.append('key', key);
       formData.append('title', file.name);
@@ -119,7 +136,6 @@ export default function VideoUploader() {
       });
       setMessage(`Upload complete! Final rate: ${completeRes.data.finalUploadRate} MB/s`);
       
-      // Reset form
       setFile(null);
       setProgress(0);
       setUploadRate(0);
@@ -156,6 +172,7 @@ export default function VideoUploader() {
             <p><strong>Selected:</strong> {file.name}</p>
             <p><strong>Size:</strong> {(file.size / (1024 * 1024)).toFixed(2)} MB</p>
             <p><strong>Type:</strong> {file.type}</p>
+            <p><strong>Upload Method:</strong> {file.size > MULTIPART_THRESHOLD ? 'Multipart (Large File)' : 'Direct Upload'}</p>
           </div>
         )}
 

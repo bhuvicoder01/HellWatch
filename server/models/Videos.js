@@ -20,7 +20,11 @@ const videoSchema=mongoose.Schema({
         type: Map,
         of: String,
         default: new Map()
-    }
+    },
+    // isApproved:{
+    //     type:Boolean,
+    //     default:false
+    // }
 },
 {timestamps:true})
 

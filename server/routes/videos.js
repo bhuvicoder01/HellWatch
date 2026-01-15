@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Video = require('../models/Videos'); // your model file
 const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getUploadUrl, getUploadRate, thumbnailUpload, completeVideoUpload } = require("../services/s3");
+const { getUploadUrl, getUploadRate, thumbnailUpload, completeVideoUpload, initiateMultipartUpload, getPresignedUrls, completeMultipartUpload, abortMultipartUpload } = require("../services/s3");
 const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo } = require("../controllers/videoController");
 const authMiddleware = require("../middleware/Auth");
 
@@ -15,6 +15,12 @@ router.get("/", listVideos);
 router.get('/upload-url',authMiddleware, getUploadUrl)
 router.get('/upload-rate/:key', getUploadRate)
 router.post('/complete-upload',authMiddleware, thumbnailUpload.single('thumbnail'), completeVideoUpload)
+
+// Multipart upload routes
+router.post('/multipart/initiate', authMiddleware, initiateMultipartUpload)
+router.post('/multipart/urls', authMiddleware, getPresignedUrls)
+router.post('/multipart/complete', authMiddleware, completeMultipartUpload)
+router.post('/multipart/abort', authMiddleware, abortMultipartUpload)
 router.get('/:id/thumbnail', getThumbnail);
 
 router.get("/:id",getVideoById);

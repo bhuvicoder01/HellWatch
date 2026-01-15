@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3')
+const { S3Client, PutObjectCommand, GetObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } = require('@aws-sdk/client-s3')
 const { NodeHttpHandler } = require("@smithy/node-http-handler");
 const { Agent } = require('https')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
@@ -174,6 +174,101 @@ const getUploadRate = async (req, res) => {
   const uploadRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0; // MB/s
 
   res.json({ uploadRate: uploadRate.toFixed(2) });
+};
+
+// Multipart upload functions
+const initiateMultipartUpload = async (req, res) => {
+  try {
+    const { fileName, fileType } = req.body;
+    const key = `videos/${Date.now()}-${fileName}`;
+
+    const command = new CreateMultipartUploadCommand({
+      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Key: key,
+      ContentType: fileType
+    });
+
+    const result = await s3.send(command);
+    
+    res.json({
+      uploadId: result.UploadId,
+      key: key
+    });
+  } catch (error) {
+    console.error('Error initiating multipart upload:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getPresignedUrls = async (req, res) => {
+  try {
+    const { key, uploadId, parts } = req.body;
+    const urls = [];
+
+    for (let i = 1; i <= parts; i++) {
+      const command = new UploadPartCommand({
+        Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+        Key: key,
+        UploadId: uploadId,
+        PartNumber: i
+      });
+
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600*24 });
+      urls.push({ partNumber: i, url });
+    }
+
+    console.log('Generated URLs:', urls); // Debug log
+    res.json({ urls });
+  } catch (error) {
+    console.error('Error generating presigned URLs:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const completeMultipartUpload = async (req, res) => {
+  try {
+    const { key, uploadId, parts } = req.body;
+
+    const command = new CompleteMultipartUploadCommand({
+      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: {
+        Parts: parts.map(part => ({
+          ETag: part.etag,
+          PartNumber: part.partNumber
+        }))
+      }
+    });
+
+    const result = await s3.send(command);
+    
+    res.json({
+      location: result.Location,
+      key: key
+    });
+  } catch (error) {
+    console.error('Error completing multipart upload:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const abortMultipartUpload = async (req, res) => {
+  try {
+    const { key, uploadId } = req.body;
+
+    const command = new AbortMultipartUploadCommand({
+      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Key: key,
+      UploadId: uploadId
+    });
+
+    await s3.send(command);
+    res.json({ message: 'Upload aborted successfully' });
+  } catch (error) {
+    console.error('Error aborting multipart upload:', error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 const completeSongUpload = async (req, res) => {
@@ -388,4 +483,17 @@ const completeVideoUpload = async (req, res) => {
 };
 
 
-module.exports = { s3, upload: multerUpload, getAudioUploadUrl, getUploadUrl, getUploadRate, completeSongUpload, completeVideoUpload, thumbnailUpload: upload };
+module.exports = {
+  s3,
+  upload: multerUpload,
+  getAudioUploadUrl,
+  getUploadUrl,
+  getUploadRate,
+  completeSongUpload,
+  completeVideoUpload,
+  thumbnailUpload: upload,
+  initiateMultipartUpload,
+  getPresignedUrls,
+  completeMultipartUpload,
+  abortMultipartUpload
+};
