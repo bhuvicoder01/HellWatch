@@ -40,19 +40,20 @@ export const Modal = ({
         className="modal fade show d-block" 
         tabIndex={-1} 
         role="dialog"
-        // style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
         onClick={onClose}
       >
         <div 
           className={`modal-dialog ${getSizeClass()} ${centered ? 'modal-dialog-centered' : ''}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="modal-content">
+          <div className="modal-content text-white" style={{backgroundColor:'var(--bg-dark)'}}>
             <div className="modal-header border-0">
               <h5 className="modal-title">{title}</h5>
               <button 
                 type="button" 
-                className="btn-close" 
+                className="btn-close"
+                style={{backgroundColor:'red'}}
                 onClick={onClose}
                 aria-label="Close"
               ></button>

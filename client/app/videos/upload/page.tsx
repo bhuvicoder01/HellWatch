@@ -3,14 +3,16 @@ import axios from "axios";
 import { useState } from "react";
 import {api} from "@/services/api";
 import MultipartUpload from "@/services/multipartUpload";
+import { useUploadProgress } from "@/hooks/useUploadProgress";
 
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [uploadRate, setUploadRate] = useState(0);
   const [message, setMessage] = useState('');
-  const [fileKey, setFileKey] = useState('');
+  const [fileKey, setFileKey] = useState<string | null>(null);
+  
+  const { uploadRate, ws } = useUploadProgress(fileKey);
 
   const MULTIPART_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
@@ -68,10 +70,14 @@ export default function VideoUploader() {
         setMessage('Preparing multipart upload...');
         const multipartUpload = new MultipartUpload(file);
         
-        const result = await multipartUpload.upload((partNumber: number, totalParts: number) => {
-          const progressPercent = (partNumber / totalParts) * 100;
+        // Set key for WebSocket tracking
+        await multipartUpload.initiate();
+        setFileKey(multipartUpload.key);
+        
+        const result = await multipartUpload.upload((loaded: number, total: number) => {
+          const progressPercent = (loaded / total) * 100;
           setProgress(progressPercent);
-          setMessage(`Uploading part ${partNumber}/${totalParts}...`);
+          setMessage(`Uploading: ${(loaded / (1024 * 1024)).toFixed(1)}MB / ${(total / (1024 * 1024)).toFixed(1)}MB`);
         });
         
         key = multipartUpload.key!;
@@ -90,15 +96,6 @@ export default function VideoUploader() {
         setFileKey(key);
         setMessage('Uploading video...');
 
-        const rateInterval = setInterval(async () => {
-          try {
-            const rateRes = await api.get(`/videos/upload-rate/${encodeURIComponent(key)}`);
-            setUploadRate(parseFloat(rateRes.data.uploadRate));
-          } catch (err) {
-            console.error('Error getting upload rate:', err);
-          }
-        }, 1000);
-
         await axios.put(uploadUrl, file, {
           headers: { "Content-Type": file.type },
           onUploadProgress: (evt) => {
@@ -107,8 +104,6 @@ export default function VideoUploader() {
             }
           }
         });
-
-        clearInterval(rateInterval);
       }
 
       setMessage('Generating thumbnail...');
@@ -138,8 +133,7 @@ export default function VideoUploader() {
       
       setFile(null);
       setProgress(0);
-      setUploadRate(0);
-      setFileKey('');
+      setFileKey(null);
       
     } catch (error:any) {
       console.error('Upload error:', error?.message);

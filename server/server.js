@@ -4,6 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const {exec}=require('child_process')
 const jwt = require('jsonwebtoken');
+const { WebSocketServer } = require('ws');
 
 
 
@@ -11,7 +12,7 @@ const app = express();
 app.use(cookieParser());
 app.use(cors({
   origin:['https://hell-watch.vercel.app','http://localhost:3000'],
-  methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow methods
+  methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE',], // Explicitly allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   credentials: true,
   optionsSuccessStatus: 200,
@@ -103,7 +104,30 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
   MongoDB.connect(process.env.MONGODB_URI);
- 
 });
 
 server.setMaxListeners(1000);
+
+// WebSocket server for upload progress
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) => {
+  console.log('WebSocket client connected');
+  
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      if (data.type === 'subscribe') {
+        ws.uploadKey = data.key;
+      }
+    } catch (error) {
+      console.error('WebSocket message error:', error);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
+  });
+});
+
+global.wss = wss;

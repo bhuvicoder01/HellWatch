@@ -1,7 +1,7 @@
 import { api } from "./api";
 
 class MultipartUpload {
-  constructor(file, chunkSize = 20 * 1024 * 1024) { // 5MB chunks
+  constructor(file, chunkSize = 20 * 1024 * 1024) { // 20MB chunks
     this.file = file;
     this.chunkSize = chunkSize;
     this.totalChunks = Math.ceil(file.size / chunkSize);
@@ -13,7 +13,8 @@ class MultipartUpload {
   async initiate() {
     const response = await api.post('/videos/multipart/initiate', {
       fileName: this.file.name,
-      fileType: this.file.type
+      fileType: this.file.type,
+      totalParts: this.totalChunks
     });
 
     this.uploadId = response.data.uploadId;
@@ -31,44 +32,67 @@ class MultipartUpload {
     return response.data;
   }
 
-  async uploadPart(partNumber, url, chunk) {
-    const response = await fetch(url, {
-      method: 'PUT',
-      body: chunk
+  async uploadPart(partNumber, url, chunk, onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && onProgress) {
+          onProgress(partNumber, event.loaded, event.total);
+        }
+      };
+      
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const etag = xhr.getResponseHeader('ETag');
+          resolve({ partNumber, etag });
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      };
+      
+      xhr.onerror = () => reject(new Error('Upload failed'));
+      
+      xhr.open('PUT', url);
+      xhr.send(chunk);
     });
-
-    return {
-      partNumber,
-      etag: response.headers.get('ETag')
-    };
   }
 
   async upload(onProgress) {
     try {
-      // Step 1: Initiate multipart upload
       await this.initiate();
-
-      // Step 2: Get presigned URLs for all parts
       const { urls } = await this.getPresignedUrls();
 
-      // Step 3: Upload parts in parallel
+      const partProgress = new Map();
+      urls.forEach(({ partNumber }) => {
+        partProgress.set(partNumber, { loaded: 0, total: 0 });
+      });
+
       const uploadPromises = urls.map(async ({ partNumber, url }) => {
         const start = (partNumber - 1) * this.chunkSize;
         const end = Math.min(start + this.chunkSize, this.file.size);
         const chunk = this.file.slice(start, end);
 
-        const result = await this.uploadPart(partNumber, url, chunk);
-        
-        if (onProgress) {
-          onProgress(partNumber, this.totalChunks);
-        }
+        const result = await this.uploadPart(partNumber, url, chunk, (pn, loaded, total) => {
+          partProgress.set(pn, { loaded, total });
+          
+          let totalLoaded = 0;
+          let totalSize = 0;
+          partProgress.forEach(p => {
+            totalLoaded += p.loaded;
+            totalSize += p.total;
+          });
+          
+          if (onProgress) {
+            onProgress(totalLoaded, this.file.size);
+          }
+        });
 
         return result;
       });
 
       this.parts = await Promise.all(uploadPromises);
 
-      // Step 4: Complete multipart upload
       const response = await api.post('/videos/multipart/complete', {
         key: this.key,
         uploadId: this.uploadId,

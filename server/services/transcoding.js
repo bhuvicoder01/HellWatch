@@ -19,12 +19,12 @@ function runCommand(cmd) {
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
         // log stderr for debugging
-        console.error('FFmpeg error:', error.message);
-        console.error('FFmpeg stderr:', stderr);
+        // console.error('FFmpeg error:', error.message);
+        // console.error('FFmpeg stderr:', stderr);
         return reject(error);
       }
       // log stdout for debugging
-      console.log('FFmpeg stdout:', stdout);
+      // console.log('FFmpeg stdout:', stdout);
       resolve({ stdout, stderr });
     });
   });
@@ -55,16 +55,16 @@ class TranscodingService {
 
     // Ensure temp directory exists
     if (!fs.existsSync(tempDir)) {
-      console.log('Creating temp directory');
+      // console.log('Creating temp directory');
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
     // Verify input file exists
     if (!fs.existsSync(inputPath)) {
-      console.error(`Input file does not exist: ${inputPath}`);
+      // console.error(`Input file does not exist: ${inputPath}`);
       throw new Error(`Input file does not exist: ${inputPath}`);
     }
-    console.log('Input file verified, starting quality transcoding');
+    // console.log('Input file verified, starting quality transcoding');
 
     for (const quality of qualities) {
       console.log(`Starting ${quality.name} quality transcoding`);
@@ -83,7 +83,7 @@ class TranscodingService {
         `"${outputPath}"`
       ].join(' ');
       
-      console.log(`FFmpeg command: ${cmd}`);
+      // console.log(`FFmpeg command: ${cmd}`);
 
       try {
         await runCommand(cmd);
@@ -100,7 +100,7 @@ class TranscodingService {
           Body: fileStream,
           ContentType: 'video/mp4'
         }));
-        console.log(`S3 upload completed for ${quality.name}`);
+        // console.log(`S3 upload completed for ${quality.name}`);
 
         results[quality.name] = s3Key;
 

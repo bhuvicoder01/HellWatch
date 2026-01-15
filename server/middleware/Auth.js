@@ -9,6 +9,9 @@ async function authMiddleware(req,res,next){
     }
     try {
         const decoded=jwt.verify(token,process.env.JWT_SECRET)
+        if(decoded.exp<Math.ceil(Date.now()/1000)){
+            return res.status(401).json({message:"Token expired"})
+        }
         // console.log(decoded)
         const userData={_id:decoded.id,username:decoded.username}
         const user=await userModel.findById(userData._id)

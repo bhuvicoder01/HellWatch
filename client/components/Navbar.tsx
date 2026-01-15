@@ -4,12 +4,14 @@ import { useSong } from "@/contexts/MediaContext";
 import { API_URL } from "@/services/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Modal } from "./Modal";
 
 export default function Navbar() {
-    const {user,logout}=useAuth() 
+    const {user,isAuthExpired,logout}=useAuth() 
     const [showDropdown, setShowDropdown] = useState(false);
     const [dropdownRef, setDropdownRef] = useState<HTMLDivElement | null>(null);
     const {currentSong}=useSong()
+    const [showAuthModal,setShowAuthModal]=useState(isAuthExpired);
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
@@ -64,6 +66,19 @@ export default function Navbar() {
             </div>
             
             </div>
+        {/*modal to info for auth expired */}
+            <Modal
+            show={showAuthModal}
+            onClose={() => {setShowAuthModal(false)}}
+            title={<h2>Session Expired 😵</h2>}
+            children={
+                <div className="">
+                    <p>Your session has expired. Please log in again.</p>
+                    <Link href="/auth/login" onClick={()=>{setShowAuthModal(false)}} className="btn btn-danger">Login</Link>
+                </div>
+            }
+            footer={``}
+            />
  
 
     </>

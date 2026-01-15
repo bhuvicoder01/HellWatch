@@ -44,6 +44,25 @@ const s3 = new S3Client(
 // Track upload progress
 const uploadProgress = new Map();
 
+// Export uploadProgress for WebSocket access
+module.exports.uploadProgress = uploadProgress;
+
+// Broadcast upload progress via WebSocket
+const broadcastProgress = (key, progress) => {
+  if (!global.wss) return;
+  
+  global.wss.clients.forEach(client => {
+    if (client.uploadKey === key && client.readyState === 1) {
+      client.send(JSON.stringify({
+        type: 'progress',
+        key,
+        uploadRate: progress.uploadRate,
+        elapsed: progress.elapsed
+      }));
+    }
+  });
+};
+
 const uploadThumbnailToS3 = async (filePath, videoKey) => {
   try {
     const thumbnailKey = `thumbnails/${Date.now()}-${videoKey.split('/').pop().replace(/\.[^/.]+$/, '')}.jpg`;
@@ -108,13 +127,30 @@ const getUploadUrl = async (req, res) => {
       uploadRate: 0
     });
 
+    // Start progress monitoring
+    const progressInterval = setInterval(() => {
+      const progress = uploadProgress.get(key);
+      if (!progress) {
+        clearInterval(progressInterval);
+        return;
+      }
+
+      const elapsed = (Date.now() - progress.startTime) / 1000;
+      const uploadRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
+      
+      broadcastProgress(key, { uploadRate: uploadRate.toFixed(2), elapsed: elapsed.toFixed(1) });
+    }, 1000);
+
+    // Store interval for cleanup
+    uploadProgress.get(key).interval = progressInterval;
+
     const command = new PutObjectCommand({
       Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
       Key: key,
       ContentType: fileType,
     });
 
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 * 24 }); // 24 hours
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 * 24 });
 
     return res.json({
       uploadUrl: url,
@@ -141,13 +177,29 @@ const getAudioUploadUrl = async (req, res) => {
       uploadRate: 0
     });
 
+    // Start progress monitoring
+    const progressInterval = setInterval(() => {
+      const progress = uploadProgress.get(key);
+      if (!progress) {
+        clearInterval(progressInterval);
+        return;
+      }
+
+      const elapsed = (Date.now() - progress.startTime) / 1000;
+      const uploadRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0;
+      
+      broadcastProgress(key, { uploadRate: uploadRate.toFixed(2), elapsed: elapsed.toFixed(1) });
+    }, 1000);
+
+    uploadProgress.get(key).interval = progressInterval;
+
     const command = new PutObjectCommand({
       Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
       Key: key,
       ContentType: fileType,
     });
 
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 * 24 }); // 24 hours
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 * 24 });
 
     return res.json({
       uploadUrl: url,
@@ -161,20 +213,6 @@ const getAudioUploadUrl = async (req, res) => {
   }
 };
 
-
-const getUploadRate = async (req, res) => {
-  const { key } = req.params;
-  const progress = uploadProgress.get(key);
-
-  if (!progress) {
-    return res.json({ uploadRate: 0 });
-  }
-
-  const elapsed = (Date.now() - progress.startTime) / 1000; // seconds
-  const uploadRate = elapsed > 0 ? (progress.fileSize / (1024 * 1024)) / elapsed : 0; // MB/s
-
-  res.json({ uploadRate: uploadRate.toFixed(2) });
-};
 
 // Multipart upload functions
 const initiateMultipartUpload = async (req, res) => {
@@ -276,6 +314,11 @@ const completeSongUpload = async (req, res) => {
   const progress = uploadProgress.get(key);
 
   try {
+    // Clear progress interval
+    if (progress?.interval) {
+      clearInterval(progress.interval);
+    }
+
     const owner = await userModel.findById(req.user._id)
     await audioModel.create({ key,title,album,artist,albumartist, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
 
@@ -373,6 +416,11 @@ const completeVideoUpload = async (req, res) => {
   const progress = uploadProgress.get(key);
 
   try {
+    // Clear progress interval
+    if (progress?.interval) {
+      clearInterval(progress.interval);
+    }
+
     const owner = await userModel.findById(req.user._id)
     await videoModel.create({ key, title: title, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
 
@@ -488,12 +536,12 @@ module.exports = {
   upload: multerUpload,
   getAudioUploadUrl,
   getUploadUrl,
-  getUploadRate,
   completeSongUpload,
   completeVideoUpload,
   thumbnailUpload: upload,
   initiateMultipartUpload,
   getPresignedUrls,
   completeMultipartUpload,
-  abortMultipartUpload
+  abortMultipartUpload,
+  uploadProgress
 };

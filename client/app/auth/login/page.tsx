@@ -19,28 +19,28 @@ function Login() {
     }
 },[user])
 
-    const handleSubmit=async()=>{
-        try {
-            const res=await api.post(`/auth/login`,{
-                email,
-                password
-            })
-            if(typeof window !== 'undefined'){
-            localStorage.setItem('user',JSON.stringify(res.data.user))
-            const token = JSON.parse(res.data.token);
-            if (token && typeof window !== 'undefined') {
-                localStorage.setItem('token', token );
-            }
+//     const handleSubmit=async()=>{
+//         try {
+//             const res=await api.post(`/auth/login`,{
+//                 email,
+//                 password
+//             })
+//             if(typeof window !== 'undefined'){
+//             localStorage.setItem('user',JSON.stringify(res.data.user))
+//             const token = JSON.parse(res.data.token);
+//             if (token && typeof window !== 'undefined') {
+//                 localStorage.setItem('token', token );
+//             }
 
-            navigate('/')
-}
+//             navigate('/')
+// }
             
-        } catch (error) {
-            console.error(error);
-            alert("Something went wrong!");
+//         } catch (error) {
+//             console.error(error);
+//             alert("Something went wrong!");
             
-        }
-    }
+//         }
+//     }
   return (
     
     <>
