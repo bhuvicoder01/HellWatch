@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION,
+  region: 'us-east-1',
   credentials: {
     accessKeyId: process.env.accessKeyId,
     secretAccessKey: process.env.secretAccessKey
