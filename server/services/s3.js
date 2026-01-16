@@ -20,7 +20,7 @@ const agent = new Agent({
 // 1. Configure the S3 Client
 const s3 = new S3Client(
   {
-    region: 'ap-south-1',
+    region: process.env.AWS_REGION,
     credentials: {
       accessKeyId: process.env.accessKeyId,
       secretAccessKey: process.env.secretAccessKey
@@ -69,7 +69,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
     const fileBuffer = fs.readFileSync(filePath);
 
     const uploadCommand = new PutObjectCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: thumbnailKey,
       Body: fileBuffer,
       ContentType: 'image/jpeg'
@@ -95,7 +95,7 @@ const uploadThumbnailToS3 = async (filePath, videoKey) => {
 // 2. Configure multer-s3 storage
 const s3Storage = new multerS3({
   s3: s3,
-  bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+  bucket: process.env.AWS_BUCKET,
   // acl: 'public-read', // Set appropriate access control
   metadata: (req, file, cb) => {
     cb(null, { fieldName: file.fieldname });
@@ -145,7 +145,7 @@ const getUploadUrl = async (req, res) => {
     uploadProgress.get(key).interval = progressInterval;
 
     const command = new PutObjectCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: key,
       ContentType: fileType,
     });
@@ -194,7 +194,7 @@ const getAudioUploadUrl = async (req, res) => {
     uploadProgress.get(key).interval = progressInterval;
 
     const command = new PutObjectCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: key,
       ContentType: fileType,
     });
@@ -221,7 +221,7 @@ const initiateMultipartUpload = async (req, res) => {
     const key = `videos/${Date.now()}-${fileName}`;
 
     const command = new CreateMultipartUploadCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: key,
       ContentType: fileType
     });
@@ -245,7 +245,7 @@ const getPresignedUrls = async (req, res) => {
 
     for (let i = 1; i <= parts; i++) {
       const command = new UploadPartCommand({
-        Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+        Bucket: process.env.AWS_BUCKET,
         Key: key,
         UploadId: uploadId,
         PartNumber: i
@@ -268,7 +268,7 @@ const completeMultipartUpload = async (req, res) => {
     const { key, uploadId, parts } = req.body;
 
     const command = new CompleteMultipartUploadCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: key,
       UploadId: uploadId,
       MultipartUpload: {
@@ -296,7 +296,7 @@ const abortMultipartUpload = async (req, res) => {
     const { key, uploadId } = req.body;
 
     const command = new AbortMultipartUploadCommand({
-      Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+      Bucket: process.env.AWS_BUCKET,
       Key: key,
       UploadId: uploadId
     });
@@ -456,7 +456,7 @@ const completeVideoUpload = async (req, res) => {
           }
 
           const getCommand = new GetObjectCommand({
-            Bucket: 'bhuvisvbhuvistestvideosdatabucketmumbairegion',
+            Bucket: process.env.AWS_BUCKET,
             Key: video.key
           });
           const data = await s3.send(getCommand);

@@ -4,14 +4,14 @@ const { exec } = require('child_process');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const s3 = new S3Client({
-  region: 'ap-south-1',
+  region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.accessKeyId,
     secretAccessKey: process.env.secretAccessKey
   }
 });
 
-const BUCKET = 'bhuvisvbhuvistestvideosdatabucketmumbairegion';
+const BUCKET = process.env.AWS_BUCKET;
 
 // small helper to promisify exec
 function runCommand(cmd) {

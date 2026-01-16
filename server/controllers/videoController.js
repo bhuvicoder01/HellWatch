@@ -6,7 +6,7 @@ const TranscodingService = require("../services/transcoding");
 const { S3Client, GetObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3=S3.s3
-const BUCKET = 'bhuvisvbhuvistestvideosdatabucketmumbairegion';
+const BUCKET = process.env.AWS_BUCKET;
 
 class videoController {
     static async listVideos(req, res) {
