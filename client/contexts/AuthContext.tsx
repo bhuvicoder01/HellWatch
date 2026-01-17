@@ -53,6 +53,10 @@ export function AuthProvider({ children }: any) {
 
             const data = await res.data
             if (data.user) {
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('user', JSON.stringify(data.user))
+                    localStorage.setItem('isAuthExpired','false')
+                }
                 setUser(data.user)
                 setIsAuthenticated(true)
             }
@@ -64,6 +68,7 @@ export function AuthProvider({ children }: any) {
                 if (typeof window !== 'undefined') {
                     localStorage.removeItem('user')
                     setIsAuthExpired(true);
+                    localStorage.setItem('isAuthExpired', 'true')
                     console.log(isAuthExpired)
                     setUser(null)
                     setIsAuthenticated(false)
@@ -110,6 +115,10 @@ export function AuthProvider({ children }: any) {
     const logout = () => {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('user')
+            localStorage.removeItem('token')
+            localStorage.setItem('isAuthExpired','true')
+            setIsAuthExpired(false);
+
         }
         setUser(null)
         setIsAuthenticated(false)

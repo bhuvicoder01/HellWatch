@@ -11,7 +11,7 @@ export default function Navbar() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [dropdownRef, setDropdownRef] = useState<HTMLDivElement | null>(null);
     const {currentSong}=useSong()
-    const [showAuthModal,setShowAuthModal]=useState(isAuthExpired);
+    const [showAuthModal,setShowAuthModal]=useState<boolean>(typeof window!=='undefined'?((localStorage.getItem('isAuthExpired'))==='true'?true:false):false);
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
@@ -70,7 +70,7 @@ export default function Navbar() {
             <Modal
             show={showAuthModal}
             onClose={() => {setShowAuthModal(false)}}
-            title={<h2>Session Expired 😵</h2>}
+            title={`Session Expired 😵`}
             children={
                 <div className="">
                     <p>Your session has expired. Please log in again.</p>

@@ -16,6 +16,21 @@ const videoSchema=mongoose.Schema({
     duration:String,
     genre:String,
     thumbnail:String,
+    stats:{
+        views:Number,
+       likes:Number,
+       dislikes:Number,
+    },
+    likes:{
+        type: Map,
+        of: String,
+        default: new Map()
+    },
+    dislikes:{
+        type: Map,
+        of: String,
+        default: new Map()
+    },
     qualities: {
         type: Map,
         of: String,

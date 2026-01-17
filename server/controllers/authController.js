@@ -1,4 +1,6 @@
+const audioModel = require("../models/Audio");
 const userModel = require("../models/User");
+const videoModel = require("../models/Videos");
 const encrypt = require("../services/encrypt");
 
 class authController{
@@ -26,12 +28,8 @@ class authController{
                 return res.status(400).json({message:"User already exists"});
             }
             const hashedPassword=await encrypt.hashPassword(password);
-            const avatar=req.files?.avatar?.[0] ? {
-                filename: req.files.avatar[0].filename,
-                path: req.files.avatar[0].path,
-                originalname: req.files.avatar[0].originalname
-            } : null;
-            const user=await userModel.create({username:username,password:hashedPassword,email,isAdmin,avatar});  
+            const avatar=req.file
+            const user=await userModel.create({username:username,password:hashedPassword,email,isAdmin,'avatar.url':avatar?.location, 'avatar.bucket': avatar?.bucket, 'avatar.key': avatar?.key});  
             res.json({user,message:"Registration successful"});
         } catch (error) {
             console.error(error);
@@ -41,13 +39,13 @@ class authController{
     static async login(req,res){
         try {
             const {email,password}=req.body;
-            console.log(email,password)
+            // console.log(email,password)
             const user=await userModel.findOne({email:email});
             if(!user){
                 return  res.status(400).json({message:"Invalid credentials"});
             }
             const isMatch=await encrypt.comparePassword(password,user.password);
-            console.log(isMatch);
+            // console.log(isMatch);
             if(!isMatch){
                 return res.status(400).json({message:"Invalid credentials"});
             }
@@ -93,12 +91,14 @@ class authController{
             // hashedPassword=await encrypt.hashPassword(password);
             // }
             const avatar=req.file;
-            console.log(avatar);
+            // console.log(avatar);
             // if(username===user.username && password===user.password && email===user.email && isAdmin===user.isAdmin && avatar===user.avatar){
             //     return res.status(400).json({message:"No changes made"});
             // }
             const updatedUser=await userModel.findByIdAndUpdate(user._id, {avatar:{url:avatar?.location,bucket:avatar?.bucket,key:avatar?.key}}, {new:true});
             res.json({user:updatedUser, message:"Update successful"});
+            await videoModel.updateMany({"owner.id": user._id}, {$set: {"owner.pic": avatar?.location}})
+            await audioModel.updateMany({"owner.id": user._id}, {$set: {"owner.pic": avatar?.location}})
         } catch (error) {
             console.error(error);
             res.status(500).json({message:"Server error", error:error.message});

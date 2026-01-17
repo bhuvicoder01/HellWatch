@@ -150,9 +150,16 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                     </div>
                 ) : (
                     <>
-                    <h2 className="title">{videoData?.title}</h2>
-                        <h3 className="title">{videoData.key}</h3>
-                        <p className="description">{new Date(videoData.createdAt).toLocaleDateString()}</p>
+                 <p className="title">
+                    <span className="d-flex " style={{alignItems:'center',maxHeight:'30px'}}>
+                        {<Link href={`/public/profile?id=${video?.owner?.id}`}><img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={video?.owner?.pic?video?.owner?.pic:undefined}/></Link>}
+                        </span>
+
+                    {videoData?.title}</p>
+                        {/* <h3 className="title">{videoData.key}</h3> */}
+                        <p className="description"><Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link><br/>
+                        uploaded on  {new Date(videoData.createdAt).toLocaleDateString()}
+                        </p>
                     </>
                 )}
             </div>

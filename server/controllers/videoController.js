@@ -217,5 +217,47 @@ static async transcodeVideo(req, res) {
   }
 }
 
+static async updateVideoMetadata(req,res){
+  try {
+    // const {title, description, tags,} = req.query;
+    // const video = await Video.findByIdAndUpdate(
+    //   req.params.id,
+    //   { title, description, tags },
+    //   { new: true }
+    // );
+    const {liked,disliked}=req.query
+    const video=await Video.findById(req.params.id);
+    if (!video) return res.sendStatus(404);
+    if(liked && !video.likes.includes(req.user._id)){
+        video.likes.push(req.user._id)
+        video.dislikes.pull(req.user._id)
+    }
+    
+    if(disliked && !video.dislikes.includes(req.user._id)){
+        video.dislikes.push(req.user._id)
+        video.likes.pull(req.user._id)
+    }
+    
+    // video.views+=Number(views)
+    await video.save();
+    
+
+    res.json({likes:video.likes.length,dislikes:video.dislikes.length})
+    // res.json({
+    //   id: video._id,
+    //   owner: video?.owner,
+    //   title: video?.title,
+    //   description: video?.description,
+    //   tags: video?.tags,
+    //   key: video.key,
+    //   thumbnail: video?.thumbnail,
+    //   createdAt: video.createdAt
+    // });
+    
+  } catch (error) {
+    
+  }
+}
+
 }
 module.exports=videoController;

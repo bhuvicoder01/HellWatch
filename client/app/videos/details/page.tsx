@@ -9,6 +9,8 @@ import { useEffect, useState, Suspense, useMemo } from "react";
 import VideosPage from "../page";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 
 function VideoDetailsContent() {
     const {Videos}=useVideo()
@@ -86,6 +88,10 @@ function VideoDetailsContent() {
             console.error('Error updating video:', error);
         }
     };
+
+    const handleAction=async(action:string)=>{
+
+    }
     if(!video){
         return <div>Loading...</div>
     }
@@ -123,6 +129,10 @@ function VideoDetailsContent() {
                     <>
                     <span className="d-flex " style={{alignItems:'center',fontSize:'14px',maxHeight:'30px'}}>Uploaded by:{<img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={video?.owner?.pic?video?.owner?.pic:undefined}/>}<Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link></span>
                     <h2 className="title">{video?.title}</h2>
+                    <div className="d-flex" style={{flexDirection:'row',alignItems:'center'}}>
+                        <button title="like"  className="btn video-liked"><FontAwesomeIcon icon={faThumbsUp} /></button>
+                        <button title="dislike " className="btn video-disliked"><FontAwesomeIcon icon={faThumbsDown}/></button>
+                    </div>
                         {/* <h3 className="title">{video.key}</h3> */}
                         <p className="description">{new Date(video.createdAt).toLocaleDateString()}</p>
                     </>

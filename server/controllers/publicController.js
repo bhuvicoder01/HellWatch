@@ -24,7 +24,7 @@ class publicController{
     static getUserVideos=async(req,res)=>{
         try {
             const {id}=req.query
-            let videos=await videoModel.find({'owner.id':id})
+            let videos=await videoModel.find({'owner.id':id}).sort({createdAt:-1})
 
              const formatted = videos.map(v => ({
           id: v._id,
