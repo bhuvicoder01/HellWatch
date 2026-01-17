@@ -20,7 +20,7 @@ const agent = new Agent({
 // 1. Configure the S3 Client
 const s3 = new S3Client(
   {
-    region: 'us-east-1',
+    region:process.env.AWS_REGION,
     credentials: {
       accessKeyId: process.env.accessKeyId,
       secretAccessKey: process.env.secretAccessKey
