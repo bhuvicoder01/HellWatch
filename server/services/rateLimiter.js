@@ -6,7 +6,7 @@ function rateLimiter (windowSize,maxRequests){
         max: maxRequests, // Limit each IP to maxRequests requests per window
         message: 'Too many requests from this IP, please try again later.',
         standardHeaders: true,
-        legacyHeaders: false,
+        legacyHeaders: true,
       })
 }
 module.exports=rateLimiter;
