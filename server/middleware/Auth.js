@@ -12,7 +12,7 @@ async function authMiddleware(req,res,next){
         if(decoded.exp<Math.ceil(Date.now()/1000)){
             return res.status(401).json({message:"Token expired"})
         }
-        // console.log(decoded)
+        console.log(decoded)
         const userData={_id:decoded.id,username:decoded.username}
         const user=await userModel.findById(userData._id)
         req.user=user

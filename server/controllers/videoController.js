@@ -60,8 +60,10 @@ class videoController {
           owner: videoDoc?.owner,
           title: videoDoc.title,
           key: videoDoc.key,
+          stats:videoDoc?.stats,
+          popularity:Object.fromEntries(videoDoc?.popularity || new Map()),
           thumbnail: videoDoc.thumbnail,
-          qualities: Object.fromEntries(videoDoc.qualities || new Map()),
+          qualities: Object.fromEntries(videoDoc?.qualities || new Map()),
           createdAt: videoDoc.createdAt
         };
         res.json(formatted);
@@ -226,23 +228,39 @@ static async updateVideoMetadata(req,res){
     //   { new: true }
     // );
     const {liked,disliked}=req.query
+    console.log(req.query.liked,req.query.disliked);
+    console.log(req.params.id)
     const video=await Video.findById(req.params.id);
+    console.log(video)
     if (!video) return res.sendStatus(404);
-    if(liked && !video.likes.includes(req.user._id)){
-        video.likes.push(req.user._id)
-        video.dislikes.pull(req.user._id)
+    if(liked==='1'){
+      const current = video.popularity.get(req.user._id)
+      if(current === 'liked') {
+        video.popularity.delete(req.user._id)
+      } else {
+        video.popularity.set(req.user._id,'liked')
+      }
     }
-    
-    if(disliked && !video.dislikes.includes(req.user._id)){
-        video.dislikes.push(req.user._id)
-        video.likes.pull(req.user._id)
+    if(disliked==='1'){
+      const current = video.popularity.get(req.user._id)
+      if(current === 'disliked') {
+        video.popularity.delete(req.user._id)
+      } else {
+        video.popularity.set(req.user._id,'disliked')
+      }
     }
+    const totalLikes = Array.from(video.popularity.entries()).filter(([key, value]) => value === 'liked').length
+    video.stats.likes = totalLikes
+    const totalDislikes = Array.from(video.popularity.entries()).filter(([key, value]) => value === 'disliked').length
+    video.stats.dislikes = totalDislikes
     
     // video.views+=Number(views)
-    await video.save();
+    const result=await video.save();
+    console.log(result.stats)
+    // console.log(result.popularity)
     
 
-    res.json({likes:video.likes.length,dislikes:video.dislikes.length})
+    res.json({populairty:result.popularity})
     // res.json({
     //   id: video._id,
     //   owner: video?.owner,
@@ -255,7 +273,7 @@ static async updateVideoMetadata(req,res){
     // });
     
   } catch (error) {
-    
+    console.error(error);
   }
 }
 

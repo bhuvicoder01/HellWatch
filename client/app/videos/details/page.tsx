@@ -23,10 +23,12 @@ function VideoDetailsContent() {
     const { refreshVideos } = useVideo();
     const {user}=useAuth()
     const {currentSong,setCurrentSong}=useSong()
+    const [liked, setLiked] = useState(false);
+    const [disliked, setDisliked] = useState(false);
 
 
     
-    const id=useSearchParams().get('id');
+    const id=useSearchParams().get('id')||'';
     
     useMemo(() => {
       setVideos(Videos);
@@ -54,6 +56,27 @@ function VideoDetailsContent() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [id]);
+
+     useEffect(()=>{
+        if(video?.popularity){
+            const likedEntry = Object.entries(video?.popularity).find(([key, value]) => (value === 'liked')&&(key===user?._id));
+            const dislikedEntry = Object.entries(video?.popularity).find(([key, value]) => (value === 'disliked')&&(key===user?._id));
+
+            if (likedEntry) {
+                console.log('liked')
+                setLiked(true);
+            } else {
+                setLiked(false);
+            }
+
+            if (dislikedEntry) {
+                console.log('disliked')
+                setDisliked(true);
+            } else {
+                setDisliked(false);
+            }
+        }
+    },[video])
 
     const getVideoData = async (id: string) => {
         try {
@@ -90,8 +113,19 @@ function VideoDetailsContent() {
     };
 
     const handleAction=async(action:string)=>{
-
+        if(action==='liked'){
+            await api.put(`/videos/${video.id}/actions?liked=1&disliked=0`,{userId:user?._id})
+            getVideoData(id)
+        }
+        else if(action==='disliked'){
+            await api.put(`/videos/${video.id}/actions?liked=0&disliked=1`,{userId:user?._id})
+            getVideoData(id)
+        }
+        
     }
+    
+   
+
     if(!video){
         return <div>Loading...</div>
     }
@@ -130,8 +164,8 @@ function VideoDetailsContent() {
                     <span className="d-flex " style={{alignItems:'center',fontSize:'14px',maxHeight:'30px'}}>Uploaded by:{<img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={video?.owner?.pic?video?.owner?.pic:undefined}/>}<Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link></span>
                     <h2 className="title">{video?.title}</h2>
                     <div className="d-flex" style={{flexDirection:'row',alignItems:'center'}}>
-                        <button title="like"  className="btn video-liked"><FontAwesomeIcon icon={faThumbsUp} /></button>
-                        <button title="dislike " className="btn video-disliked"><FontAwesomeIcon icon={faThumbsDown}/></button>
+                        <button title="like" onClick={()=>handleAction('liked')} className={`btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
+                        <button title="dislike " onClick={()=>handleAction('disliked')} className={`btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
                     </div>
                         {/* <h3 className="title">{video.key}</h3> */}
                         <p className="description">{new Date(video.createdAt).toLocaleDateString()}</p>

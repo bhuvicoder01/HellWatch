@@ -17,16 +17,11 @@ const videoSchema=mongoose.Schema({
     genre:String,
     thumbnail:String,
     stats:{
-        views:Number,
-       likes:Number,
-       dislikes:Number,
+        views:{type:Number,default:0},
+       likes:{type:Number,default:0},
+       dislikes:{type:Number,default:0},
     },
-    likes:{
-        type: Map,
-        of: String,
-        default: new Map()
-    },
-    dislikes:{
+    popularity:{
         type: Map,
         of: String,
         default: new Map()
