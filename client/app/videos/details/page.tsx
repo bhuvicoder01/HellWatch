@@ -254,6 +254,7 @@ function VideoDetailsContent() {
                 background: transparent;
                 border: none;
                 color: #6c757d;
+                font-size:20px;
                 padding: 8px 12px;
                 margin-right: 10px;
                 border-radius: 4px;
