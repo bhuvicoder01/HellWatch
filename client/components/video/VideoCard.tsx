@@ -2,6 +2,8 @@ import { api, API_URL } from "@/services/api";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useVideo } from "@/contexts/MediaContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 export default function VideoCard({Key,mainVideo=false,showEdit, video, controls=false, detailPage=false }: {Key?: any, mainVideo?: boolean, showEdit?: boolean, video: any, controls?: boolean, detailPage?: boolean }) {
 
@@ -160,6 +162,7 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                         <p className="description"><Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link><br/>
                         uploaded on  {new Date(videoData.createdAt).toLocaleDateString()}
                         </p>
+                        <span className="description">{videoData?.stats?.views||0} <FontAwesomeIcon className="" style={{color:'red'}} icon={faEye} /></span>
                     </>
                 )}
             </div>

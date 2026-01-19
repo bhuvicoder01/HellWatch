@@ -6,13 +6,14 @@ const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = r
 const { getUploadUrl, thumbnailUpload, completeVideoUpload, initiateMultipartUpload, getPresignedUrls, completeMultipartUpload, abortMultipartUpload } = require("../services/s3");
 const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo, updateVideoMetadata, trackView } = require("../controllers/videoController");
 const authMiddleware = require("../middleware/Auth");
+const rateLimiter = require("../services/rateLimiter");
 
 
 
 // GET /api/videos  -> list all videos
 router.get("/", listVideos);
 
-router.get('/upload-url',authMiddleware, getUploadUrl)
+router.get('/upload-url',rateLimiter(60,2),authMiddleware, getUploadUrl)
 router.post('/complete-upload',authMiddleware, thumbnailUpload.single('thumbnail'), completeVideoUpload)
 
 // Multipart upload routes
@@ -31,7 +32,7 @@ router.get("/stream/:id",streamVideo);
 router.delete("/:id",deleteVideo);
 
 // PUT /videos/:id -> update video
-router.put("/:id",updateVideo);
+router.put("/:id",rateLimiter(15,2),updateVideo);
 
 // POST /videos/:id/quality -> add quality version
 router.post("/:id/quality", addQuality);

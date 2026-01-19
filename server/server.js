@@ -26,6 +26,7 @@ app.use(express.static('public'));
 const videoRoutes = require('./routes/videos');
 const MongoDB = require('./services/db');
 const authMiddleware = require('./middleware/Auth');
+const rateLimiter = require('./services/rateLimiter');
 
 
 
@@ -52,11 +53,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/songs', require('./routes/audios'));
-app.use('/videos', videoRoutes);
+app.use('/songs',rateLimiter(60,1000), require('./routes/audios'));
+app.use('/videos',rateLimiter(60,10000), videoRoutes);
 app.use('/auth', require('./routes/auth'));
 
-app.use('/public',require('./routes/public'));
+app.use('/public',rateLimiter(60,1000), require('./routes/public'));
 
 // Apple Music search route
 app.get('/apple-music/search', async (req, res) => {
