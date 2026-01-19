@@ -150,6 +150,7 @@ HellWatch/
 - `GET /videos` - Get all videos
 - `POST /videos/upload` - Upload video
 - `GET /videos/stream/:id` - Stream video
+- `POST /videos/:id/track-view` - Track video views (user ID for logged-in users, IP for anonymous)
 - `DELETE /videos/:id` - Delete video
 
 ### Audio
@@ -172,8 +173,13 @@ All media files are stored in AWS S3 with presigned URLs for secure access. The 
 ### Authentication System
 JWT-based authentication with secure cookie storage, providing seamless user experience while maintaining security.
 
-### Custom Video Player
-Built-in video player with custom controls, quality selection, and optimized streaming capabilities.
+### View Tracking System
+The platform implements intelligent view tracking that adapts based on user authentication status:
+
+- **Logged-in Users**: Views are tracked by user ID, preventing duplicate counts from the same user within 24 hours
+- **Anonymous Users**: Views are tracked by IP address with the same 24-hour duplicate prevention
+- **View Validation**: Only counts views when users watch at least 25% of the video content
+- **Analytics**: Provides accurate view statistics for content creators and platform analytics
 
 ## 🤝 Contributing
 
