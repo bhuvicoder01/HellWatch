@@ -164,8 +164,8 @@ function VideoDetailsContent() {
                     <span className="d-flex " style={{alignItems:'center',fontSize:'14px',maxHeight:'30px'}}>Uploaded by:{<img className="profile-img" style={{maxHeight:'30px',minHeight:'30px',minWidth:'30px',width:'30px',height:'30px',borderRadius:'50%',objectFit:'cover',objectPosition:'center',maxWidth:'30px'}} src={video?.owner?.pic?video?.owner?.pic:undefined}/>}<Link className="text-decoration-none text-white" style={{fontFamily:'-apple-system'}} href={`/public/profile?id=${video?.owner?.id}`}>{video?.owner?.username}</Link></span>
                     <h2 className="title">{video?.title}</h2>
                     <div className="d-flex" style={{flexDirection:'row',alignItems:'center'}}>
-                        <button title="like" onClick={()=>handleAction('liked')} className={`btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
-                        <button title="dislike " onClick={()=>handleAction('disliked')} className={`btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
+                        <button title="like" onClick={(e)=>{e.currentTarget.blur();handleAction('liked')}} onTouchEnd={(e)=>{e.currentTarget.blur();handleAction('liked')}} className={`action-btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
+                        <button title="dislike " onClick={(e)=>{e.currentTarget.blur();handleAction('disliked')}} onTouchEnd={(e)=>{e.currentTarget.blur();handleAction('disliked')}} className={`action-btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
                     </div>
                         {/* <h3 className="title">{video.key}</h3> */}
                         <p className="description">{new Date(video.createdAt).toLocaleDateString()}</p>
@@ -248,6 +248,31 @@ function VideoDetailsContent() {
             .description {
                 font-size: 16px;
                 color: #6c757d;
+            }
+            
+            .action-btn {
+                background: transparent;
+                border: none;
+                color: #6c757d;
+                padding: 8px 12px;
+                margin-right: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .action-btn.video-liked,
+            .action-btn.video-disliked {
+                color: #ff0019;
+            }
+            
+            @media (hover: hover) {
+                .action-btn:hover {
+                    color: rgb(255, 0, 0);
+                }
+               
             }
                 `
         }</style>
