@@ -56,7 +56,6 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    alert(error?.message)
     return Promise.reject(error);
   }
 );
@@ -79,7 +78,7 @@ export const authAPI = {
   refresh: async () => api.get('/auth/refresh'),
   getUser: async () => api.get('/auth/me'),
   updateUser: async (credentials: any) => {
-    console.log(credentials.get('Avatar'))
+    // console.log(credentials.get('Avatar'))
     return await api.put('/auth/user/update', credentials,
       {
         headers: {
