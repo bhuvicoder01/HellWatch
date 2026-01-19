@@ -11,7 +11,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  icon: '/favicon.png',
+  icon: '/favicon.ico',
   title: 'HellWatch',
   description: 'Your video streaming app'
 };
