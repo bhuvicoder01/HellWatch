@@ -228,10 +228,10 @@ static async updateVideoMetadata(req,res){
     //   { new: true }
     // );
     const {liked,disliked}=req.query
-    console.log(req.query.liked,req.query.disliked);
-    console.log(req.params.id)
+    // console.log(req.query.liked,req.query.disliked);
+    // console.log(req.params.id)
     const video=await Video.findById(req.params.id);
-    console.log(video)
+    // console.log(video)
     if (!video) return res.sendStatus(404);
     if(liked==='1'){
       const current = video.popularity.get(req.user._id)
@@ -256,7 +256,7 @@ static async updateVideoMetadata(req,res){
     
     // video.views+=Number(views)
     const result=await video.save();
-    console.log(result.stats)
+    // console.log(result.stats)
     // console.log(result.popularity)
     
 

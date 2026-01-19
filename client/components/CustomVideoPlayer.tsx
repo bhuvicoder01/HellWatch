@@ -60,11 +60,12 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         payload.ipAddress = ipData.ip;
       }
 
-      await fetch(`${API_URL}/videos/${videoId}/track-view`, {
+      const res=await fetch(`${API_URL}/videos/${videoId}/track-view`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
     } catch (error) {
       console.error('Error tracking view:', error);
     }
@@ -95,7 +96,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
       // Track view when 25% watched
       const watchedPercentage = (video.currentTime / video.duration) * 100;
       if (watchedPercentage >= 25 && !viewTracked) {
-        console.log(viewTracked)
+        // console.log(viewTracked)
         trackView(watchedPercentage);
         setViewTracked(true);
       }

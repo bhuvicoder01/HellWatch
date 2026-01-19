@@ -63,14 +63,14 @@ function VideoDetailsContent() {
             const dislikedEntry = Object.entries(video?.popularity).find(([key, value]) => (value === 'disliked')&&(key===user?._id));
 
             if (likedEntry) {
-                console.log('liked')
+                // console.log('liked')
                 setLiked(true);
             } else {
                 setLiked(false);
             }
 
             if (dislikedEntry) {
-                console.log('disliked')
+                // console.log('disliked')
                 setDisliked(true);
             } else {
                 setDisliked(false);
