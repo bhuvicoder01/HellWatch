@@ -115,6 +115,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   useEffect(()=>{
     const video=videoRef.current;
     if(!video) return;
+    setViewTracked(false)
     video.play()
     setIsPlaying(true)
   },[videoId])
