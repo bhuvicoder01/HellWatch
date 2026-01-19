@@ -1,5 +1,6 @@
 'use client';
 import { useSong } from '@/contexts/MediaContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { API_URL } from '@/services/api';
 import { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -46,13 +47,23 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [showTitle,setShowTitle]=useState(true)
   const [viewTracked, setViewTracked] = useState(false)
   const {currentSong,setCurrentSong}=useSong()
+  const { user, isAuthenticated } = useAuth()
 
   const trackView = async (watchedPercentage: number) => {
     try {
+      const payload: any = { watchedPercentage };
+      
+      if (isAuthenticated && user) {
+        payload.userId = user._id;
+      } else {
+        const ipData = await (await fetch("https://api.ipify.org?format=json")).json();
+        payload.ipAddress = ipData.ip;
+      }
+
       await fetch(`${API_URL}/videos/${videoId}/track-view`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ watchedPercentage })
+        body: JSON.stringify(payload)
       });
     } catch (error) {
       console.error('Error tracking view:', error);

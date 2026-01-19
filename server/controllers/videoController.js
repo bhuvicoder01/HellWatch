@@ -280,8 +280,7 @@ static async updateVideoMetadata(req,res){
 static async trackView(req, res) {
   try {
     const { id } = req.params;
-    const { watchedPercentage } = req.body;
-    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const { watchedPercentage, userId, ipAddress } = req.body;
     
     if (watchedPercentage < 25) {
       return res.json({ message: 'View not counted - insufficient watch time' });
@@ -291,12 +290,31 @@ static async trackView(req, res) {
     if (!video) return res.sendStatus(404);
     
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const existingView = video.viewHistory.find(view => 
-      view.ip === clientIp && view.timestamp > oneDayAgo
-    );
+    let existingView;
+    
+    if (userId) {
+      // For logged-in users, check by userId
+      existingView = video.viewHistory.find(view => 
+        view.userId && view.userId.toString() === userId && view.timestamp > oneDayAgo
+      );
+    } else if (ipAddress) {
+      // For anonymous users, check by IP
+      existingView = video.viewHistory.find(view => 
+        view.ip === ipAddress && view.timestamp > oneDayAgo && !view.userId
+      );
+    } else {
+      return res.status(400).json({ message: 'Either userId or ipAddress is required' });
+    }
     
     if (!existingView) {
-      video.viewHistory.push({ ip: clientIp, watchedPercentage });
+      const viewEntry = { watchedPercentage };
+      if (userId) {
+        viewEntry.userId = userId;
+      } else {
+        viewEntry.ip = ipAddress;
+      }
+      
+      video.viewHistory.push(viewEntry);
       video.stats.views += 1;
       await video.save();
       res.json({ message: 'View counted', views: video.stats.views });

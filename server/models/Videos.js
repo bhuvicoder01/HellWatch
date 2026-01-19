@@ -22,6 +22,11 @@ const videoSchema=mongoose.Schema({
        dislikes:{type:Number,default:0},
     },
     viewHistory: [{
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+            required: false
+        },
         ip: String,
         timestamp: { type: Date, default: Date.now },
         watchedPercentage: { type: Number, default: 0 }
