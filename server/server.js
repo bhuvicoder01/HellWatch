@@ -44,7 +44,7 @@ function generateAppleMusicToken() {
 }
 
 
-app.use(rateLimiter(60,10000))
+app.use(rateLimiter(10,50000))
 // Health check — used by LB
 app.get('/health', (req, res) => {
   res.json({
