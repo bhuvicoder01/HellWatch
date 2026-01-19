@@ -1,7 +1,7 @@
 import { api } from "./api";
 
 class MultipartUpload {
-  constructor(file, chunkSize = 20 * 1024 * 1024) { // 20MB chunks
+  constructor(file, chunkSize = 50 * 1024 * 1024) { // 50MB chunks
     this.file = file;
     this.chunkSize = chunkSize;
     this.totalChunks = Math.ceil(file.size / chunkSize);
