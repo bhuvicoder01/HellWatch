@@ -53,7 +53,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/songs',rateLimiter(60,1000), require('./routes/audios'));
+app.use('/songs',rateLimiter(60,20000), require('./routes/audios'));
 app.use('/videos',rateLimiter(60,10000), videoRoutes);
 app.use('/auth', require('./routes/auth'));
 
