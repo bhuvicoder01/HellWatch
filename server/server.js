@@ -44,6 +44,7 @@ function generateAppleMusicToken() {
 }
 
 
+app.use(rateLimiter(60,10000))
 // Health check — used by LB
 app.get('/health', (req, res) => {
   res.json({
@@ -52,12 +53,11 @@ app.get('/health', (req, res) => {
     time: new Date().toISOString()
   });
 });
-
-app.use('/songs',rateLimiter(60,20000), require('./routes/audios'));
-app.use('/videos',rateLimiter(60,10000), videoRoutes);
+app.use('/songs', require('./routes/audios'));
+app.use('/videos', videoRoutes);
 app.use('/auth', require('./routes/auth'));
 
-app.use('/public',rateLimiter(60,1000), require('./routes/public'));
+app.use('/public', require('./routes/public'));
 
 // Apple Music search route
 app.get('/apple-music/search', async (req, res) => {
