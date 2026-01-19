@@ -277,5 +277,37 @@ static async updateVideoMetadata(req,res){
   }
 }
 
+static async trackView(req, res) {
+  try {
+    const { id } = req.params;
+    const { watchedPercentage } = req.body;
+    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    
+    if (watchedPercentage < 25) {
+      return res.json({ message: 'View not counted - insufficient watch time' });
+    }
+    
+    const video = await Video.findById(id);
+    if (!video) return res.sendStatus(404);
+    
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const existingView = video.viewHistory.find(view => 
+      view.ip === clientIp && view.timestamp > oneDayAgo
+    );
+    
+    if (!existingView) {
+      video.viewHistory.push({ ip: clientIp, watchedPercentage });
+      video.stats.views += 1;
+      await video.save();
+      res.json({ message: 'View counted', views: video.stats.views });
+    } else {
+      res.json({ message: 'View already counted today', views: video.stats.views });
+    }
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+}
+
 }
 module.exports=videoController;

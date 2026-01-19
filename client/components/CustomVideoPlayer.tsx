@@ -44,7 +44,20 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
   const [isDoubleTappedSeek,setIsDoubleTappedSeek]=useState(false)
   const [isDoubleTappedRewind,setIsDoubleTappedRewind]=useState(false)
   const [showTitle,setShowTitle]=useState(true)
+  const [viewTracked, setViewTracked] = useState(false)
   const {currentSong,setCurrentSong}=useSong()
+
+  const trackView = async (watchedPercentage: number) => {
+    try {
+      await fetch(`${API_URL}/videos/${videoId}/track-view`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ watchedPercentage })
+      });
+    } catch (error) {
+      console.error('Error tracking view:', error);
+    }
+  };
 
 
   const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
@@ -65,7 +78,17 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     if (!video) return;
     
 
-    const updateTime = () => setCurrentTime(video.currentTime);
+    const updateTime = () => {
+      setCurrentTime(video.currentTime);
+      
+      // Track view when 25% watched
+      const watchedPercentage = (video.currentTime / video.duration) * 100;
+      if (watchedPercentage >= 25 && !viewTracked) {
+        console.log(viewTracked)
+        trackView(watchedPercentage);
+        setViewTracked(true);
+      }
+    };
     const updateDuration = () => setDuration(video.duration);
     
     video.addEventListener('timeupdate', updateTime);
@@ -75,7 +98,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
       video.removeEventListener('timeupdate', updateTime);
       video.removeEventListener('loadedmetadata', updateDuration);
     };
-  }, [document.fullscreenElement]);
+  }, [document.fullscreenElement, viewTracked]);
 
   useEffect(()=>{
     const video=videoRef.current;

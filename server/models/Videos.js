@@ -21,6 +21,11 @@ const videoSchema=mongoose.Schema({
        likes:{type:Number,default:0},
        dislikes:{type:Number,default:0},
     },
+    viewHistory: [{
+        ip: String,
+        timestamp: { type: Date, default: Date.now },
+        watchedPercentage: { type: Number, default: 0 }
+    }],
     popularity:{
         type: Map,
         of: String,
