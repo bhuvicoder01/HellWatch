@@ -140,7 +140,8 @@ export default function VideoUploader() {
       
     } catch (error:any) {
       console.error('Upload error:', error?.message);
-      setMessage('Upload failed');
+      setMessage('Upload failed, Login first if not already.👍');
+      // setMessage('Upload failed');
     } finally {
       setUploading(false);
     }

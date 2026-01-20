@@ -91,6 +91,7 @@ export default function SongsUploader() {
         } catch (error) {
           console.error('Error parsing audio metadata:', error);
         //   doc.output.textContent = 'Error parsing metadata: ' + err.message;
+        
         }
       setFile(e.target.files[0]);
       setMessage('');
@@ -179,7 +180,7 @@ export default function SongsUploader() {
       
     } catch (error) {
       console.error('Upload error:', error);
-      setMessage('Upload failed');
+          setMessage('Upload failed, Login first if not already.👍');
     } finally {
       setUploading(false);
     }
