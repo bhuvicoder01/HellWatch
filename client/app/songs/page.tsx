@@ -7,8 +7,11 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export default function SongsPage() {
-const {Songs}=useSong()
+const {Songs,refreshSongs}=useSong()
 
+    useEffect(()=>{
+refreshSongs()
+    },[])
     
 
     return(<>

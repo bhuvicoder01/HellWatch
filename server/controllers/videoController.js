@@ -282,7 +282,7 @@ static async trackView(req, res) {
     const { id } = req.params;
     const { watchedPercentage, userId, ipAddress } = req.body;
     
-    if (watchedPercentage < 25) {
+    if (watchedPercentage < 10) {
       return res.json({ message: 'View not counted - insufficient watch time' });
     }
     

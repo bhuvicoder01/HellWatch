@@ -28,9 +28,10 @@ import {
 interface CustomVideoPlayerProps {
   videoId: string;
   title?: string;
+  getVideoData?:Function
 }
 
-export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerProps) {
+export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,7 +66,7 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
+      getVideoData(videoId);
     } catch (error) {
       console.error('Error tracking view:', error);
     }

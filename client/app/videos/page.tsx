@@ -7,7 +7,7 @@ import { useVideo } from "@/contexts/MediaContext";
 import Link from "next/link";
 
 function Videos({detailsPage=false,mobileDisplay=false}: {detailsPage?: boolean,mobileDisplay?:boolean}) {
-  const {Videos}=useVideo()
+  const {Videos,refreshVideos}=useVideo()
   const [videos, setVideos] = useState(Videos);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -24,7 +24,9 @@ useMemo(() => {
   setVideos(Videos);
 }, [Videos]);
 
-
+useEffect(()=>{
+refreshVideos()
+},[])
   // useEffect(() => {
   //   console.log(Videos)
   //   const loadVideos = async () => {
