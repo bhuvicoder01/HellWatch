@@ -93,9 +93,9 @@ export default function CustomVideoPlayer({ videoId, title }: CustomVideoPlayerP
     const updateTime = () => {
       setCurrentTime(video.currentTime);
       
-      // Track view when 25% watched
+      // Track view when 10% watched
       const watchedPercentage = (video.currentTime / video.duration) * 100;
-      if (watchedPercentage >= 25 && !viewTracked) {
+      if (watchedPercentage >= 10 && !viewTracked) {
         // console.log(viewTracked)
         trackView(watchedPercentage);
         setViewTracked(true);

@@ -4,8 +4,10 @@ import { useState } from "react";
 import {api} from "@/services/api";
 import MultipartUpload from "@/services/multipartUpload";
 import { useUploadProgress } from "@/hooks/useUploadProgress";
+import { useVideo } from "@/contexts/MediaContext";
 
 export default function VideoUploader() {
+  const {refreshVideos}=useVideo()
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -134,6 +136,7 @@ export default function VideoUploader() {
       setFile(null);
       setProgress(0);
       setFileKey(null);
+      refreshVideos()
       
     } catch (error:any) {
       console.error('Upload error:', error?.message);

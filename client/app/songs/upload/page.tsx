@@ -3,8 +3,10 @@ import axios from "axios";
 import { useState } from "react";
 import {api} from "@/services/api";
 import { parseBlob } from 'music-metadata';
+import { useSong } from "@/contexts/MediaContext";
 
 export default function SongsUploader() {
+  const {refreshSongs}=useSong()
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -173,6 +175,7 @@ export default function SongsUploader() {
       setProgress(0);
       setUploadRate(0);
       setFileKey('');
+      refreshSongs()
       
     } catch (error) {
       console.error('Upload error:', error);
