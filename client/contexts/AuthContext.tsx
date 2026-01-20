@@ -69,7 +69,7 @@ export function AuthProvider({ children }: any) {
                     localStorage.removeItem('user')
                     setIsAuthExpired(true);
                     localStorage.setItem('isAuthExpired', 'true')
-                    console.log(isAuthExpired)
+                    // console.log(isAuthExpired)
                     setUser(null)
                     setIsAuthenticated(false)
                 }
