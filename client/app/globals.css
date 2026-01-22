@@ -335,6 +335,7 @@ body {
   overflow-x: auto;
   overflow-y: auto;
   max-height: 80vh;
+  max-width: 100%;
   gap: 20px;
   padding: 20px;
   scrollbar-width: none;
