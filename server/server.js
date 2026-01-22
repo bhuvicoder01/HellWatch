@@ -11,7 +11,7 @@ const { WebSocketServer } = require('ws');
 const app = express();
 app.use(cookieParser());
 app.use(cors({
-  origin:['https://hell-watch.vercel.app','http://localhost:3000'],
+  origin:['https://hell-watch.vercel.app','http://localhost:3000','https://hellwatch-ping-service.onrender.com'],
   methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE',], // Explicitly allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   credentials: true,
@@ -89,7 +89,7 @@ app.get('/apple-music/token', (req, res) => {
 });
 
 //ping reverse to ping service alive
-app.use('/ping-reverse',async(req,res)=>{
+app.get('/ping-reverse',async(req,res)=>{
   exec('curl https://hellwatch-ping-service.onrender.com', (error, stdout, stderr) => {
     if (error) {
         console.error(`exec error: ${error}`);
