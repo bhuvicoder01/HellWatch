@@ -88,6 +88,20 @@ app.get('/apple-music/token', (req, res) => {
   }
 });
 
+//ping reverse to ping service alive
+app.use('/ping-reverse',async(req,res)=>{
+  exec('curl http://localhost:3000', (error, stdout, stderr) => {
+    if (error) {
+        console.error(`exec error: ${error}`);
+        return res.status(500).send('Error executing curl command');
+    }
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+    res.send('Pinged reverse service successfully');
+  });
+});
+
+
 app.use('/page', async(req,res)=>{
 const user=req.user
 const resp=('http://localhost:5000/videos/stream/694e99ef8e45c5bdfade4d85')
