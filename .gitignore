@@ -9,3 +9,5 @@ server/temp
 server/uploads
 server/.env
 server/.env.development
+render_service_alive_mechanism/.env
+render_service_alive_mechanism/package-lock.json
