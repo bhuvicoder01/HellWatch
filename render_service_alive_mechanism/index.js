@@ -19,7 +19,7 @@ app.listen(PORT, () => {
     
     // Schedule a task to run every 10 minutes (*/10 * * * *)
     // This wakes up Service A before Render's 15-minute timeout.
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('*/1 * * * *', async () => {
       try {
         console.log(`--- Pinging target service at ${new Date().toISOString()} ---`);
         const response = await axios.get(`${TARGET_URL}/ping-reverse`, { timeout: 5000 });
