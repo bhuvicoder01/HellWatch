@@ -22,7 +22,7 @@ app.listen(PORT, () => {
     cron.schedule('*/1 * * * *', async () => {
       try {
         console.log(`--- Pinging target service at ${new Date().toISOString()} ---`);
-        const response = await axios.get(`${TARGET_URL}/ping-reverse`, { timeout: 5000 });
+        const response = await axios.get(`${TARGET_URL}/ping-reverse`);
         console.log(`✅ Ping successful. Status: ${response.status}`);
       } catch (error) {
         console.error(`❌ Ping failed for ${TARGET_URL}:${error.status} ${error.message}`);
