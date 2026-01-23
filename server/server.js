@@ -92,11 +92,11 @@ app.get('/apple-music/token', (req, res) => {
 app.use('/ping-reverse',async(req,res)=>{
   exec('curl https://hellwatch-ping-service.onrender.com', (error, stdout, stderr) => {
     if (error) {
-        console.error(`exec error: ${error}`);
+        // console.error(`exec error: ${error}`);
         return res.status(500).send('Error executing curl command');
     }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+    // console.log(`stdout: ${stdout}`);
+    // console.error(`stderr: ${stderr}`);
     res.send('Pinged reverse service successfully');
   });
 });
