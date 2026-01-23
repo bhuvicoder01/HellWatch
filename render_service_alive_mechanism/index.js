@@ -25,7 +25,7 @@ app.listen(PORT, () => {
         const response = await axios.get(`${TARGET_URL}/ping-reverse`, { timeout: 5000 });
         console.log(`✅ Ping successful. Status: ${response.status}`);
       } catch (error) {
-        console.error(`❌ Ping failed for ${TARGET_URL}: ${error.message}`);
+        console.error(`❌ Ping failed for ${TARGET_URL}:${error.status} ${error.message}`);
       }
     });
 
