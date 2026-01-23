@@ -89,7 +89,7 @@ app.get('/apple-music/token', (req, res) => {
 });
 
 //ping reverse to ping service alive
-app.get('/ping-reverse',async(req,res)=>{
+app.use('/ping-reverse',async(req,res)=>{
   exec('curl https://hellwatch-ping-service.onrender.com', (error, stdout, stderr) => {
     if (error) {
         console.error(`exec error: ${error}`);
