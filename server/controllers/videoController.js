@@ -87,7 +87,7 @@ class videoController {
       key = videoDoc.qualities.get(quality);
     }
 
-    console.log(key)
+    // console.log(key)
     const range = req.headers.range;
     if (!range) {
       return res.status(416).send("Requires Range header");
