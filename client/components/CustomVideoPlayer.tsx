@@ -40,7 +40,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [quality, setQuality] = useState('low');
+  const [quality, setQuality] = useState('original');
   const [autoQuality, setAutoQuality] = useState(true);
   const [networkSpeed, setNetworkSpeed] = useState(0);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -181,6 +181,28 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   },[videoId])
 
   useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.innerWidth < 768 && window.orientation !== undefined) {
+        if (Math.abs(window.orientation) === 90) {
+          const container = containerRef.current;
+          if (container && !document.fullscreenElement) {
+            container.requestFullscreen();
+            setIsFullscreen(true);
+          }
+        } else {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    return () => window.removeEventListener('orientationchange', handleOrientationChange);
+  }, []);
+
+  useEffect(() => {
     if (!autoQuality || qualityChanging) return;
     
     const timer = setTimeout(() => {
@@ -213,6 +235,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   };
 
   const showControlsTemporarily = () => {
+    if (controlsTimeout) clearTimeout(controlsTimeout);
     setShowControls(true);
     setShowTitle(true)
     if (!showQualityMenu) {
@@ -373,30 +396,31 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     <div 
       ref={containerRef}
       onMouseMove={() => {
-        // setShowControls(true)
-        // setShowTitle(true) 
-        // hideControlsAfterDelay();
         showControlsTemporarily()
       }}
       onMouseLeave={() => {
-        setShowControls(false)
-        setShowTitle(false)
-
+        if (!isFullscreen) {
+          setShowControls(false)
+          setShowTitle(false)
+        }
       }}
       onTouchStart={handleTouchStart}
-      // onTouchEnd={handleTouchEnd}
       onTouchStartCapture={handleTouchStart}
       style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: window.innerWidth > 992 ? '200%' : '100vw',
-        aspectRatio: '16/9',
+        position: isFullscreen ? 'fixed' : 'relative',
+        top: isFullscreen ? 0 : 'auto',
+        left: isFullscreen ? 0 : 'auto',
+        width: isFullscreen ? '100vw' : '100%',
+        height: isFullscreen ? '100vh' : 'auto',
+        maxWidth: isFullscreen ? 'none' : (window.innerWidth > 992 ? '200%' : '100vw'),
+        aspectRatio: isFullscreen ? 'auto' : '16/9',
         backgroundColor: '#000',
-        borderRadius: '12px',
+        borderRadius: isFullscreen ? '0' : '12px',
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        boxShadow: isFullscreen ? 'none' : '0 8px 32px rgba(0,0,0,0.3)',
         touchAction: 'manipulation',
-        margin: '0 auto'
+        margin: isFullscreen ? '0' : '0 auto',
+        zIndex: isFullscreen ? 9999 : 'auto'
       }}
     >
       {title && showTitle && (
