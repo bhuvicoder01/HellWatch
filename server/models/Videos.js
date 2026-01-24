@@ -41,6 +41,13 @@ const videoSchema=mongoose.Schema({
         of: String,
         default: new Map()
     },
+    transcodingJobId: String,
+    thumbnailJobId: String,
+    transcodingStatus: {
+        type: String,
+        enum: ['PENDING', 'SUBMITTED', 'PROGRESSING', 'COMPLETE', 'ERROR'],
+        default: 'PENDING'
+    },
     // isApproved:{
     //     type:Boolean,
     //     default:false

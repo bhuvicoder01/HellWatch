@@ -38,7 +38,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [quality, setQuality] = useState('high');
+  const [quality, setQuality] = useState('original');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -614,6 +614,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
               <option value="low">480p</option>
               <option value="medium">720p</option>
               <option value="high">1080p</option>
+              <option value="original">Original</option>
             </select>
             
             <button

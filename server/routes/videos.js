@@ -4,7 +4,7 @@ const router = express.Router();
 const Video = require('../models/Videos'); // your model file
 const { S3Client, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { getUploadUrl, thumbnailUpload, completeVideoUpload, initiateMultipartUpload, getPresignedUrls, completeMultipartUpload, abortMultipartUpload } = require("../services/s3");
-const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo, updateVideoMetadata, trackView } = require("../controllers/videoController");
+const { listVideos, getThumbnail, getVideoById, streamVideo, deleteVideo, updateVideo, addQuality, transcodeVideo, getTranscodingStatus, updateVideoMetadata, trackView } = require("../controllers/videoController");
 const authMiddleware = require("../middleware/Auth");
 const rateLimiter = require("../services/rateLimiter");
 
@@ -39,6 +39,9 @@ router.post("/:id/quality", addQuality);
 
 // POST /videos/transcode -> transcode video to multiple qualities
 router.post("/transcode", transcodeVideo);
+
+// GET /videos/:id/transcode-status -> get transcoding job status
+router.get("/:id/transcode-status", getTranscodingStatus);
 
 router.put('/:id/actions',authMiddleware, updateVideoMetadata)
 
