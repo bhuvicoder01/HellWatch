@@ -46,6 +46,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [isBuffering, setIsBuffering] = useState(false);
   const [bufferHealth, setBufferHealth] = useState(0);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [qualityChanging, setQualityChanging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -140,7 +141,10 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     };
 
     const handleWaiting = () => setIsBuffering(true);
-    const handleCanPlay = () => setIsBuffering(false);
+    const handleCanPlay = () => {
+      setIsBuffering(false);
+      setQualityChanging(false);
+    };
     const updateDuration = () => setDuration(video.duration);
     
     const updateBufferHealth = () => {
@@ -177,7 +181,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   },[videoId])
 
   useEffect(() => {
-    if (!autoQuality) return;
+    if (!autoQuality || qualityChanging) return;
     
     const timer = setTimeout(() => {
       // Downgrade if buffering or low buffer health
@@ -187,7 +191,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         else if (quality === 'medium') changeQualityAuto('low');
       }
       // Upgrade if good buffer health and not buffering
-      else if (bufferHealth > 15 && !isBuffering) {
+      else if (bufferHealth > 10 && !isBuffering) {
         if (quality === 'low') changeQualityAuto('medium');
         else if (quality === 'medium') changeQualityAuto('high');
         else if (quality === 'high') changeQualityAuto('original');
@@ -195,13 +199,15 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     }, isBuffering ? 2000 : 5000);
     
     return () => clearTimeout(timer);
-  }, [isBuffering, bufferHealth, quality, autoQuality]);
+  }, [isBuffering, bufferHealth, quality, autoQuality, qualityChanging]);
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
     const timeout = setTimeout(() =>{
-      setShowControls(false)
-      setShowTitle(false)
+      if (!showQualityMenu) {
+        setShowControls(false)
+        setShowTitle(false)
+      }
     }, 3000);
     setControlsTimeout(timeout);
   };
@@ -209,7 +215,9 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const showControlsTemporarily = () => {
     setShowControls(true);
     setShowTitle(true)
-    hideControlsAfterDelay();
+    if (!showQualityMenu) {
+      hideControlsAfterDelay();
+    }
   };
 
   const togglePlay = () => {
@@ -303,6 +311,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     
     const currentTime = video.currentTime;
     setQuality(newQuality);
+    setQualityChanging(true);
     
     setTimeout(() => {
       video.currentTime = currentTime;
@@ -367,11 +376,11 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         // setShowControls(true)
         // setShowTitle(true) 
         // hideControlsAfterDelay();
-        // showControlsTemporarily()
+        showControlsTemporarily()
       }}
       onMouseLeave={() => {
-        // setShowControls(false)
-        // setShowTitle(false)
+        setShowControls(false)
+        setShowTitle(false)
 
       }}
       onTouchStart={handleTouchStart}
@@ -412,6 +421,22 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
           whiteSpace: 'nowrap'
         }}>
           {title}
+        </div>
+      )}
+      {isBuffering  && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'white',
+          fontSize: '14px',
+          background: 'rgba(0,0,0,0.7)',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          zIndex: 15
+        }}>
+          Buffering...
         </div>
       )}
       {showControls && showQualityMenu && (
