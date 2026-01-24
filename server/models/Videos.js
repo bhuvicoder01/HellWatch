@@ -41,6 +41,17 @@ const videoSchema=mongoose.Schema({
         of: String,
         default: new Map()
     },
+    transcoding: {
+        jobId: String,
+        status: {
+            type: String,
+            enum: ['SUBMITTED', 'PROGRESSING', 'COMPLETE', 'ERROR', 'CANCELED'],
+            default: 'SUBMITTED'
+        },
+        progress: { type: Number, default: 0 },
+        startedAt: Date,
+        completedAt: Date
+    },
     // isApproved:{
     //     type:Boolean,
     //     default:false

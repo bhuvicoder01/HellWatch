@@ -4,6 +4,7 @@ import { useState } from "react";
 import {api} from "@/services/api";
 import MultipartUpload from "@/services/multipartUpload";
 import { useUploadProgress } from "@/hooks/useUploadProgress";
+import { useTranscodingStatus } from "@/hooks/useTranscodingStatus";
 import { useVideo } from "@/contexts/MediaContext";
 
 export default function VideoUploader() {
@@ -13,8 +14,10 @@ export default function VideoUploader() {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('');
   const [fileKey, setFileKey] = useState<string | null>(null);
+  const [transcodingJobId, setTranscodingJobId] = useState<string | null>(null);
   
   const { uploadRate, ws } = useUploadProgress(fileKey);
+  const { status: transcodingStatus } = useTranscodingStatus(transcodingJobId);
 
   const MULTIPART_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
@@ -131,7 +134,22 @@ export default function VideoUploader() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      setMessage(`Upload complete! Final rate: ${completeRes.data.finalUploadRate} MB/s`);
+      
+      setMessage('Upload complete! Starting transcoding...');
+      
+      // Start MediaConvert transcoding
+      try {
+        const transcodingRes = await api.post('/videos/transcode', {
+          videoKey: key,
+          videoId: completeRes.data.videoId // Assuming the complete-upload returns videoId
+        });
+        
+        setTranscodingJobId(transcodingRes.data.jobId);
+        setMessage(`Transcoding started (Job: ${transcodingRes.data.jobId})`);
+      } catch (transcodingError) {
+        console.error('Transcoding start failed:', transcodingError);
+        setMessage('Upload complete, but transcoding failed to start');
+      }
       
       setFile(null);
       setProgress(0);
@@ -194,6 +212,23 @@ export default function VideoUploader() {
               <span>{progress.toFixed(1)}%</span>
               <span>{uploadRate} MB/s</span>
             </div>
+          </div>
+        )}
+
+        {transcodingStatus && (
+          <div className="transcoding-status">
+            <h3>Transcoding Status</h3>
+            <div className="status-info">
+              <span><strong>Job ID:</strong> {transcodingStatus.jobId}</span>
+              <span><strong>Status:</strong> {transcodingStatus.status}</span>
+              <span><strong>Progress:</strong> {transcodingStatus.progress}%</span>
+            </div>
+            {transcodingStatus.status === 'COMPLETE' && (
+              <div className="success-message">✅ Transcoding completed! Your video is ready.</div>
+            )}
+            {transcodingStatus.status === 'ERROR' && (
+              <div className="error-message">❌ Transcoding failed. Please try again.</div>
+            )}
           </div>
         )}
 
@@ -320,6 +355,46 @@ export default function VideoUploader() {
         .message.error {
           background: #f8d7da;
           color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+        
+        .transcoding-status {
+          background: #e3f2fd;
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid #bbdefb;
+          margin-bottom: 20px;
+        }
+        
+        .transcoding-status h3 {
+          margin: 0 0 15px 0;
+          color: #1976d2;
+        }
+        
+        .status-info {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 15px;
+        }
+        
+        .status-info span {
+          color: #424242;
+        }
+        
+        .success-message {
+          background: #d4edda;
+          color: #155724;
+          padding: 10px;
+          border-radius: 4px;
+          border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+          background: #f8d7da;
+          color: #721c24;
+          padding: 10px;
+          border-radius: 4px;
           border: 1px solid #f5c6cb;
         }
       `}</style>

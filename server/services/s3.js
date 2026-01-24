@@ -9,6 +9,7 @@ const path = require('path')
 const upload = require('./upload')
 const videoModel = require('../models/Videos')
 const TranscodingService = require('./transcoding');
+const BatchTranscodingService = require('./batchTranscoding');
 const audioModel = require('../models/Audio');
 const userModel = require('../models/User');
 
@@ -22,9 +23,8 @@ const s3 = new S3Client(
   {
     region:process.env.AWS_REGION,
     credentials: {
-      accessKeyId: process.env.accessKeyId,
-      secretAccessKey: process.env.secretAccessKey
-    },
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY    },
     maxAttempts: 3,
     requestHandler: new NodeHttpHandler(
       {
@@ -422,7 +422,7 @@ const completeVideoUpload = async (req, res) => {
     }
 
     const owner = await userModel.findById(req.user._id)
-    await videoModel.create({ key, title: title, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
+    let video = videoModel.create({ key, title: title, 'owner.id': req.user._id, 'owner.username': owner?.username, 'owner.pic': owner?.avatar?.url, 'owner.email': owner?.email })
 
     let thumbnailKey = null;
 
@@ -437,65 +437,71 @@ const completeVideoUpload = async (req, res) => {
       }
     }
 
-    const video = await videoModel.findOneAndUpdate(
+    video = await videoModel.findOneAndUpdate(
       { key },
       { thumbnail: thumbnailKey },
       { new: true }
     );
 
-    // Start transcoding in background
-    if (video) {
-      setTimeout(async () => {
-        try {
-          const tempDir = path.join(__dirname, '../temp');
-          const tempPath = path.join(tempDir, `${video._id}_original.mp4`);
+    video=await videoModel.findById(video._id);
+    // Start Batch transcoding in background
+    // if (video) {
+    //   setTimeout(async () => {
+    //     try {
+    //       const batchService = new BatchTranscodingService();
+    //       const job = await batchService.submitTranscodingJob(video.key, video._id);
+    //       console.log(`Batch job started for video ${video._id}: ${job.jobId}`);
+    //     } catch (error) {
+    //       console.error('Batch transcoding failed, using FFmpeg fallback:', error);
+    //       // Fallback to local FFmpeg
+    //       try {
+    //         const tempDir = path.join(__dirname, '../temp');
+    //         const tempPath = path.join(tempDir, `${video._id}_original.mp4`);
 
-          // Ensure temp directory exists
-          if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-          }
+    //         if (!fs.existsSync(tempDir)) {
+    //           fs.mkdirSync(tempDir, { recursive: true });
+    //         }
 
-          const getCommand = new GetObjectCommand({
-            Bucket: process.env.AWS_BUCKET,
-            Key: video.key
-          });
-          const data = await s3.send(getCommand);
+    //         const getCommand = new GetObjectCommand({
+    //           Bucket: process.env.AWS_BUCKET,
+    //           Key: video.key
+    //         });
+    //         const data = await s3.send(getCommand);
 
-          // Check if S3 response has Body
-          if (!data.Body) {
-            throw new Error('No data received from S3');
-          }
+    //         if (!data.Body) {
+    //           throw new Error('No data received from S3');
+    //         }
 
-          const writeStream = fs.createWriteStream(tempPath);
+    //         const writeStream = fs.createWriteStream(tempPath);
 
-          await new Promise((resolve, reject) => {
-            data.Body.pipe(writeStream);
-            writeStream.on('finish', resolve);
-            writeStream.on('error', reject);
-          });
+    //         await new Promise((resolve, reject) => {
+    //           data.Body.pipe(writeStream);
+    //           writeStream.on('finish', resolve);
+    //           writeStream.on('error', reject);
+    //         });
 
-          // Verify file was created successfully
-          if (!fs.existsSync(tempPath)) {
-            throw new Error(`Failed to create temp file: ${tempPath}`);
-          }
+    //         if (!fs.existsSync(tempPath)) {
+    //           throw new Error(`Failed to create temp file: ${tempPath}`);
+    //         }
 
-          const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
-          const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
+    //         const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
+    //         const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
 
-          video.qualities = new Map(Object.entries(qualities));
-          if (!video.thumbnail) video.thumbnail = autoThumbnail;
-          await video.save();
+    //         video.qualities = new Map(Object.entries(qualities));
+    //         if (!video.thumbnail) video.thumbnail = autoThumbnail;
+    //         await video.save();
 
-          if (fs.existsSync(tempPath)) {
-            fs.unlinkSync(tempPath);
-          }
+    //         if (fs.existsSync(tempPath)) {
+    //           fs.unlinkSync(tempPath);
+    //         }
 
-          console.log(`Transcoding completed for video ${video._id}`);
-        } catch (error) {
-          console.error('Transcoding failed:', error);
-        }
-      }, 2000);
-    }
+    //         console.log(`FFmpeg fallback transcoding completed for video ${video._id}`);
+    //       } catch (fallbackError) {
+    //         console.error('FFmpeg fallback also failed:', fallbackError);
+    //       }
+    //     }
+    //   }, 2000);
+    // }
 
     if (progress) {
       const elapsed = (Date.now() - progress.startTime) / 1000;
@@ -504,7 +510,8 @@ const completeVideoUpload = async (req, res) => {
       return res.json({
         finalUploadRate: finalRate.toFixed(2),
         thumbnailKey,
-        message: 'Upload completed, transcoding started'
+        message: 'Upload completed, transcoding started',
+        videoId:video._id
       });
     }
 

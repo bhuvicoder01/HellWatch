@@ -3,6 +3,7 @@ const { listenerCount } = require("../models/User");
 const Video = require("../models/Videos");
 const S3= require("../services/s3");
 const TranscodingService = require("../services/transcoding");
+const BatchTranscodingService = require("../services/batchTranscoding");
 const { S3Client, GetObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3=S3.s3
@@ -194,28 +195,81 @@ static async addQuality(req, res) {
 
 static async transcodeVideo(req, res) {
   try {
-    const { videoPath, videoId } = req.body;
+    const { videoKey, videoId } = req.body;
     
-    // Start transcoding process
-    const qualities = await TranscodingService.transcodeVideo(videoPath, videoId);
-    const thumbnail = await TranscodingService.generateThumbnail(videoPath, videoId);
-    
-    // Update video document with quality versions
-    const video = await Video.findById(videoId);
-    if (!video) return res.sendStatus(404);
-    
-    video.qualities = new Map(Object.entries(qualities));
-    video.thumbnail = thumbnail;
-    await video.save();
+    // Use Batch for cost-effective transcoding
+    const batchService = new BatchTranscodingService();
+    const job = await batchService.submitTranscodingJob(videoKey, videoId);
     
     res.json({ 
-      message: 'Transcoding completed', 
-      qualities: Object.fromEntries(video.qualities),
-      thumbnail: video.thumbnail
+      message: 'Batch transcoding job started', 
+      jobId: job.jobId,
+      status: job.status,
+      service: 'batch'
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Transcoding failed' });
+    console.error('Batch transcoding failed, trying FFmpeg fallback:', err);
+    
+    // Fallback to local FFmpeg
+    try {
+      const { videoPath, videoId } = req.body;
+      const qualities = await TranscodingService.transcodeVideo(videoPath, videoId);
+      const thumbnail = await TranscodingService.generateThumbnail(videoPath, videoId);
+      
+      const video = await Video.findById(videoId);
+      if (video) {
+        video.qualities = new Map(Object.entries(qualities));
+        video.thumbnail = thumbnail;
+        await video.save();
+      }
+      
+      res.json({ 
+        message: 'Local FFmpeg transcoding completed (fallback)', 
+        qualities: Object.fromEntries(video.qualities),
+        thumbnail: video.thumbnail,
+        service: 'ffmpeg'
+      });
+    } catch (fallbackErr) {
+      console.error('Both Batch and FFmpeg failed:', fallbackErr);
+      res.status(500).json({ error: 'All transcoding services failed' });
+    }
+  }
+}
+
+static async checkTranscodingStatus(req, res) {
+  try {
+    const { jobId } = req.params;
+    const batchService = new BatchTranscodingService();
+    const job = await batchService.getJobStatus(jobId);
+    
+    // if (job.error) {
+    //   console.log(`Access denied for job ${jobId}: ${job.error}`);
+    // } else {
+    //   console.log(`Job ${jobId} status: ${job.status}`);
+    // }
+    
+    if (job.status === 'SUCCEEDED') {
+      const outputs = batchService.extractOutputKeys(req.query.videoId);
+      
+      const video = await Video.findById(req.query.videoId);
+      if (video) {
+        video.qualities = new Map(Object.entries(outputs.qualities));
+        if (!video.thumbnail) video.thumbnail = outputs.thumbnail;
+        await video.save();
+        console.log(`Updated video ${req.query.videoId} with transcoded qualities`);
+      }
+    }
+    
+    res.json({ 
+      jobId: job.jobId,
+      status: job.status,
+      statusReason: job.statusReason,
+      error: job.error,
+      service: 'batch'
+    });
+  } catch (err) {
+    console.error('Error checking transcoding status:', err);
+    res.status(500).json({ error: 'Failed to check job status' });
   }
 }
 

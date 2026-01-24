@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'HellWatch AWS Batch Setup for Video Transcoding'
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID for Batch compute environment
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Subnet IDs for Batch compute environment
+
+Resources:
+  # IAM Role for Batch Service
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: HellWatchBatchServiceRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: batch.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+
+  # IAM Role for EC2 Instances
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: HellWatchBatchInstanceRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+
+  # Instance Profile
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: HellWatchBatchInstanceProfile
+      Roles:
+        - !Ref InstanceRole
+
+  # IAM Role for Job Execution
+  JobExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: HellWatchBatchJobRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub 'arn:aws:s3:::hellwatch-assets-bucket/*'
+
+  # Security Group
+  BatchSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Batch compute environment
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  # Compute Environment
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeEnvironmentName: hellwatch-spot-compute
+      Type: MANAGED
+      State: ENABLED
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      ComputeResources:
+        Type: EC2
+        MinvCpus: 0
+        MaxvCpus: 100
+        DesiredvCpus: 0
+        InstanceTypes:
+          - c5.large
+          - c5.xlarge
+        BidPercentage: 50
+        Subnets: !Ref SubnetIds
+        SecurityGroupIds:
+          - !Ref BatchSecurityGroup
+        InstanceRole: !GetAtt InstanceProfile.Arn
+        Tags:
+          Project: HellWatch
+          Environment: Production
+
+  # Job Queue
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: hellwatch-transcoding-queue
+      State: ENABLED
+      Priority: 1
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref ComputeEnvironment
+
+  # Job Definition
+  JobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: hellwatch-ffmpeg-job
+      Type: container
+      ContainerProperties:
+        Image: public.ecr.aws/docker/library/node:18-alpine
+        Vcpus: 2
+        Memory: 4096
+        JobRoleArn: !GetAtt JobExecutionRole.Arn
+        Command:
+          - sh
+          - -c
+          - |
+            apk add --no-cache ffmpeg aws-cli
+            node /app/transcode.js
+
+Outputs:
+  ComputeEnvironmentArn:
+    Description: Batch Compute Environment ARN
+    Value: !Ref ComputeEnvironment
+  JobQueueArn:
+    Description: Batch Job Queue ARN
+    Value: !Ref JobQueue
+  JobDefinitionArn:
+    Description: Batch Job Definition ARN
+    Value: !Ref JobDefinition

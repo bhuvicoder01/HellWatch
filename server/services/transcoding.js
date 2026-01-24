@@ -2,15 +2,16 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const S3 = require('./s3');
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.accessKeyId,
-    secretAccessKey: process.env.secretAccessKey
-  }
-});
-
+// const s3 = new S3Client({
+//   region: process.env.AWS_REGION,
+//   credentials: {
+//     accessKeyId: process.env.accessKeyId,
+//     secretAccessKey: process.env.secretAccessKey
+//   }
+// });
+const s3=S3.s3
 const BUCKET = process.env.AWS_BUCKET;
 
 // small helper to promisify exec

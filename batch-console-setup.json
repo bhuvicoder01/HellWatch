@@ -1,0 +1,152 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "HellWatch AWS Batch Setup - One Click Deploy",
+  "Parameters": {
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Description": "Select your VPC"
+    },
+    "SubnetIds": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Description": "Select 2 or more subnets"
+    }
+  },
+  "Resources": {
+    "BatchServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {"Service": "batch.amazonaws.com"},
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"]
+      }
+    },
+    "InstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {"Service": "ec2.amazonaws.com"},
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [{"Ref": "InstanceRole"}]
+      }
+    },
+    "JobRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {"Service": "ecs-tasks.amazonaws.com"},
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Policies": [{
+          "PolicyName": "S3Access",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+              "Resource": "arn:aws:s3:::hellwatch-assets-bucket/*"
+            }]
+          }
+        }]
+      }
+    },
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Batch compute security group",
+        "VpcId": {"Ref": "VpcId"},
+        "SecurityGroupEgress": [{
+          "IpProtocol": "-1",
+          "CidrIp": "0.0.0.0/0"
+        }]
+      }
+    },
+    "ComputeEnvironment": {
+      "Type": "AWS::Batch::ComputeEnvironment",
+      "Properties": {
+        "ComputeEnvironmentName": "hellwatch-spot-compute",
+        "Type": "MANAGED",
+        "State": "ENABLED",
+        "ServiceRole": {"Fn::GetAtt": ["BatchServiceRole", "Arn"]},
+        "ComputeResources": {
+          "Type": "EC2",
+          "MinvCpus": 0,
+          "MaxvCpus": 100,
+          "DesiredvCpus": 0,
+          "InstanceTypes": ["c5.large", "c5.xlarge"],
+          "BidPercentage": 50,
+          "Subnets": {"Ref": "SubnetIds"},
+          "SecurityGroupIds": [{"Ref": "SecurityGroup"}],
+          "InstanceRole": {"Fn::GetAtt": ["InstanceProfile", "Arn"]}
+        }
+      }
+    },
+    "JobQueue": {
+      "Type": "AWS::Batch::JobQueue",
+      "Properties": {
+        "JobQueueName": "hellwatch-transcoding-queue",
+        "State": "ENABLED",
+        "Priority": 1,
+        "ComputeEnvironmentOrder": [{
+          "Order": 1,
+          "ComputeEnvironment": {"Ref": "ComputeEnvironment"}
+        }]
+      }
+    },
+    "JobDefinition": {
+      "Type": "AWS::Batch::JobDefinition",
+      "Properties": {
+        "JobDefinitionName": "hellwatch-ffmpeg-job",
+        "Type": "container",
+        "ContainerProperties": {
+          "Image": "node:18-alpine",
+          "Vcpus": 2,
+          "Memory": 4096,
+          "JobRoleArn": {"Fn::GetAtt": ["JobRole", "Arn"]},
+          "Command": [
+            "sh",
+            "-c",
+            "apk add --no-cache ffmpeg aws-cli && echo 'Setup complete' && sleep 60"
+          ],
+          "Environment": [
+            {"Name": "AWS_DEFAULT_REGION", "Value": "us-east-1"}
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "JobQueue": {
+      "Description": "Batch Job Queue Name",
+      "Value": {"Ref": "JobQueue"}
+    },
+    "JobDefinition": {
+      "Description": "Batch Job Definition Name", 
+      "Value": {"Ref": "JobDefinition"}
+    },
+    "ComputeEnvironment": {
+      "Description": "Batch Compute Environment Name",
+      "Value": {"Ref": "ComputeEnvironment"}
+    }
+  }
+}

@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+# Install FFmpeg and AWS CLI
+RUN apk add --no-cache \
+    ffmpeg \
+    aws-cli
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --only=production
+
+# Copy transcoding script
+COPY transcode.js ./
+
+# Run transcoding script
+CMD ["node", "transcode.js"]

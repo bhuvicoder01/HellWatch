@@ -12,6 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-batch": "^3.974.0",
+    "@aws-sdk/client-mediaconvert": "^3.974.0",
     "@aws-sdk/client-s3": "^3.956.0",
     "@aws-sdk/s3-request-presigner": "^3.956.0",
     "@smithy/node-http-handler": "^4.4.7",

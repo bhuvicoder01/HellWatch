@@ -1,0 +1,9 @@
+{
+  "name": "hellwatch-transcoder",
+  "version": "1.0.0",
+  "description": "FFmpeg transcoding service for HellWatch",
+  "main": "transcode.js",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.956.0"
+  }
+}
