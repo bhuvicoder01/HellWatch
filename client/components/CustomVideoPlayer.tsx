@@ -176,7 +176,7 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     setViewTracked(false)
     video.play()
     setIsPlaying(true)
-    // showControlsTemporarily()
+    showControlsTemporarily()
     if (autoQuality) adaptQuality();
   },[videoId])
 
