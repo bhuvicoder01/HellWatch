@@ -15,6 +15,8 @@ import {
   faHouseChimneyWindow,
   faMinimize,
   faMaximize,
+  faCog,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 import { faHome, faVideo, faMusic } from "@fortawesome/free-solid-svg-icons";
@@ -39,6 +41,11 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [quality, setQuality] = useState('low');
+  const [autoQuality, setAutoQuality] = useState(true);
+  const [networkSpeed, setNetworkSpeed] = useState(0);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [bufferHealth, setBufferHealth] = useState(0);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -49,6 +56,36 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [viewTracked, setViewTracked] = useState(false)
   const {currentSong,setCurrentSong}=useSong()
   const { user, isAuthenticated } = useAuth()
+
+  const measureNetworkSpeed = async () => {
+    try {
+      const startTime = Date.now();
+      const response = await fetch(`${API_URL}/videos/stream/${videoId}?quality=low&test=1`, { method: 'HEAD' });
+      const endTime = Date.now();
+      const duration = (endTime - startTime) / 1000;
+      const speed = 1 / duration; // Simple speed metric
+      setNetworkSpeed(speed);
+      return speed;
+    } catch {
+      return 0;
+    }
+  };
+
+  const getOptimalQuality = (speed: number) => {
+    if (speed > 5) return 'original'; 
+    if (speed > 3) return 'high';
+    if (speed > 1.5) return 'medium';
+    return 'low';
+  };
+
+  const adaptQuality = async () => {
+    if (!autoQuality) return;
+    const speed = await measureNetworkSpeed();
+    const optimal = getOptimalQuality(speed);
+    if (optimal !== quality) {
+      changeQuality(optimal);
+    }
+  };
 
   const trackView = async (watchedPercentage: number) => {
     try {
@@ -97,19 +134,35 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
       // Track view when 10% watched
       const watchedPercentage = (video.currentTime / video.duration) * 100;
       if (watchedPercentage >= 10 && !viewTracked) {
-        // console.log(viewTracked)
         trackView(watchedPercentage);
         setViewTracked(true);
       }
     };
+
+    const handleWaiting = () => setIsBuffering(true);
+    const handleCanPlay = () => setIsBuffering(false);
     const updateDuration = () => setDuration(video.duration);
+    
+    const updateBufferHealth = () => {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const bufferAhead = bufferedEnd - video.currentTime;
+        setBufferHealth(bufferAhead);
+      }
+    };
     
     video.addEventListener('timeupdate', updateTime);
     video.addEventListener('loadedmetadata', updateDuration);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('progress', updateBufferHealth);
     
     return () => {
       video.removeEventListener('timeupdate', updateTime);
       video.removeEventListener('loadedmetadata', updateDuration);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('progress', updateBufferHealth);
     };
   }, [document.fullscreenElement, viewTracked]);
 
@@ -119,8 +172,30 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     setViewTracked(false)
     video.play()
     setIsPlaying(true)
-    showControlsTemporarily()
+    // showControlsTemporarily()
+    if (autoQuality) adaptQuality();
   },[videoId])
+
+  useEffect(() => {
+    if (!autoQuality) return;
+    
+    const timer = setTimeout(() => {
+      // Downgrade if buffering or low buffer health
+      if (isBuffering || bufferHealth < 5) {
+        if (quality === 'original') changeQualityAuto('high');
+        else if (quality === 'high') changeQualityAuto('medium');
+        else if (quality === 'medium') changeQualityAuto('low');
+      }
+      // Upgrade if good buffer health and not buffering
+      else if (bufferHealth > 15 && !isBuffering) {
+        if (quality === 'low') changeQualityAuto('medium');
+        else if (quality === 'medium') changeQualityAuto('high');
+        else if (quality === 'high') changeQualityAuto('original');
+      }
+    }, isBuffering ? 2000 : 5000);
+    
+    return () => clearTimeout(timer);
+  }, [isBuffering, bufferHealth, quality, autoQuality]);
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
@@ -214,6 +289,20 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     
     const currentTime = video.currentTime;
     setQuality(newQuality);
+    setAutoQuality(false); // Disable auto when manually changed
+    
+    setTimeout(() => {
+      video.currentTime = currentTime;
+      if (isPlaying) video.play();
+    }, 100);
+  };
+
+  const changeQualityAuto = (newQuality: string) => {
+    const video = videoRef.current;
+    if (!video || newQuality === quality) return;
+    
+    const currentTime = video.currentTime;
+    setQuality(newQuality);
     
     setTimeout(() => {
       video.currentTime = currentTime;
@@ -278,11 +367,11 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         // setShowControls(true)
         // setShowTitle(true) 
         // hideControlsAfterDelay();
-        showControlsTemporarily()
+        // showControlsTemporarily()
       }}
       onMouseLeave={() => {
-        setShowControls(false)
-        setShowTitle(false)
+        // setShowControls(false)
+        // setShowTitle(false)
 
       }}
       onTouchStart={handleTouchStart}
@@ -324,6 +413,91 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         }}>
           {title}
         </div>
+      )}
+      {showControls && showQualityMenu && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          background: 'rgba(0,0,0,0.9)',
+          borderRadius: '8px',
+          padding: '12px',
+          zIndex: 25,
+          minWidth: '150px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>Quality Settings</div>
+            <button
+              onClick={() => setShowQualityMenu(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '14px',
+                padding: '2px'
+              }}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '12px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={autoQuality}
+                onChange={(e) => {
+                  setAutoQuality(e.target.checked);
+                  if (e.target.checked) adaptQuality();
+                }}
+                style={{ marginRight: '6px' }}
+              />
+              Auto Quality
+            </label>
+          </div>
+          {['low', 'medium', 'high', 'original'].map((q) => (
+            <div key={q} style={{ marginBottom: '4px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="quality"
+                  value={q}
+                  checked={quality === q}
+                  onChange={() => changeQuality(q)}
+                  style={{ marginRight: '6px' }}
+                />
+                {q === 'low' ? '480p' : q === 'medium' ? '720p' : q === 'high' ? '1080p' : 'Original'}
+                {autoQuality && quality === q && ' (Auto)'}
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
+      {showControls && (
+        <button
+          onClick={() => setShowQualityMenu(!showQualityMenu)}
+          title="Quality Settings"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'rgba(0,0,0,0.6)',
+            border: 'none',
+            color: 'white',
+            fontSize: '16px',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '50%',
+            zIndex: 20,
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <FontAwesomeIcon icon={faCog} />
+        </button>
       )}
       {showControls && (
        <button
@@ -595,27 +769,6 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <select
-              value={quality}
-              onChange={(e) => changeQuality(e.target.value)}
-              title="Change Quality"
-              style={{
-                background: 'rgba(0,0,0,0.6)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '10px',
-                padding: '0px 0px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                outline: 'none',
-                minHeight: '32px'
-              }}
-            >
-              <option value="low">480p</option>
-              <option value="medium">720p</option>
-              <option value="high">1080p</option>
-              <option value="original">Original</option>
-            </select>
             
             <button
               aria-placeholder='Toogle screen'
