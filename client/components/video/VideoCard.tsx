@@ -106,14 +106,14 @@ export default function VideoCard({Key,mainVideo=false,showEdit, video, controls
                                 onError={() => setShowThumbnail(false)}
                             />
                         )}
-                        <video 
+                        {/* <video 
                             ref={videoRef}
                             style={{ display: showThumbnail ? 'none' : 'block' }}
                             muted
                             className="video-preview"
                         >
                             <source src={`${API_URL}/videos/stream/${videoData.id}`} type="video/mp4" />
-                        </video>
+                        </video> */}
                     </div>
                 </Link>
             )

@@ -197,9 +197,9 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     const handleOrientationChange = () => {
       if (window.innerWidth < 768 && window.orientation !== undefined) {
         if (Math.abs(window.orientation) === 90) {
-          const video = videoRef.current;
-          if (video && document.fullscreenElement === null) {
-            video.requestFullscreen();
+          const container = containerRef.current;
+          if (container && document.fullscreenElement === null) {
+            container.requestFullscreen();
             setIsFullscreen(true);
           }
         } else {
