@@ -9,6 +9,7 @@ const path = require('path')
 const upload = require('./upload')
 const videoModel = require('../models/Videos')
 const TranscodingService = require('./transcoding');
+const MediaConvertService = require('./mediaConvert');
 const audioModel = require('../models/Audio');
 const userModel = require('../models/User');
 
@@ -22,8 +23,8 @@ const s3 = new S3Client(
   {
     region:process.env.AWS_REGION,
     credentials: {
-      accessKeyId: process.env.accessKeyId,
-      secretAccessKey: process.env.secretAccessKey
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY 
     },
     maxAttempts: 3,
     requestHandler: new NodeHttpHandler(
@@ -265,7 +266,7 @@ const getPresignedUrls = async (req, res) => {
 
 const completeMultipartUpload = async (req, res) => {
   try {
-    const { key, uploadId, parts } = req.body;
+    const { key, uploadId, parts, title } = req.body;
 
     const command = new CompleteMultipartUploadCommand({
       Bucket: process.env.AWS_BUCKET,
@@ -280,6 +281,35 @@ const completeMultipartUpload = async (req, res) => {
     });
 
     const result = await s3.send(command);
+    
+    // Create video record and start MediaConvert transcoding
+    if (title) {
+      const owner = await userModel.findById(req.user._id);
+      const video = await videoModel.create({ 
+        key, 
+        title, 
+        'owner.id': req.user._id, 
+        'owner.username': owner?.username, 
+        'owner.pic': owner?.avatar?.url, 
+        'owner.email': owner?.email 
+      });
+
+      // Start MediaConvert transcoding
+      setTimeout(async () => {
+        try {
+          const transcodingResult = await MediaConvertService.createTranscodingJob(video.key, video._id);
+          video.transcodingJobId = transcodingResult.job.Id;
+          video.transcodingStatus = 'SUBMITTED';
+          video.qualities = new Map(Object.entries(transcodingResult.qualities));
+          await video.save();
+          console.log(`MediaConvert job submitted for video ${video._id}`);
+        } catch (error) {
+          console.error('MediaConvert job submission failed:', error);
+          video.transcodingStatus = 'ERROR';
+          await video.save();
+        }
+      }, 2000);
+    }
     
     res.json({
       location: result.Location,
@@ -443,56 +473,24 @@ const completeVideoUpload = async (req, res) => {
       { new: true }
     );
 
-    // Start transcoding in background
+    // Start MediaConvert transcoding in background
     if (video) {
       setTimeout(async () => {
         try {
-          const tempDir = path.join(__dirname, '../temp');
-          const tempPath = path.join(tempDir, `${video._id}_original.mp4`);
-
-          // Ensure temp directory exists
-          if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-          }
-
-          const getCommand = new GetObjectCommand({
-            Bucket: process.env.AWS_BUCKET,
-            Key: video.key
-          });
-          const data = await s3.send(getCommand);
-
-          // Check if S3 response has Body
-          if (!data.Body) {
-            throw new Error('No data received from S3');
-          }
-
-          const writeStream = fs.createWriteStream(tempPath);
-
-          await new Promise((resolve, reject) => {
-            data.Body.pipe(writeStream);
-            writeStream.on('finish', resolve);
-            writeStream.on('error', reject);
-          });
-
-          // Verify file was created successfully
-          if (!fs.existsSync(tempPath)) {
-            throw new Error(`Failed to create temp file: ${tempPath}`);
-          }
-
-          const qualities = await TranscodingService.transcodeVideo(tempPath, video._id);
-          const autoThumbnail = await TranscodingService.generateThumbnail(tempPath, video._id);
-
-          video.qualities = new Map(Object.entries(qualities));
-          if (!video.thumbnail) video.thumbnail = autoThumbnail;
+          // Start MediaConvert job (includes thumbnail generation)
+          const result = await MediaConvertService.createTranscodingJob(video.key, video._id);
+          
+          // Update video with job info and quality paths
+          video.transcodingJobId = result.job.Id;
+          video.transcodingStatus = 'SUBMITTED';
+          video.qualities = new Map(Object.entries(result.qualities));
           await video.save();
-
-          if (fs.existsSync(tempPath)) {
-            fs.unlinkSync(tempPath);
-          }
-
-          console.log(`Transcoding completed for video ${video._id}`);
+          
+          console.log(`MediaConvert job submitted for video ${video._id}`);
         } catch (error) {
-          console.error('Transcoding failed:', error);
+          console.error('MediaConvert job submission failed:', error);
+          video.transcodingStatus = 'ERROR';
+          await video.save();
         }
       }, 2000);
     }

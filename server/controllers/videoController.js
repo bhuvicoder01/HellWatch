@@ -3,6 +3,7 @@ const { listenerCount } = require("../models/User");
 const Video = require("../models/Videos");
 const S3= require("../services/s3");
 const TranscodingService = require("../services/transcoding");
+const MediaConvertService = require("../services/mediaConvert");
 const { S3Client, GetObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3=S3.s3
@@ -86,6 +87,7 @@ class videoController {
       key = videoDoc.qualities.get(quality);
     }
 
+    console.log(key)
     const range = req.headers.range;
     if (!range) {
       return res.status(416).send("Requires Range header");
@@ -134,6 +136,13 @@ static async deleteVideo(req, res) {
       Bucket: BUCKET,
       Key: video.key
     }));
+
+    for (const qualityKey of video.qualities ? video.qualities.values() : []) {
+      await s3.send(new DeleteObjectCommand({
+        Bucket: BUCKET,
+        Key: qualityKey
+      }));
+    }
 
     // Delete thumbnail from S3 if exists
     if (video.thumbnail) {
@@ -194,28 +203,67 @@ static async addQuality(req, res) {
 
 static async transcodeVideo(req, res) {
   try {
-    const { videoPath, videoId } = req.body;
+    const { inputKey, videoId } = req.body;
     
-    // Start transcoding process
-    const qualities = await TranscodingService.transcodeVideo(videoPath, videoId);
-    const thumbnail = await TranscodingService.generateThumbnail(videoPath, videoId);
+    // Start MediaConvert transcoding job (includes thumbnail)
+    const result = await MediaConvertService.createTranscodingJob(inputKey, videoId);
     
-    // Update video document with quality versions
+    // Update video document with job info
     const video = await Video.findById(videoId);
     if (!video) return res.sendStatus(404);
     
-    video.qualities = new Map(Object.entries(qualities));
-    video.thumbnail = thumbnail;
+    video.transcodingJobId = result.job.Id;
+    video.transcodingStatus = 'SUBMITTED';
+    video.qualities = new Map(Object.entries(result.qualities));
     await video.save();
     
     res.json({ 
-      message: 'Transcoding completed', 
-      qualities: Object.fromEntries(video.qualities),
+      message: 'Transcoding job submitted', 
+      jobId: result.job.Id,
+      status: 'SUBMITTED',
+      qualities: result.qualities
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Transcoding job failed' });
+  }
+}
+
+static async getTranscodingStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const video = await Video.findById(id);
+    if (!video || !video.transcodingJobId) {
+      return res.sendStatus(404);
+    }
+    
+    const job = await MediaConvertService.getJobStatus(video.transcodingJobId);
+    
+    if (job.Status === 'COMPLETE') {
+      // Update video with transcoded file paths
+      const qualities = {
+        low: `videos/${id}/${video.key.split('/').pop().replace('.mp4', '_480p.mp4')}`,
+        medium: `videos/${id}/${video.key.split('/').pop().replace('.mp4', '_720p.mp4')}`,
+        high: `videos/${id}/${video.key.split('/').pop().replace('.mp4', '_1080p.mp4')}`
+      };
+      
+      video.qualities = new Map(Object.entries(qualities));
+      video.transcodingStatus = 'COMPLETE';
+      await video.save();
+    } else if (job.Status === 'ERROR') {
+      video.transcodingStatus = 'ERROR';
+      await video.save();
+    }
+    
+    res.json({
+      status: job.Status,
+      progress: job.JobPercentComplete || 0,
+      qualities: video.qualities ? Object.fromEntries(video.qualities) : {},
       thumbnail: video.thumbnail
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Transcoding failed' });
+    res.status(500).json({ error: 'Failed to get transcoding status' });
   }
 }
 
