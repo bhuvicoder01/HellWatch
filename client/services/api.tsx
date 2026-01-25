@@ -97,10 +97,3 @@ export const publicAPI={
   getUser: async(id:any)=>api.get(`/public/user?id=${id}`),
   getUserVideos:async(id:any)=>api.get(`/public/user/videos?id=${id}`)
 }
-
-export const videoAPI = {
-  transcodeVideo: async (data: { inputKey: string; videoId: string }) => 
-    api.post('/videos/transcode', data),
-  getTranscodingStatus: async (videoId: string) => 
-    api.get(`/videos/${videoId}/transcode-status`)
-}
