@@ -121,7 +121,7 @@ const server = app.listen(PORT, () => {
   MongoDB.connect(process.env.MONGODB_URI);
 });
 
-server.setMaxListeners(10000);
+server.setMaxListeners(100000);
 
 // WebSocket server for upload progress
 const wss = new WebSocketServer({ server });

@@ -22,8 +22,8 @@ const s3 = new S3Client(
   {
     region:process.env.AWS_REGION,
     credentials: {
-      accessKeyId: process.env.accessKeyId,
-      secretAccessKey: process.env.secretAccessKey
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     },
     maxAttempts: 3,
     requestHandler: new NodeHttpHandler(

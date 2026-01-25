@@ -40,7 +40,13 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [quality, setQuality] = useState('high');
+  const [quality, setQuality] = useState('original');
+  const [autoQuality, setAutoQuality] = useState(true);
+  const [networkSpeed, setNetworkSpeed] = useState(0);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [bufferHealth, setBufferHealth] = useState(0);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [qualityChanging, setQualityChanging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -134,14 +140,33 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
       }
     };
 
+    const handleWaiting = () => setIsBuffering(true);
+    const handleCanPlay = () => {
+      setIsBuffering(false);
+      setQualityChanging(false);
+    };
     const updateDuration = () => setDuration(video.duration);
+    
+    const updateBufferHealth = () => {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const bufferAhead = bufferedEnd - video.currentTime;
+        setBufferHealth(bufferAhead);
+      }
+    };
     
     video.addEventListener('timeupdate', updateTime);
     video.addEventListener('loadedmetadata', updateDuration);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('progress', updateBufferHealth);
     
     return () => {
       video.removeEventListener('timeupdate', updateTime);
       video.removeEventListener('loadedmetadata', updateDuration);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('progress', updateBufferHealth);
     };
   }, [document.fullscreenElement, viewTracked]);
 
@@ -152,7 +177,29 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     video.play()
     setIsPlaying(true)
     showControlsTemporarily()
+    if (autoQuality) adaptQuality();
   },[videoId])
+
+  useEffect(() => {
+    if (!autoQuality || qualityChanging) return;
+    
+    const timer = setTimeout(() => {
+      // Downgrade if buffering or low buffer health
+      if (isBuffering || bufferHealth < 5) {
+        if (quality === 'original') changeQualityAuto('high');
+        else if (quality === 'high') changeQualityAuto('medium');
+        else if (quality === 'medium') changeQualityAuto('low');
+      }
+      // Upgrade if good buffer health and not buffering
+      else if (bufferHealth > 10 && !isBuffering) {
+        if (quality === 'low') changeQualityAuto('medium');
+        else if (quality === 'medium') changeQualityAuto('high');
+        else if (quality === 'high') changeQualityAuto('original');
+      }
+    }, isBuffering ? 2000 : 5000);
+    
+    return () => clearTimeout(timer);
+  }, [isBuffering, bufferHealth, quality, autoQuality, qualityChanging]);
 
   const toggleFullscreen = () => {
     const container = containerRef.current;
@@ -167,33 +214,35 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     }
   };
 
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      if (window.innerWidth < 768 && window.orientation !== undefined) {
-        if (Math.abs(window.orientation) === 90) {
-          const container = containerRef.current;
-          if (container && document.fullscreenElement === null) {
-            container.requestFullscreen();
-            setIsFullscreen(true);
-          }
-        } else {
-          if (document.fullscreenElement !== null) {
-            document.exitFullscreen();
-            setIsFullscreen(false);
-          }
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const handleOrientationChange = () => {
+  //     if (window.innerWidth < 768 && window.orientation !== undefined) {
+  //       if (Math.abs(window.orientation) === 90) {
+  //         const container = containerRef.current;
+  //         if (container && document.fullscreenElement === null) {
+  //           container.requestFullscreen();
+  //           setIsFullscreen(true);
+  //         }
+  //       } else {
+  //         if (document.fullscreenElement !== null) {
+  //           document.exitFullscreen();
+  //           setIsFullscreen(false);
+  //         }
+  //       }
+  //     }
+  //   };
 
-    window.addEventListener('orientationchange', handleOrientationChange);
-    return () => window.removeEventListener('orientationchange', handleOrientationChange);
-  }, []);
+  //   window.addEventListener('orientationchange', handleOrientationChange);
+  //   return () => window.removeEventListener('orientationchange', handleOrientationChange);
+  // }, []);
 
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
     const timeout = setTimeout(() =>{
-      setShowControls(false)
-      setShowTitle(false)
+      if (!showQualityMenu) {
+        setShowControls(false)
+        setShowTitle(false)
+      }
     }, 3000);
     setControlsTimeout(timeout);
   };
@@ -202,7 +251,9 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     if (controlsTimeout) clearTimeout(controlsTimeout);
     setShowControls(true);
     setShowTitle(true)
-    hideControlsAfterDelay();
+    if (!showQualityMenu) {
+      hideControlsAfterDelay();
+    }
   };
 
   const togglePlay = () => {
@@ -282,6 +333,21 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     
     const currentTime = video.currentTime;
     setQuality(newQuality);
+    setAutoQuality(false); // Disable auto when manually changed
+    
+    setTimeout(() => {
+      video.currentTime = currentTime;
+      if (isPlaying) video.play();
+    }, 100);
+  };
+
+  const changeQualityAuto = (newQuality: string) => {
+    const video = videoRef.current;
+    if (!video || newQuality === quality) return;
+    
+    const currentTime = video.currentTime;
+    setQuality(newQuality);
+    setQualityChanging(true);
     
     setTimeout(() => {
       video.currentTime = currentTime;
@@ -357,31 +423,29 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         zIndex: isFullscreen ? 9999 : 'auto'
       }}
     >
-      {title && showTitle && (
+      {isBuffering ? (
         <div style={{
           position: 'absolute',
-          top: '16px',
-          left: '16px',
-          zIndex: 20,
-          background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.8))',
-          backdropFilter: 'blur(12px)',
-          padding: '10px 18px',
-          borderRadius: '12px',
-          color: '#ffffff',
-          fontSize: '16px',
-          fontWeight: '600',
-          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          maxWidth: '70%',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 15
         }}>
-          {title}
+          <video
+            autoPlay
+            loop
+            muted
+            style={{
+              width: '120px',
+              height: '120px',
+              objectFit: 'contain',
+              display: 'block'
+            }}
+          >
+            <source src="/CircleLoader.webm" type="video/webm" />
+          </video>
         </div>
-      )}
-      {showControls && (
+      ):(showControls && 
        <button
               onClick={togglePlay}
               title={isPlaying ? "Pause" : "Play"}
@@ -411,7 +475,118 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
               {/* {isPlaying ?<text style={{maxHeight:'40px',padding:'0',overflow:'hidden'}}>||</text> : '▶'} */}
               {isPlaying?<FontAwesomeIcon style={{color:'red'}} icon={faPause}/>:<FontAwesomeIcon style={{color:'red'}}  icon={faPlay}/>}
             </button>
+      )
+      }
+      {showControls && showQualityMenu && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          background: 'rgba(0,0,0,0.9)',
+          borderRadius: '8px',
+          padding: '12px',
+          zIndex: 25,
+          minWidth: '150px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>Quality Settings</div>
+            <button
+              onClick={() => setShowQualityMenu(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '14px',
+                padding: '2px'
+              }}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '12px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={autoQuality}
+                onChange={(e) => {
+                  setAutoQuality(e.target.checked);
+                  if (e.target.checked) adaptQuality();
+                }}
+                style={{ marginRight: '6px' }}
+              />
+              Auto Quality
+            </label>
+          </div>
+          {['low', 'medium', 'high', 'original'].map((q) => (
+            <div key={q} style={{ marginBottom: '4px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="quality"
+                  value={q}
+                  checked={quality === q}
+                  onChange={() => changeQuality(q)}
+                  style={{ marginRight: '6px' }}
+                />
+                {q === 'low' ? '480p' : q === 'medium' ? '720p' : q === 'high' ? '1080p' : 'Original'}
+                {autoQuality && quality === q && ' (Auto)'}
+              </label>
+            </div>
+          ))}
+        </div>
       )}
+      {showControls && (
+        <button
+          onClick={() => setShowQualityMenu(!showQualityMenu)}
+          title="Quality Settings"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'rgba(0,0,0,0.6)',
+            border: 'none',
+            color: 'white',
+            fontSize: '16px',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '50%',
+            zIndex: 20,
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <FontAwesomeIcon icon={faCog} />
+        </button>
+      )}
+      {title && showTitle && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '16px',
+          zIndex: 20,
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.8))',
+          backdropFilter: 'blur(12px)',
+          padding: '10px 18px',
+          borderRadius: '12px',
+          color: '#ffffff',
+          fontSize: '16px',
+          fontWeight: '600',
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          maxWidth: '70%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          {title}
+        </div>
+      )}
+      
       
       <video
         onDoubleClick={handleDoubleClick}
@@ -651,26 +826,6 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <select
-              value={quality}
-              onChange={(e) => changeQuality(e.target.value)}
-              title="Change Quality"
-              style={{
-                background: 'rgba(0,0,0,0.6)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '10px',
-                padding: '0px 0px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                outline: 'none',
-                minHeight: '32px'
-              }}
-            >
-              <option value="low">480p</option>
-              <option value="medium">720p</option>
-              <option value="high">1080p</option>
-            </select>
             
             <button
               aria-placeholder='Toogle screen'
