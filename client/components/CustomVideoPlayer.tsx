@@ -58,34 +58,40 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
   const {currentSong,setCurrentSong}=useSong()
   const { user, isAuthenticated } = useAuth()
 
-  const measureNetworkSpeed = async () => {
-    try {
-      const startTime = Date.now();
-      const response = await fetch(`${API_URL}/videos/stream/${videoId}?quality=low&test=1`, { method: 'HEAD' });
-      const endTime = Date.now();
-      const duration = (endTime - startTime) / 1000;
-      const speed = 1 / duration; // Simple speed metric
-      setNetworkSpeed(speed);
-      return speed;
-    } catch {
-      return 0;
+  const [downloadRate, setDownloadRate] = useState(0);
+  const [lastProgressTime, setLastProgressTime] = useState(0);
+  const [lastBytesLoaded, setLastBytesLoaded] = useState(0);
+
+  const measureDownloadRate = () => {
+    const video = videoRef.current;
+    if (!video || !video.buffered.length) return 0;
+    
+    const now = Date.now();
+    const bytesLoaded = video.buffered.end(0) * 1000000; // Rough estimate
+    
+    if (lastProgressTime && now - lastProgressTime > 1000) {
+      const timeDiff = (now - lastProgressTime) / 1000;
+      const bytesDiff = bytesLoaded - lastBytesLoaded;
+      const rate = bytesDiff / timeDiff / 1000000; // MB/s
+      setDownloadRate(rate);
+      setLastProgressTime(now);
+      setLastBytesLoaded(bytesLoaded);
+      return rate;
     }
+    
+    if (!lastProgressTime) {
+      setLastProgressTime(now);
+      setLastBytesLoaded(bytesLoaded);
+    }
+    
+    return downloadRate;
   };
 
-  const getOptimalQuality = (speed: number) => {
-    if (speed > 5) return 'original'; 
-    if (speed > 3) return 'high';
-    if (speed > 1.5) return 'medium';
+  const getOptimalQuality = (rate: number) => {
+    if (rate > 2.5) return 'original'; 
+    if (rate > 1.5) return 'high';
+    if (rate > 0.5) return 'medium';
     return 'low';
-  };
-
-  const adaptQuality = async () => {
-    if (!autoQuality) return;
-    const speed = await measureNetworkSpeed();
-    const optimal = getOptimalQuality(speed);
-    if (optimal !== quality) {
-      changeQuality(optimal);
-    }
   };
 
   const trackView = async (watchedPercentage: number) => {
@@ -152,6 +158,9 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
         const bufferAhead = bufferedEnd - video.currentTime;
         setBufferHealth(bufferAhead);
+        
+        // Measure download rate during progress updates
+        if (autoQuality) measureDownloadRate();
       }
     };
     
@@ -177,7 +186,9 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     video.play()
     setIsPlaying(true)
     showControlsTemporarily()
-    if (autoQuality) adaptQuality();
+    setAutoQuality(true);
+    setLastProgressTime(0);
+    setLastBytesLoaded(0);
   },[videoId])
 
   useEffect(() => {
@@ -191,10 +202,13 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         else if (quality === 'medium') changeQualityAuto('low');
       }
       // Upgrade if good buffer health and not buffering
-      else if (bufferHealth > 10 && !isBuffering) {
-        if (quality === 'low') changeQualityAuto('medium');
-        else if (quality === 'medium') changeQualityAuto('high');
-        else if (quality === 'high') changeQualityAuto('original');
+      else if (bufferHealth > 10 && !isBuffering && downloadRate > 0) {
+        const optimal = getOptimalQuality(downloadRate);
+        if (optimal !== quality) {
+          if (quality === 'low' && optimal !== 'low') changeQualityAuto('medium');
+          else if (quality === 'medium' && (optimal === 'high' || optimal === 'original')) changeQualityAuto('high');
+          else if (quality === 'high' && optimal === 'original') changeQualityAuto('original');
+        }
       }
     }, isBuffering ? 2000 : 5000);
     
@@ -511,7 +525,6 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
                 checked={autoQuality}
                 onChange={(e) => {
                   setAutoQuality(e.target.checked);
-                  if (e.target.checked) adaptQuality();
                 }}
                 style={{ marginRight: '6px' }}
               />

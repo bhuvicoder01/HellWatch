@@ -40,7 +40,7 @@ function VideoDetailsContent() {
     } else {
       document.title = 'HellWatch';
     }
-  }, [video]);
+  }, [id]);
     
     useEffect(() => {
         if (id) {
@@ -76,7 +76,7 @@ function VideoDetailsContent() {
                 setDisliked(false);
             }
         }
-    },[video])
+    },[video?.popularity])
 
     const getVideoData = async (id: string) => {
         try {
@@ -93,7 +93,7 @@ function VideoDetailsContent() {
         const handleDelete = async () => {
         if (confirm('Are you sure you want to delete this video?')) {
             try {
-                await api.delete(`/videos/${video.id}`);
+                await api.delete(`/videos/${id}`);
                 refreshVideos();
             } catch (error) {
                 console.error('Error deleting video:', error);

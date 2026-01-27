@@ -12,7 +12,7 @@ const app = express();
 app.use(cookieParser());
 app.use(cors({
   origin:['https://hell-watch.vercel.app','http://localhost:3000','https://hellwatch-ping-service.onrender.com'],
-  methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE',], // Explicitly allow methods
+  methods: ['GET','HEAD', 'POST','PATCH', 'PUT', 'DELETE',], // Explicitly allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   credentials: true,
   optionsSuccessStatus: 200,
