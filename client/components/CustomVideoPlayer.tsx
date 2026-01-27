@@ -228,28 +228,6 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
     }
   };
 
-  // useEffect(() => {
-  //   const handleOrientationChange = () => {
-  //     if (window.innerWidth < 768 && window.orientation !== undefined) {
-  //       if (Math.abs(window.orientation) === 90) {
-  //         const container = containerRef.current;
-  //         if (container && document.fullscreenElement === null) {
-  //           container.requestFullscreen();
-  //           setIsFullscreen(true);
-  //         }
-  //       } else {
-  //         if (document.fullscreenElement !== null) {
-  //           document.exitFullscreen();
-  //           setIsFullscreen(false);
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   window.addEventListener('orientationchange', handleOrientationChange);
-  //   return () => window.removeEventListener('orientationchange', handleOrientationChange);
-  // }, []);
-
   const hideControlsAfterDelay = () => {
     if (controlsTimeout) clearTimeout(controlsTimeout);
     const timeout = setTimeout(() =>{
