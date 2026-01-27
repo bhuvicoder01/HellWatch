@@ -257,12 +257,17 @@ export default function CustomVideoPlayer({ videoId, title,getVideoData=()=>{} }
         setShowControls(false)
         setShowTitle(false)
       }
-    }, 3000);
+    }, 4000);
     setControlsTimeout(timeout);
   };
 
   const showControlsTemporarily = () => {
-    if (controlsTimeout) clearTimeout(controlsTimeout);
+    if(showQualityMenu){
+      setShowControls(true)
+      setShowTitle(true)
+      return
+    }
+    // if (controlsTimeout) clearTimeout(controlsTimeout);
     setShowControls(true);
     setShowTitle(true)
     if (!showQualityMenu) {
