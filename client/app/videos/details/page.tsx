@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDeleteLeft, faEdit, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { navigate } from "next/dist/client/components/segment-cache/navigation";
 
 function VideoDetailsContent() {
     const {Videos}=useVideo()
@@ -25,9 +26,6 @@ function VideoDetailsContent() {
     const {currentSong,setCurrentSong}=useSong()
     const [liked, setLiked] = useState(false);
     const [disliked, setDisliked] = useState(false);
-
-
-    
     const id=useSearchParams().get('id')||'';
     
     useMemo(() => {
@@ -40,10 +38,22 @@ function VideoDetailsContent() {
     } else {
       document.title = 'HellWatch';
     }
-  }, [id]);
-    
-    useEffect(() => {
-        if (id) {
+  }, [video]);
+
+  const getVideoData = async (id: string) => {
+        try {
+            const res=await api.get(`/videos/${id}`);
+            setVideo(res.data);
+            setEditTitle(res.data.title||res.data.key);
+        } catch (error) {
+            console.error('Error fetching video data:', error);
+            return null;
+        }
+    }
+
+useEffect(() => {
+     if (id) {
+        console.log('Fetching video data for ID:', id);
             getVideoData(id);
             setCurrentSong(null)
             if(typeof window!=='undefined'){
@@ -51,11 +61,15 @@ function VideoDetailsContent() {
                 localStorage.removeItem('currentTime')
             }
         }
+}, [id]);
+    
+    useEffect(() => {
+       
         const handleResize = () => setWindowWidth(window.innerWidth);
         setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [id]);
+    }, []);
 
      useEffect(()=>{
         if(video?.popularity){
@@ -78,22 +92,14 @@ function VideoDetailsContent() {
         }
     },[video?.popularity])
 
-    const getVideoData = async (id: string) => {
-        try {
-            const res=await api.get(`/videos/${id}`);
-            setVideo(res.data);
-            setEditTitle(res.data.title||res.data.key);
-        } catch (error) {
-            console.error('Error fetching video data:', error);
-            return null;
-        }
-    }
+    
     
         const handleDelete = async () => {
         if (confirm('Are you sure you want to delete this video?')) {
             try {
                 await api.delete(`/videos/${id}`);
                 refreshVideos();
+                
             } catch (error) {
                 console.error('Error deleting video:', error);
             }
@@ -133,7 +139,7 @@ function VideoDetailsContent() {
     return (<>
         <div className="d-flex flex-column flex-lg-row mb-5" style={{gap: '20px'}}>
             <div className="flex-grow-1">
-                <CustomVideoPlayer videoId={id} title={video.title} getVideoData={getVideoData} />
+                <CustomVideoPlayer videoId={video.id} title={video.title} />
                 <div className="mt-3">
                     {showEdit&&video?.owner?.id===user?._id && (
                         <div className="edit-controls">
