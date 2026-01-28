@@ -83,7 +83,6 @@ function VideoDetailsContent() {
             const res=await api.get(`/videos/${id}`);
             setVideo(res.data);
             setEditTitle(res.data.title||res.data.key);
-            return res.data;
         } catch (error) {
             console.error('Error fetching video data:', error);
             return null;
@@ -166,8 +165,8 @@ function VideoDetailsContent() {
                     <div className="d-flex" style={{flexDirection:'column',alignItems:'left'}}>
                     <div className="views-count">{video?.stats?.views}<span> views</span></div>
                     <div className="d-flex" style={{flexDirection:'row',alignItems:'center'}}>
-                        <button title="like" onClick={(e)=>{e.currentTarget.blur();handleAction('liked')}} onTouchEndCapture={(e)=>{e.currentTarget.blur();handleAction('liked')}} className={`action-btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
-                        <button title="dislike " onClick={(e)=>{e.currentTarget.blur();handleAction('disliked')}} onTouchEndCapture={(e)=>{e.currentTarget.blur();handleAction('disliked')}} className={`action-btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
+                        <button title="like" onClick={(e)=>{e.currentTarget.blur();handleAction('liked')}} className={`action-btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
+                        <button title="dislike " onClick={(e)=>{e.currentTarget.blur();handleAction('disliked')}} className={`action-btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
                     </div>
                     </div>
                         {/* <h3 className="title">{video.key}</h3> */}
