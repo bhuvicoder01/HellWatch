@@ -1,12 +1,11 @@
 # 🚀 HellWatch Streaming Platform
 
-A full-stack video and audio streaming platform built with Next.js and Express.js, featuring video transcoding, Apple Music integration, and cloud storage.
+A full-stack video and audio streaming platform built with Next.js and Express.js, featuring video transcoding, and cloud storage.
 
 ## ✨ Features
 
 - **Video Streaming**: Upload, transcode, and stream videos with multiple quality options
 - **Audio Streaming**: Upload and stream audio files with metadata support
-- **Apple Music Integration**: Search and discover music through Apple Music API
 - **User Authentication**: Secure JWT-based authentication system
 - **Cloud Storage**: AWS S3 integration for scalable media storage
 - **Video Transcoding**: Automatic video processing with FFmpeg
@@ -36,7 +35,6 @@ A full-stack video and audio streaming platform built with Next.js and Express.j
 - MongoDB database
 - AWS S3 bucket and credentials
 - FFmpeg installed on system
-- Apple Music API credentials (optional)
 
 ## 🚀 Installation
 
@@ -72,10 +70,6 @@ AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=your_aws_region
 S3_BUCKET_NAME=your_s3_bucket_name
 
-# Apple Music API (Optional)
-APPLE_TEAM_ID=your_apple_team_id
-APPLE_KEY_ID=your_apple_key_id
-APPLE_PRIVATE_KEY=your_apple_private_key
 ```
 
 **Client (.env.local):**
@@ -158,9 +152,6 @@ HellWatch/
 - `POST /songs/upload` - Upload audio
 - `GET /songs/stream/:id` - Stream audio
 
-### Apple Music
-- `GET /apple-music/search` - Search Apple Music
-- `GET /apple-music/token` - Get developer token
 
 ## 🎯 Key Features Explained
 
@@ -200,6 +191,7 @@ This project is licensed under the ISC License.
 **FFmpeg not found:**
 - Install FFmpeg on your system
 - Ensure it's added to your system PATH
+- currently searching and optimizing for cheaper encoding sources
 
 **MongoDB connection issues:**
 - Verify MongoDB is running
