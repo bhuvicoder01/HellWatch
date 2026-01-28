@@ -133,7 +133,7 @@ function VideoDetailsContent() {
     return (<>
         <div className="d-flex flex-column flex-lg-row mb-5" style={{gap: '20px'}}>
             <div className="flex-grow-1">
-                <CustomVideoPlayer videoId={video.id} title={video.title} getVideoData={getVideoData} />
+                <CustomVideoPlayer videoId={id} title={video.title} getVideoData={getVideoData} />
                 <div className="mt-3">
                     {showEdit&&video?.owner?.id===user?._id && (
                         <div className="edit-controls">
