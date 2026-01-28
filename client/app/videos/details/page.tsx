@@ -53,7 +53,7 @@ function VideoDetailsContent() {
 
 useEffect(() => {
      if (id) {
-        console.log('Fetching video data for ID:', id);
+        // console.log('Fetching video data for ID:', id);
             getVideoData(id);
             setCurrentSong(null)
             if(typeof window!=='undefined'){
