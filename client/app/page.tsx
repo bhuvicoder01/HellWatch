@@ -155,7 +155,7 @@ export default function Home() {
 
   return (
     <main className=" bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-12 overflow-x-scroll">
+      <div className="container mx-auto px-4 py-12" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-6xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent mb-4">
