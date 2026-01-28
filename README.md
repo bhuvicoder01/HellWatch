@@ -204,5 +204,5 @@ This project is licensed under the ISC License.
 - Ensure correct region configuration
 
 ## 📞 Support
-
+- cebhuvneshsingh@gmail.com
 For support and questions, please open an issue in the repository.
