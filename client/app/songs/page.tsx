@@ -4,14 +4,22 @@ import VideoCard from "@/components/video/VideoCard"
 import { useSong } from "@/contexts/MediaContext"
 import { api } from "@/services/api"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export default function SongsPage() {
-const {Songs,refreshSongs}=useSong()
+const {Songs,refreshSongs,setCurrentSong}=useSong()
+const id=useSearchParams().get('play')
 
     useEffect(()=>{
+        if(id){
+            const song=Songs?.find((s: any)=>s._id===id||s.id===id)
+            if(song){
+                setCurrentSong(song)
+            }
+        }
 refreshSongs()
-    },[])
+    },[id])
     
 
     return(<>

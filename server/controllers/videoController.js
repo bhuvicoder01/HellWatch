@@ -17,6 +17,7 @@ class videoController {
           id: v._id,
           owner: v?.owner,
           title: v?.title,
+          stats:v?.stats,
           key: v.key,
           thumbnail: v.thumbnail,
           qualities: Object.fromEntries(v.qualities || new Map()),

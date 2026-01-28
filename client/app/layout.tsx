@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google';
 import { SongProvider, VideoProvider } from '@/contexts/MediaContext';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { Suspense } from 'react';
 
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <Suspense fallback={<div>Loading...</div>}>
         <AuthProvider>
         <VideoProvider>
           <SongProvider>
@@ -35,6 +37,7 @@ export default function RootLayout({
         </SongProvider>
         </VideoProvider>
         </AuthProvider>
+        </Suspense>
         </body>
     </html>
   );

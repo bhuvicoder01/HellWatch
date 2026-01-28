@@ -10,7 +10,7 @@ import VideosPage from "../page";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import { faDeleteLeft, faEdit, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 function VideoDetailsContent() {
     const {Videos}=useVideo()
@@ -139,10 +139,10 @@ function VideoDetailsContent() {
                     {showEdit&&video?.owner?.id===user?._id && (
                         <div className="edit-controls">
                             <button onClick={() => setIsEditing(!isEditing)} className="edit-btn">
-                                ✏️
+                                <FontAwesomeIcon icon={isEditing ? faEdit : faEdit} /> {isEditing ? 'Editing' : 'Edit'}
                             </button>
                             <button onClick={handleDelete} className="delete-btn">
-                                🗑️
+                                <FontAwesomeIcon icon={faTrashCan} /> Delete
                             </button>
                         </div>
                     )}
@@ -166,8 +166,8 @@ function VideoDetailsContent() {
                     <div className="d-flex" style={{flexDirection:'column',alignItems:'left'}}>
                     <div className="views-count">{video?.stats?.views}<span> views</span></div>
                     <div className="d-flex" style={{flexDirection:'row',alignItems:'center'}}>
-                        <button title="like" onClick={(e)=>{e.currentTarget.blur();handleAction('liked')}} onTouchEnd={(e)=>{e.currentTarget.blur();handleAction('liked')}} className={`action-btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
-                        <button title="dislike " onClick={(e)=>{e.currentTarget.blur();handleAction('disliked')}} onTouchEnd={(e)=>{e.currentTarget.blur();handleAction('disliked')}} className={`action-btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
+                        <button title="like" onClick={(e)=>{e.currentTarget.blur();handleAction('liked')}} onTouchEndCapture={(e)=>{e.currentTarget.blur();handleAction('liked')}} className={`action-btn ${liked?'video-liked':''}`}><FontAwesomeIcon icon={faThumbsUp} /><span className="text-white">{video?.stats?.likes||0}</span></button>
+                        <button title="dislike " onClick={(e)=>{e.currentTarget.blur();handleAction('disliked')}} onTouchEndCapture={(e)=>{e.currentTarget.blur();handleAction('disliked')}} className={`action-btn ${disliked?'video-disliked':''}`}><FontAwesomeIcon icon={faThumbsDown}/><span className="text-white">{video?.stats?.dislikes||0}</span></button>
                     </div>
                     </div>
                         {/* <h3 className="title">{video.key}</h3> */}
