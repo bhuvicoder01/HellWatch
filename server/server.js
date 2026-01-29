@@ -124,23 +124,23 @@ const server = app.listen(PORT, () => {
 server.setMaxListeners(100000);
 
 // Cleanup function to remove listeners
-const cleanup = () => {
-  console.log('Cleaning up listeners...');
-  server.removeAllListeners();
-  if (global.wss) {
-    global.wss.clients.forEach(ws => ws.terminate());
-    global.wss.close();
-  }
-  process.exit(0);
-};
+// const cleanup = () => {
+//   console.log('Cleaning up listeners...');
+//   server.removeAllListeners();
+//   if (global.wss) {
+//     global.wss.clients.forEach(ws => ws.terminate());
+//     global.wss.close();
+//   }
+//   process.exit(0);
+// };
 
 // Handle process termination
-process.on('SIGTERM', cleanup);
-process.on('SIGINT', cleanup);
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  cleanup();
-});
+// process.on('SIGTERM', cleanup);
+// process.on('SIGINT', cleanup);
+// process.on('uncaughtException', (err) => {
+//   console.error('Uncaught Exception:', err);
+//   cleanup();
+// });
 
 // WebSocket server for upload progress
 const wss = new WebSocketServer({ server });
