@@ -29,6 +29,9 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
     const handleSongStart=async()=>{
         const foundSong = Songs.find((s:SongContextType) => s.id === song.id);
         if (foundSong) {
+            if(typeof window !=='undefined'){
+                localStorage.removeItem('currentTime')
+            }
             setCurrentSong(foundSong);
         }
         // console.log(currentSong)

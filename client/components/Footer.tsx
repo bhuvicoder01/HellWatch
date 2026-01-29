@@ -30,6 +30,7 @@ export default function Footer() {
   const thumbnailUrlRef = useRef<string | undefined>(undefined);
   const [isPageReloaded, setIsPageReloaded] = useState(true);
   const pathname = usePathname();
+  const bufferRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
 
   
   //fetch thumbnail early to render quick
@@ -54,15 +55,46 @@ export default function Footer() {
   useEffect(() => {
     if (currentSong) {
       document.title = `${currentSong.title} by ${currentSong.artist} | HellWatch`;
+      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+      if (favicon) {
+        favicon.href = thumbnail || '/favicon.ico';
+      }
     } else {
       document.title = 'HellWatch';
     }
   }, [currentSong]);
 
+  // Buffer adjacent songs
+  useEffect(() => {
+    if (!currentSong || Songs.length === 0) return;
+    
+    const currentIndex = Songs.findIndex((song: any) => song.id === currentSong.id);
+    const nextIndex = currentIndex + 1 < Songs.length ? currentIndex + 1 : 0;
+    const prevIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : Songs.length - 1;
+    
+    const bufferSong = (song: any) => {
+      if (!bufferRefs.current[song.id]) {
+        const audio = new Audio(`${API_URL}/songs/stream/${song.id}`);
+        audio.preload = 'auto';
+        audio.load();
+        bufferRefs.current[song.id] = audio;
+        console.log(`Buffering song: ${song.title} (${song.id})`);
+      }
+    };
+    
+    if (Songs[nextIndex]) bufferSong(Songs[nextIndex]);
+    if (Songs[prevIndex]) bufferSong(Songs[prevIndex]);
+  }, [currentSong, Songs]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (thumbnailUrlRef.current) URL.revokeObjectURL(thumbnailUrlRef.current);
+      Object.values(bufferRefs.current).forEach(audio => {
+        audio.pause();
+        audio.src = '';
+      });
+      bufferRefs.current = {};
     };
   }, []);
 
@@ -145,6 +177,9 @@ export default function Footer() {
 
   const skipToNext = () => {
     if (!currentSong) return;
+    if(typeof window !=='undefined'){
+      localStorage.removeItem('currentTime')
+    }
     const currentIndex = Songs.findIndex(
       (song: any) => song.id === currentSong.id
     );
@@ -154,6 +189,9 @@ export default function Footer() {
 
   const skipToPrevious = () => {
     if (!currentSong) return;
+    if(typeof window !=='undefined'){
+      localStorage.removeItem('currentTime')
+    }
     const currentIndex = Songs.findIndex(
       (song: any) => song.id === currentSong.id
     );
@@ -161,6 +199,28 @@ export default function Footer() {
       currentIndex - 1 >= 0 ? currentIndex - 1 : Songs.length - 1;
     setCurrentSong(Songs[prevIndex] as any);
   };
+
+  // Media Session API for external controls
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentSong) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist || 'Unknown Artist',
+        album: 'HellWatch',
+        artwork: thumbnail ? [{ src: thumbnail, sizes: '512x512', type: 'image/jpeg' }] : []
+      });
+
+      navigator.mediaSession.setActionHandler('play', togglePlay);
+      navigator.mediaSession.setActionHandler('pause', togglePlay);
+      navigator.mediaSession.setActionHandler('previoustrack', skipToPrevious);
+      navigator.mediaSession.setActionHandler('nexttrack', skipToNext);
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (audioRef.current && details.seekTime) {
+          audioRef.current.currentTime = details.seekTime;
+        }
+      });
+    }
+  }, [currentSong, thumbnail, isPlaying]);
 
   const isMainPage =
     ["/", "/videos", "/songs"].includes(pathname) ||
