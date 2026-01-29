@@ -88,9 +88,9 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
   };
 
   const getOptimalQuality = (rate: number) => {
-    if (rate > 2.5) return 'original'; 
-    if (rate > 1.5) return 'high';
-    if (rate > 0.5) return 'medium';
+    if (rate > 3) return 'original'; 
+    if (rate > 2) return 'high';
+    if (rate > 1) return 'medium';
     return 'low';
   };
 
@@ -111,7 +111,7 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
         body: JSON.stringify(payload)
       });
       // getVideoData(videoId);
-      
+
     } catch (error) {
       console.error('Error tracking view:', error);
     }
@@ -193,7 +193,7 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
   },[videoId])
 
   useEffect(() => {
-    if (!autoQuality || qualityChanging) return;
+    if (!autoQuality || qualityChanging||!isPlaying) return;
     
     const timer = setTimeout(() => {
       // Downgrade if buffering or low buffer health
