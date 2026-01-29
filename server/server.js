@@ -11,9 +11,9 @@ const { WebSocketServer } = require('ws');
 const app = express();
 app.use(cookieParser());
 app.use(cors({
-  origin:['https://hell-watch.vercel.app','http://localhost:3000','https://hellwatch-ping-service.onrender.com'],
-  methods: ['GET','HEAD', 'POST','PATCH', 'PUT', 'DELETE',], // Explicitly allow methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+  origin: true, // Allow all origins for mobile apps
+  methods: ['GET','HEAD', 'POST','PATCH', 'PUT', 'DELETE',],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200,
   preflightContinue:false
