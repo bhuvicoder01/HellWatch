@@ -78,7 +78,7 @@ export default function Footer() {
         audio.preload = 'auto';
         audio.load();
         bufferRefs.current[song.id] = audio;
-        console.log(`Buffering song: ${song.title} (${song.id})`);
+        // console.log(`Buffering song: ${song.title} (${song.id})`);
       }
     };
     
