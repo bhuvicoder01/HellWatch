@@ -87,22 +87,42 @@ class videoController {
       key = videoDoc.qualities.get(quality);
     }
 
-
-    const range = req.headers.range;
-    if (!range) {
-      return res.status(416).send("Requires Range header");
-    }
-
     // Get total size
     const headData = await s3.send(
       new HeadObjectCommand({ Bucket: BUCKET, Key: key })
     );
     const videoSize = headData.ContentLength;
 
+    const range = req.headers.range;
+    
+    if (!range) {
+      // If no range header, serve the entire file
+      res.writeHead(200, {
+        "Content-Length": videoSize,
+        "Content-Type": headData.ContentType || "video/mp4",
+        "Accept-Ranges": "bytes",
+        "X-Quality": quality
+      });
+      
+      const command = new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: key
+      });
+      
+      const data = await s3.send(command);
+      data.Body.pipe(res);
+      return;
+    }
 
-    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB
-    const start = Number(range.replace(/\D/g, ""));
-    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+    // Parse range header
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + (3 * 1024 * 1024), videoSize - 1);
+    
+    if (start >= videoSize || end >= videoSize) {
+      return res.status(416).send("Range Not Satisfiable");
+    }
+    
     const contentLength = end - start + 1;
 
     res.writeHead(206, {

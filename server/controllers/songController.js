@@ -63,29 +63,52 @@ class songController {
         key = audioDoc.qualities.get(quality);
       }
 
-      const range = req.headers.range;
-      if (!range) {
-        return res.status(416).send("Requires Range header");
-      }
-
       // Get total size
       const headData = await s3.send(
         new HeadObjectCommand({ Bucket: BUCKET, Key: key })
       );
       const audioSize = headData.ContentLength;
 
+      const range = req.headers.range;
+      
+      if (!range) {
+        // If no range header, serve the entire file
+        res.writeHead(200, {
+          "Content-Length": audioSize,
+          "Content-Type": headData.ContentType || "audio/mpeg",
+          "Accept-Ranges": "bytes",
+          "X-Quality": quality,
+          "Cache-Control": "public, max-age=3600"
+        });
+        
+        const command = new GetObjectCommand({
+          Bucket: BUCKET,
+          Key: key
+        });
+        
+        const data = await s3.send(command);
+        data.Body.pipe(res);
+        return;
+      }
 
-      const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB
-      const start = Number(range.replace(/\D/g, ""));
-      const end = Math.min(start + CHUNK_SIZE, audioSize - 1);
+      // Parse range header
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + (1 * 1024 * 1024), audioSize - 1);
+      
+      if (start >= audioSize || end >= audioSize) {
+        return res.status(416).send("Range Not Satisfiable");
+      }
+      
       const contentLength = end - start + 1;
 
       res.writeHead(206, {
         "Content-Range": `bytes ${start}-${end}/${audioSize}`,
         "Accept-Ranges": "bytes",
         "Content-Length": contentLength,
-        "Content-Type": headData.ContentType || "audio/mp3",
-        "X-Quality": quality
+        "Content-Type": headData.ContentType || "audio/mpeg",
+        "X-Quality": quality,
+        "Cache-Control": "public, max-age=3600"
       });
 
       const command = new GetObjectCommand({
