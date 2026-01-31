@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/proxy-image', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { url } = req.query;
     if (!url) return res.status(400).send('URL required');
