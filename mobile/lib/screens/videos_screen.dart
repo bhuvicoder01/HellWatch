@@ -23,15 +23,19 @@ class _VideosScreenState extends State<VideosScreen> {
   Future<void> _loadVideos() async {
     try {
       final loadedVideos = await ApiService.getVideos();
-      setState(() {
-        videos = loadedVideos;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          videos = loadedVideos;
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading videos: $e')),
-      );
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading videos: $e')),
+        );
+      }
     }
   }
 
@@ -63,7 +67,7 @@ class _VideosScreenState extends State<VideosScreen> {
               style: const TextStyle(color: Colors.white),
             ),
             subtitle: Text(
-              '${video.views} views',
+              '${video.views} views \n Uploaded on ${video.uploadDate.toIso8601String().split('T').first}',
               style: const TextStyle(color: Colors.grey),
             ),
             onTap: () => _playVideo(video),
@@ -92,8 +96,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _controller = VideoPlayerController.networkUrl(
       Uri.parse(ApiService.getVideoStreamUrl(widget.video.id)),
     )..initialize().then((_) {
-        setState(() {});
-        _controller.play();
+        if (mounted) {
+          setState(() {});
+          _controller.play();
+        }
       });
   }
 
@@ -124,11 +130,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
                 ),
                 onPressed: () {
-                  setState(() {
-                    _controller.value.isPlaying
-                        ? _controller.pause()
-                        : _controller.play();
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _controller.value.isPlaying
+                          ? _controller.pause()
+                          : _controller.play();
+                    });
+                  }
                 },
               ),
             ],

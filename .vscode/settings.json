@@ -1,0 +1,5 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "cmake.sourceDirectory": "D:/documents/HellWatch/mobile/windows",
+    "cmake.ignoreCMakeListsMissing": true
+}

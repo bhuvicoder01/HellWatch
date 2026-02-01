@@ -16,16 +16,16 @@ class Video {
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
-    print('Video JSON: $json');
+    // print('Video JSON: $json');
     final id = (json['id'] ?? json['_id'] ?? '').toString();
-    print('Parsed video ID: "$id" (length: ${id.length})');
+    // print('Parsed video ID: "$id" (length: ${id.length})');
     return Video(
       id: id,
       title: (json['title'] ?? 'Untitled').toString(),
       description: (json['description'] ?? '').toString(),
       filename: (json['filename'] ?? '').toString(),
-      views: json['stats.views'] ?? 0,
-      uploadDate: json['uploadDate'] != null ? DateTime.parse(json['uploadDate'].toString()) : DateTime.now(),
+      views: json['stats']?['views'] ?? 0,
+      uploadDate: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
     );
   }
 }

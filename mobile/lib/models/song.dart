@@ -14,9 +14,9 @@ class Song {
   });
 
   factory Song.fromJson(Map<String, dynamic> json) {
-    print('Song JSON: $json');
+    // print('Song JSON: $json');
     final id = (json['id'] ?? json['_id'] ?? '').toString();
-    print('Parsed song ID: "$id" (length: ${id.length})');
+    // print('Parsed song ID: "$id" (length: ${id.length})');
     return Song(
       id: id,
       title: (json['title'] ?? 'Untitled').toString(),

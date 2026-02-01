@@ -56,7 +56,7 @@ app.get('/health', (req, res) => {
 app.use('/songs', require('./routes/audios'));
 app.use('/videos', videoRoutes);
 app.use('/auth', require('./routes/auth'));
-app.use('/proxy-image', require('./routes/proxy'));
+app.use('/', require('./routes/proxy'));
 app.use('/public', require('./routes/public'));
 
 // Apple Music search route

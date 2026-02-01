@@ -7,17 +7,17 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiService {
   static String get baseUrl {
-    if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+     if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
       return 'https://hellwatch-ffus.onrender.com';
     }
     return 'http://localhost:5000';
   }
   
   static Future<List<Video>> getVideos() async {
-    print('Fetching videos from: $baseUrl/videos');
+    // print('Fetching videos from: $baseUrl/videos');
     final response = await http.get(Uri.parse('$baseUrl/videos'));
-    print('Videos response status: ${response.statusCode}');
-    print('Videos response body: ${response.body}');
+    // print('Videos response status: ${response.statusCode}');
+    // print('Videos response body: ${response.body}');
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => Video.fromJson(json)).toList();
@@ -26,10 +26,10 @@ class ApiService {
   }
   
   static Future<List<Song>> getSongs() async {
-    print('Fetching songs from: $baseUrl/songs');
+    // print('Fetching songs from: $baseUrl/songs');
     final response = await http.get(Uri.parse('$baseUrl/songs'));
-    print('Songs response status: ${response.statusCode}');
-    print('Songs response body: ${response.body}');
+    // print('Songs response status: ${response.statusCode}');
+    // print('Songs response body: ${response.body}');
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => Song.fromJson(json)).toList();
@@ -38,12 +38,12 @@ class ApiService {
   }
   
   static String getVideoStreamUrl(String id) {
-    print('Video stream URL: $baseUrl/videos/stream/$id');
+    // print('Video stream URL: $baseUrl/videos/stream/$id');
     return '$baseUrl/videos/stream/$id';
   }
   static String getSongStreamUrl(String id) {
-    print('Song ID received: "$id" (length: ${id.length})');
-    print('Song stream URL: $baseUrl/songs/stream/$id');
+    // print('Song ID received: "$id" (length: ${id.length})');
+    // print('Song stream URL: $baseUrl/songs/stream/$id');
     return '$baseUrl/songs/stream/$id';
   }
   static String getThumbnailUrl(String id) => '$baseUrl/songs/$id/thumbnail';
