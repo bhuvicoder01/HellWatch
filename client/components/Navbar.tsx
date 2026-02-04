@@ -28,7 +28,7 @@ export default function Navbar() {
         <div className="navbar">
             <div className="navbar_logo">
                 <Link href="/">
-                    <img src="/logo1.png" alt="logo" />
+                    <img src="/logo3.png" alt="logo" />
                 </Link>
             </div>
             {/* <div className="navbar-link">
