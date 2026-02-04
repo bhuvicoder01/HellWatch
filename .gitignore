@@ -15,3 +15,4 @@ MEDIACONVERT_INTEGRATION.md
 aws-mediaconvert-policy.json
 build/
 hellwatch_mobile/
+mobile/android/local.properties
