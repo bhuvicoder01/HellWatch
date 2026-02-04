@@ -47,4 +47,17 @@ class ApiService {
     return '$baseUrl/songs/stream/$id';
   }
   static String getThumbnailUrl(String id) => '$baseUrl/songs/$id/thumbnail';
+  static String getVideoThumbnailUrl(String id) => '$baseUrl/videos/$id/thumbnail';
+  
+  static Future<void> trackVideoView(String videoId, double watchedPercentage) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/videos/$videoId/track-view'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'watchedPercentage': watchedPercentage}),
+      );
+    } catch (e) {
+      throw Exception('Failed to track view: $e');
+    }
+  }
 }

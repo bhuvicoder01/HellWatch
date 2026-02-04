@@ -13,3 +13,5 @@ render_service_alive_mechanism/.env
 render_service_alive_mechanism/package-lock.json
 MEDIACONVERT_INTEGRATION.md
 aws-mediaconvert-policy.json
+build/
+hellwatch_mobile/

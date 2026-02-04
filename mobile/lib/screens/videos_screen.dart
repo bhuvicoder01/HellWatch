@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter/services.dart';
 import '../models/video.dart';
 import '../services/api_service.dart';
+import '../widgets/custom_video_player.dart';
 
 class VideosScreen extends StatefulWidget {
   const VideosScreen({super.key});
@@ -54,26 +55,82 @@ class _VideosScreenState extends State<VideosScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return ListView.builder(
-      itemCount: videos.length,
-      itemBuilder: (context, index) {
-        final video = videos[index];
-        return Card(
-          color: Colors.grey[900],
-          child: ListTile(
-            leading: const Icon(Icons.play_circle, color: Colors.red, size: 40),
-            title: Text(
-              video.title,
-              style: const TextStyle(color: Colors.white),
-            ),
-            subtitle: Text(
-              '${video.views} views \n Uploaded on ${video.uploadDate.toIso8601String().split('T').first}',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            onTap: () => _playVideo(video),
-          ),
-        );
-      },
+    return SafeArea(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (var i = 0; i < videos.length; i++)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  elevation: 4.0,
+                  color: const Color.fromARGB(171, 24, 23, 23),
+                  child: InkWell(
+                    onTap: () {
+                      if (videos.isNotEmpty) {
+                        // Future.delayed(const Duration(milliseconds: 500), () {
+                        //   _playVideo(videos[i]);
+                        // });
+                        _playVideo(videos[i]);
+                      }
+                    },
+                    splashColor: const Color.fromARGB(104, 102, 7, 235),
+                    highlightColor: const Color.fromARGB(180, 105, 104, 104),
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.network(
+                                ApiService.getVideoThumbnailUrl(videos[i].id),
+                                // width: 100,
+                                // height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 120,
+                                    height: 60,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.video_library,
+                                        size: 30),
+                                  );
+                                },
+                              ),
+                              const Icon(Icons.play_circle,
+                                  color: Colors.red, size: 30),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            videos[i].title,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '${videos[i].views} views',
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -88,64 +145,62 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController _controller;
-
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(ApiService.getVideoStreamUrl(widget.video.id)),
-    )..initialize().then((_) {
-        if (mounted) {
-          setState(() {});
-          _controller.play();
-        }
-      });
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.video.title)),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Text(widget.video.title, style: const TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Column(
         children: [
-          _controller.value.isInitialized
-              ? AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                )
-              : const Center(child: CircularProgressIndicator()),
-          VideoProgressIndicator(_controller, allowScrubbing: true),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(
-                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                ),
-                onPressed: () {
-                  if (mounted) {
-                    setState(() {
-                      _controller.value.isPlaying
-                          ? _controller.pause()
-                          : _controller.play();
-                    });
-                  }
-                },
-              ),
-            ],
+          Expanded(
+            child: CustomVideoPlayer(video: widget.video),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              widget.video.description,
-              style: const TextStyle(color: Colors.white),
+          Container(
+            color: Colors.grey[900],
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.video.title,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${widget.video.views} views • ${widget.video.uploadDate.toIso8601String().split('T').first}',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  widget.video.description,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
             ),
           ),
         ],

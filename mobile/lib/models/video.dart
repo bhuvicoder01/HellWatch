@@ -5,6 +5,7 @@ class Video {
   final String filename;
   final int views;
   final DateTime uploadDate;
+  final String thumbnail;
 
   Video({
     required this.id,
@@ -13,6 +14,7 @@ class Video {
     required this.filename,
     required this.views,
     required this.uploadDate,
+    required this.thumbnail
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class Video {
       filename: (json['filename'] ?? '').toString(),
       views: json['stats']?['views'] ?? 0,
       uploadDate: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
+      thumbnail: json['thumbnail'] ?? '',
     );
   }
 }

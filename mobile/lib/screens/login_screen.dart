@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hellwatch_mobile/widgets/image_title.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -22,17 +23,19 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
     
-    setState(() => _isLoading = false);
-    
-    if (success) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed')),
-      );
+    if (mounted) {
+      setState(() => _isLoading = false);
+      
+      if (success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed')),
+        );
+      }
     }
   }
 
@@ -44,15 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'HellWatch',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
-            ),
-            const SizedBox(height: 48),
+           const ImageTitle(
+            assetPath: 'assets/icon/hw_logo_1024.png',
+            fallbackText: 'HellWatch',
+            height: 150,
+            width: 500,
+          ),
+            const SizedBox(height: 32),
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
