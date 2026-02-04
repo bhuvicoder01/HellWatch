@@ -127,9 +127,11 @@ export default function Footer() {
         audioRef.current.currentTime = savedTime ? parseFloat(savedTime) : 0;
       }
       
-      // Auto-play for URL parameter or resume
-      audioRef.current.play().catch(console.error);
-      setIsPlaying(true);
+      // Auto-play only for URL parameter
+      if (id) {
+        audioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
     }
   }, [currentSong]);
 
