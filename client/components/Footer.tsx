@@ -16,11 +16,11 @@ import {
   faVolumeMute,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function Footer() {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { Songs, currentSong, setCurrentSong } = useSong();
+  const { Songs, currentSong, setCurrentSong,refreshSongs } = useSong();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -31,6 +31,20 @@ export default function Footer() {
   const [isPageReloaded, setIsPageReloaded] = useState(true);
   const pathname = usePathname();
   const bufferRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+  const id=useSearchParams().get('play')
+  
+      useEffect(()=>{
+          refreshSongs()
+      },[])
+      
+      useEffect(()=>{
+          if(id && Songs.length > 0){
+              const song=Songs?.find((s: any)=>s._id===id||s.id===id)
+              if(song && !currentSong){
+                  setCurrentSong(song)
+              }
+          }
+      },[id,Songs])
 
   
   //fetch thumbnail early to render quick
@@ -62,7 +76,7 @@ export default function Footer() {
     } else {
       document.title = 'HellWatch';
     }
-  }, [currentSong]);
+  }, [currentSong,thumbnail]);
 
   // Buffer adjacent songs
   useEffect(() => {
@@ -111,11 +125,11 @@ export default function Footer() {
       if (savedTime !== null && isPageReloaded) {
         setIsPageReloaded(false);
         audioRef.current.currentTime = savedTime ? parseFloat(savedTime) : 0;
-      } else {
-        // try to play when no saved time to resume
-        audioRef.current.play();
-        setIsPlaying(true);
       }
+      
+      // Auto-play for URL parameter or resume
+      audioRef.current.play().catch(console.error);
+      setIsPlaying(true);
     }
   }, [currentSong]);
 

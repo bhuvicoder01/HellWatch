@@ -146,36 +146,36 @@ export default function Home() {
   };
 
   const SectionHeader = ({ title, icon, count }: { title: string; icon: any; count?: number }) => (
-    <div className="flex items-center gap-3 mb-6">
-      <FontAwesomeIcon icon={icon} className="text-red-500 text-2xl" />
-      <h2 className="text-2xl font-bold text-white">{title}</h2>
+    <div className="flex items-center gap-3 mt-2 mb-6">
+      
+      <h2 className="text-2xl font-bold text-white"><FontAwesomeIcon color="red" icon={icon} className="text-red-500 text-2xl" />{title}</h2>
       {count && <span className="text-gray-400 text-sm">({count})</span>}
     </div>
   );
 
   return (
-    <main className=" bg-gradient-to-br from-black via-gray-900 to-black">
+    <main className=" bg-gradient-to-br from-black via-gray-900 to-black overflow-y-auto " style={{height: '100vh',scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
       <div className="container mx-auto px-4 py-12" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent mb-4">
-            HellWatch
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-red-500 via-red-400 to-orange-400 bg-clip-text text-transparent mb-6 tracking-tight">
+            Welcome to HellWatch
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Your ultimate destination for streaming videos and music. Discover trending content, 
-            explore new releases, and enjoy unlimited entertainment.
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+            Your <span className="text-red-400 font-semibold">ultimate destination</span> for streaming videos and music.<br/>
+            Discover trending content, explore new releases, and enjoy <span className="text-orange-400 font-semibold">unlimited entertainment</span>.
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 justify-center mb-12">
+        <div className="flex gap-4 justify-center mb-12">
+          <span>Upload </span>
           <Link href="/videos/upload" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-            <FontAwesomeIcon icon={faVideo} />
-            Upload Video
+            <FontAwesomeIcon size='2xl' icon={faVideo} />
           </Link>
+           <span className="text-gray-400"> or </span>
           <Link href="/songs/upload" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-            <FontAwesomeIcon icon={faMusic} />
-            Upload Song
+            <FontAwesomeIcon size="2xl" icon={faMusic} />
           </Link>
         </div>
 
