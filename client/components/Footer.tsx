@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStepForward,
   faStepBackward,
+  faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 import { faHome, faVideo, faMusic } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Repeat, Repeat1 } from "lucide-react";
 
 export default function Footer() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -25,6 +27,7 @@ export default function Footer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">(typeof window !== "undefined" ? (localStorage.getItem("repeatMode") as "off" | "one" | "all") || "off" : "off");
   const [showFullView, setShowFullView] = useState(false);
   const [thumbnail, setThumbnail] = useState<string | undefined>(undefined);
   const thumbnailUrlRef = useRef<string | undefined>(undefined);
@@ -132,6 +135,11 @@ export default function Footer() {
         audioRef.current.play().catch(console.error);
         setIsPlaying(true);
       }
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
+
+      document.title = `${currentSong.title} by ${currentSong.artist} | HellWatch`;
+      document.querySelector('link[rel="icon"]')?.setAttribute('href', thumbnail || '/favicon.ico');
     }
   }, [currentSong]);
 
@@ -216,6 +224,27 @@ export default function Footer() {
     setCurrentSong(Songs[prevIndex] as any);
   };
 
+  const toggleRepeatMode = () => {
+    setRepeatMode((prev) => {
+      if (prev === "off") {
+        if (typeof window!=='undefined') {
+          localStorage.setItem('repeatMode', 'all');
+        }
+        return "all"
+      }
+      if (prev === "one"){ 
+        if (typeof window!=='undefined') {
+          localStorage.setItem('repeatMode', 'off');
+        }
+        return "off";
+      }
+      if (typeof window!=='undefined') {
+        localStorage.setItem('repeatMode', 'one');
+      }
+      return "one";
+    });
+  };
+
   // Media Session API for external controls
   useEffect(() => {
     if ('mediaSession' in navigator && currentSong) {
@@ -273,8 +302,13 @@ export default function Footer() {
                 onLoadedMetadata={handleLoadedMetadata}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-                onEnded={skipToNext}
-              >
+                onEnded={() => {
+                  if (repeatMode === "one") {
+                    audioRef.current?.play();
+                  } else if (repeatMode === "all"||repeatMode==="off") {
+                    skipToNext();
+                  }
+              }  }>
                 <source
                   src={`${API_URL}/songs/stream/${currentSong.id}`}
                   type="audio/mpeg"
@@ -313,7 +347,13 @@ export default function Footer() {
                   <button className="control-btn" onClick={skipToNext}>
                     <FontAwesomeIcon icon={faStepForward} />
                   </button>
+                  <button className="control-btn" onClick={toggleRepeatMode}>
+                    {repeatMode === "one" &&<Repeat1 />}
+                    {repeatMode === "all" && <Repeat />}
+                    {repeatMode === "off" && <Repeat style={{color:'white'}}/>}
+                  </button>
                   {/* <i >{FaPlay}</i> */}
+                  
                 </div>
 
                 <div className="player-controls">
