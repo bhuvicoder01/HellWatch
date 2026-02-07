@@ -34,21 +34,13 @@ export default function Footer() {
   const [isPageReloaded, setIsPageReloaded] = useState(true);
   const pathname = usePathname();
   const bufferRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
-  const id=useSearchParams().get('play')
+  const id=useSearchParams()?.get('play')
   
       useEffect(()=>{
           refreshSongs()
       },[])
       
-      useEffect(()=>{
-          if(id && Songs.length > 0){
-              const song=Songs?.find((s: any)=>s._id===id||s.id===id)
-              if(song && !currentSong){
-                  setCurrentSong(song)
-              }
-          }
-      },[id,Songs])
-
+   
   
   //fetch thumbnail early to render quick
   useEffect(() => {
@@ -116,32 +108,40 @@ export default function Footer() {
   }, []);
 
   useEffect(() => {
+    if(id && pathname === '/songs' && Songs.length > 0){
+      const song = Songs?.find((s: any) => s._id === id || s.id === id) as any;
+      if(song && song?.id !== currentSong?.id){
+        setCurrentSong(song);
+      }
+    }
+  }, [id, Songs, pathname]);
+
+  useEffect(() => {
     if (audioRef.current && currentSong) {
       audioRef.current.load();
-
-      // Guard localStorage access with typeof window !== 'undefined' for SSR/type-safety
-      const savedTime =
-        typeof window !== "undefined"
-          ? localStorage.getItem("currentTime")
-          : null;
-
-      if (savedTime !== null && isPageReloaded) {
-        setIsPageReloaded(false);
-        audioRef.current.currentTime = savedTime ? parseFloat(savedTime) : 0;
-      }
-      
-      // Auto-play only for URL parameter
-      if (id) {
-        audioRef.current.play().catch(console.error);
-        setIsPlaying(true);
-      }
-      audioRef.current.play().catch(() => {});
+      audioRef.current.play().catch(console.error);
       setIsPlaying(true);
 
+      const savedData = typeof window !== "undefined" ? localStorage.getItem("songProgress") : null;
+      const parsedData = savedData ? JSON.parse(savedData) : null;
+
+      if (parsedData && parsedData.songId === currentSong.id && isPageReloaded) {
+        setIsPageReloaded(false);
+        audioRef.current.currentTime = parsedData.time || 0;
+      }
+      else{
+        if(typeof window !=='undefined'){
+          localStorage.removeItem('songProgress')
+        }
+        audioRef.current.currentTime = 0;
+      }
+      
       document.title = `${currentSong.title} by ${currentSong.artist} | HellWatch`;
       document.querySelector('link[rel="icon"]')?.setAttribute('href', thumbnail || '/favicon.ico');
     }
   }, [currentSong]);
+
+
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -155,12 +155,15 @@ export default function Footer() {
   };
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
+    if (audioRef.current && currentSong) {
       setCurrentTime(audioRef.current.currentTime);
       if (typeof window !== "undefined") {
         localStorage.setItem(
-          "currentTime",
-          audioRef.current.currentTime.toString()
+          "songProgress",
+          JSON.stringify({
+            songId: currentSong.id,
+            time: audioRef.current.currentTime
+          })
         );
       }
     }
@@ -202,7 +205,7 @@ export default function Footer() {
   const skipToNext = () => {
     if (!currentSong) return;
     if(typeof window !=='undefined'){
-      localStorage.removeItem('currentTime')
+      localStorage.removeItem('songProgress')
     }
     const currentIndex = Songs.findIndex(
       (song: any) => song.id === currentSong.id
@@ -214,7 +217,7 @@ export default function Footer() {
   const skipToPrevious = () => {
     if (!currentSong) return;
     if(typeof window !=='undefined'){
-      localStorage.removeItem('currentTime')
+      localStorage.removeItem('songProgress')
     }
     const currentIndex = Songs.findIndex(
       (song: any) => song.id === currentSong.id

@@ -33,12 +33,13 @@ export default function SongsCard({ song }: { song:SongContextType  }) {
                 localStorage.removeItem('currentTime')
             }
             setCurrentSong(foundSong);
+            
         }
         // console.log(currentSong)
     }
     return (
         <div className="song-card flex flex-col items-center justify-center w-full h-full"style={{transform:`scale(${song.id===currentSong?.id?'1.07':'1'})`,  boxShadow:`${song.id===currentSong?.id?'0 2px 12px rgba(255, 0, 0, 1)':'none'}`}} >
-            <Link href='#' onClick={handleSongStart}>
+            <Link href={`/songs?play=${song.id}`} >
 {showThumbnail && song.thumbnail&& <img src={thumbnail as string} alt={song.title} className="thumbnail" onError={()=>setShowThumbnail(false)} />}
 </Link>
         <div className="song-info"style={{justifyContent:'center',alignItems:'center'}}>
