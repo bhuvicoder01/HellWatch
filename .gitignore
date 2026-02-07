@@ -29,3 +29,8 @@ mobile/ios/Flutter/
 mobile/ios/Pods
 mobile/.flutter-plugins-dependencies
 mobile/ios/Runner
+
+backend_services/streaming_service/src/main/resources/application.properties
+backend_services/streaming_service/src/main/resources/log4jdbc.log4j2.properties
+backend_services/streaming_service/target
+backend_services/streaming_service/.idea

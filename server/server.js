@@ -58,6 +58,7 @@ app.use('/videos', videoRoutes);
 app.use('/auth', require('./routes/auth'));
 app.use('/proxy-image', require('./routes/proxy'));
 app.use('/public', require('./routes/public'));
+app.use('/streaming-proxy', require('./routes/streaming-proxy'));
 
 // Apple Music search route
 app.get('/apple-music/search', async (req, res) => {
