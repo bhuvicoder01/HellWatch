@@ -37,7 +37,7 @@ export default function Footer() {
   const id=useSearchParams()?.get('play')
   
       useEffect(()=>{
-          refreshSongs()
+          refreshSongs();
       },[])
       
    
@@ -113,26 +113,35 @@ export default function Footer() {
       if(song && song?.id !== currentSong?.id){
         setCurrentSong(song);
       }
+    } else if (!id && !currentSong && Songs.length > 0) {
+      const savedData = typeof window !== "undefined" ? localStorage.getItem("songProgress") : null;
+      const parsedData = savedData ? JSON.parse(savedData) : null;
+      if (parsedData && parsedData.songId) {
+        const song = Songs?.find((s: any) => s.id === parsedData.songId || s._id === parsedData.songId);
+        if (song) {
+          setCurrentSong(song);
+        }
+      }
     }
-  }, [id, Songs, pathname]);
+  }, [id, Songs, pathname, currentSong]);
 
   useEffect(() => {
     if (audioRef.current && currentSong) {
-      audioRef.current.load();
-      audioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-
       const savedData = typeof window !== "undefined" ? localStorage.getItem("songProgress") : null;
       const parsedData = savedData ? JSON.parse(savedData) : null;
+      const shouldAutoPlay = !parsedData || parsedData.songId !== currentSong.id;
 
-      if (parsedData && parsedData.songId === currentSong.id && isPageReloaded) {
-        setIsPageReloaded(false);
-        audioRef.current.currentTime = parsedData.time || 0;
+      audioRef.current.load();
+      if (shouldAutoPlay) {
+        audioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      } else {
+        setIsPlaying(false);
       }
-      else{
-        if(typeof window !=='undefined'){
-          localStorage.removeItem('songProgress')
-        }
+
+      if (parsedData && parsedData.songId === currentSong.id) {
+        audioRef.current.currentTime = parsedData.time || 0;
+      } else {
         audioRef.current.currentTime = 0;
       }
       
@@ -304,7 +313,11 @@ export default function Footer() {
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onPlay={() => setIsPlaying(true)}
+                onPlaying={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
+                onWaiting={() => setIsPlaying(false)}
+                onStalled={() => setIsPlaying(false)}
+                onError={() => setIsPlaying(false)}
                 onEnded={() => {
                   if (repeatMode === "one") {
                     audioRef.current?.play();

@@ -121,17 +121,6 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
   const videoUrl = `${API_URL}/videos/stream/${videoId}?quality=${quality}`;
 
   useEffect(() => {
-
-    // if(document.fullscreenElement!==null){
-    //   setShowTitle(true)
-    // }
-    // else{
-    //   setInterval(()=>{
-    //     setShowTitle(false)
-    //   },10000)
-
-    // }
-    
     const video = videoRef.current;
     if (!video) return;
     
@@ -190,6 +179,10 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
     setAutoQuality(true);
     setLastProgressTime(0);
     setLastBytesLoaded(0);
+    setCurrentSong(null);
+    if(typeof window !== 'undefined'){
+      localStorage.removeItem('songProgress');
+    }
   },[videoId])
 
   useEffect(() => {
