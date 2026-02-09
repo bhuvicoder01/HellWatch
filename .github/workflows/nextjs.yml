@@ -32,14 +32,20 @@ jobs:
         working-directory: ./client
         run: npm ci
 
-      - name: Build with Next.js
+      - name: Build static export
         working-directory: ./client
         run: npm run build
 
-      - name: Upload GitHub Pages artifact
+      - name: Verify out directory
+        working-directory: ./client
+        run: |
+          ls -la out/
+          echo "out/index.html exists: $(test -f out/index.html && echo yes || echo no)"
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./client/.next/static
+          path: ./client/out
 
   deploy:
     environment:
