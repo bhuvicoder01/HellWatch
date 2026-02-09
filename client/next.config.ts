@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
    // ✅ Force PostCSS (No LightningCSS)
-  //  output: 'export', 
+   output: 'export', 
   async rewrites() {
     return [
       {
