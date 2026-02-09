@@ -67,13 +67,9 @@ jobs:
         working-directory: ./client
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
-      - name: Build with Next.js
+      - name: Build with Next.js (exports static site)
         working-directory: ./client
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
-
-      - name: Export static site
-        working-directory: ./client
-        run: ${{ steps.detect-package-manager.outputs.runner }} next export
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
