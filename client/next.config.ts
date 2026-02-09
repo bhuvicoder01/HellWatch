@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   // output:'standalone',
    // ✅ Force PostCSS (No LightningCSS)
+   
   async rewrites() {
     return [
       {
@@ -17,7 +18,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: '**' }, // Video thumbnails ,
       { protocol: 'http', hostname: '**' }  // Video thumbnails
-    ]
+    ],
+    unoptimized: true, // Disable image optimization for external images
   }
 };
 
