@@ -4,8 +4,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
    // ✅ Force PostCSS (No LightningCSS)
-  //  output: 'export', 
-  //  basePath:'/HellWatch',
+   output: 'export', 
+   basePath:'/HellWatch',
   async rewrites() {
     return [
       {
@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**' }, // Video thumbnails ,
       { protocol: 'http', hostname: '**' }  // Video thumbnails
     ],
-    // path:'/HellWatch/public',
-    // unoptimized: true, // Disable image optimization for external images
+    path:'/HellWatch/public',
+    unoptimized: true, // Disable image optimization for external images
   }
 };
 
