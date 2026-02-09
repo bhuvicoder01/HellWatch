@@ -1,4 +1,4 @@
-name: HellWatch Static Deploy
+name: Deploy HellWatch to GitHub Pages
 
 on:
   push:
@@ -10,9 +10,16 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       
@@ -20,16 +27,20 @@ jobs:
         with:
           node-version: 20
       
-      - run: |
-          cd client
-          npm ci
-          npm run build
-          echo "::notice:: Build complete"
-          ls -la out/ || echo "❌ NO OUT DIRECTORY"
-          find . -name "index.html" -type f || echo "❌ No index.html found"
-        shell: bash
+      - run: npm ci
+        working-directory: ./client
       
-      - uses: JamesIves/github-pages-deploy-action@v4
+      - run: npm run build
+        working-directory: ./client
+      
+      - run: |
+          echo "=== ./client/out/ contents ==="
+          ls -la client/out/
+          test -f client/out/index.html && echo "✅ index.html ready" || echo "❌ MISSING index.html"
+      
+      - uses: actions/upload-pages-artifact@v3
         with:
-          folder: client/out
-          branch: gh-pages
+          path: ./client/out
+      
+      - id: deployment
+        uses: actions/deploy-pages@v4
