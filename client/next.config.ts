@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   // output:'standalone',
    // ✅ Force PostCSS (No LightningCSS)
-   
+   output: 'export', 
   async rewrites() {
     return [
       {
