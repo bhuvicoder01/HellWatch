@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**' }, // Video thumbnails ,
       { protocol: 'http', hostname: '**' }  // Video thumbnails
     ],
-    path:'/public/',
+    path:'/HellWatch/public',
     unoptimized: true, // Disable image optimization for external images
   }
 };
