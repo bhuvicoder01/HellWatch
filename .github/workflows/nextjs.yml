@@ -45,6 +45,9 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
+          cache-dependency-path: |
+            client/package-lock.json
+            client/yarn.lock
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -56,7 +59,7 @@ jobs:
         with:
           path: |
             client/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('client/**/package-lock.json', 'client/**/yarn.lock') }}-${{ hashFiles('client/**/*.[jt]s', 'client/**/*.[jt]sx', 'client/**/*.[jt]sx') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('client/**/package-lock.json', 'client/**/yarn.lock') }}-${{ hashFiles('client/**/*.[jt]s', 'client/**/*.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('client/**/package-lock.json', 'client/**/yarn.lock') }}-
 
