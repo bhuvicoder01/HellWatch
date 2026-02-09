@@ -3,9 +3,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // output:'standalone',
    // ✅ Force PostCSS (No LightningCSS)
-   output: 'export', 
+  //  output: 'export', 
   async rewrites() {
     return [
       {
