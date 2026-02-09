@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       }
     ];
   },
+  trailingSlash: true,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' }, // Video thumbnails ,
