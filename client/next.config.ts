@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
    // ✅ Force PostCSS (No LightningCSS)
    output: 'export', 
+   basePath:'/HellWatch',
   async rewrites() {
     return [
       {
