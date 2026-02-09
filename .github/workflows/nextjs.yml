@@ -1,4 +1,4 @@
-name: Deploy Next.js site to Pages
+name: Deploy HellWatch Frontend to GitHub Pages
 
 on:
   push:
@@ -15,45 +15,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
           cache: 'npm'
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: 'client/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./client
         run: npm ci
 
-      - name: Build static export
+      - name: Build static site
         working-directory: ./client
         run: npm run build
 
       - name: Verify out directory
         working-directory: ./client
         run: |
+          echo "=== Contents of ./out/ ==="
           ls -la out/
-          echo "out/index.html exists: $(test -f out/index.html && echo yes || echo no)"
+          test -f out/index.html && echo "✅ index.html exists" || echo "❌ index.html MISSING"
 
-      - name: Upload artifact
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./client/out
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
