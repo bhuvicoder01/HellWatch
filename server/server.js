@@ -119,6 +119,14 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
   MongoDB.connect(process.env.MONGODB_URI);
+  
+  // Auto-ping service every 5 minutes
+  setInterval(() => {
+    exec('curl https://hellwatch-ping-service.onrender.com', (error) => {
+      if (error) console.error('Auto-ping failed:', error.message);
+      else console.log('Auto-ping successful');
+    });
+  }, 5 * 60 * 1000);
 });
 
 server.setMaxListeners(100000);
