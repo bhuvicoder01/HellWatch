@@ -220,7 +220,14 @@ export default function Footer() {
       (song: any) => song.id === currentSong.id
     );
     const nextIndex = currentIndex + 1 < Songs.length ? currentIndex + 1 : 0;
-    setCurrentSong(Songs[nextIndex] as any);
+    //set path to /songs?id=nextSongId
+    if(typeof window !=='undefined'){
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('play', (Songs[nextIndex] as any)?.id || '');
+      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+      window.history.pushState({}, '', newUrl);
+    }
+    // setCurrentSong(Songs[nextIndex] as any);
   };
 
   const skipToPrevious = () => {
@@ -233,7 +240,15 @@ export default function Footer() {
     );
     const prevIndex =
       currentIndex - 1 >= 0 ? currentIndex - 1 : Songs.length - 1;
-    setCurrentSong(Songs[prevIndex] as any);
+        //set path to /songs?id=nextSongId
+    if(typeof window !=='undefined'){
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('play', (Songs[prevIndex] as any)?.id || '');
+      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+      window.history.pushState({}, '', newUrl);
+    }
+
+    // setCurrentSong(Songs[prevIndex] as any);
   };
 
   const toggleRepeatMode = () => {
