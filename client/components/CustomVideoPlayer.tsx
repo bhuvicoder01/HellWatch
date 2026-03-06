@@ -182,6 +182,7 @@ export default function CustomVideoPlayer({ videoId, title}: CustomVideoPlayerPr
     setCurrentSong(null);
     if(typeof window !== 'undefined'){
       localStorage.removeItem('songProgress');
+      localStorage.removeItem('currentSong');
     }
   },[videoId])
 
