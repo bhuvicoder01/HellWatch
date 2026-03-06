@@ -20,23 +20,24 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Pinger Service B running on port ${PORT}`);
   
-  if (TARGET_URL) {
-    console.log(`Scheduled pinging task for: ${TARGET_URL}`);
+  {/** uncomment below to run cron job */}
+  // if (TARGET_URL) {
+  //   console.log(`Scheduled pinging task for: ${TARGET_URL}`);
     
-    // Schedule a task to run every 5 minutes (*/5 * * * *)
-    // This wakes up Service A before Render's 15-minute timeout.
-    cron.schedule('*/5 * * * *', async () => {
-      try {
-        console.log(`--- Pinging target service at ${new Date().toISOString()} ---`);
-        const response = await axios.get(`${TARGET_URL}/ping-reverse`);
-        console.log(`✅ Ping successful. Status: ${response.status}`);
-      } catch (error) {
-        console.error(`❌ Ping failed for ${TARGET_URL}:${error.status} ${error.message}`);
-      }
-    });
+  //   // Schedule a task to run every 5 minutes (*/5 * * * *)
+  //   // This wakes up Service A before Render's 15-minute timeout.
+  //   cron.schedule('*/5 * * * *', async () => {
+  //     try {
+  //       console.log(`--- Pinging target service at ${new Date().toISOString()} ---`);
+  //       const response = await axios.get(`${TARGET_URL}/ping-reverse`);
+  //       console.log(`✅ Ping successful. Status: ${response.status}`);
+  //     } catch (error) {
+  //       console.error(`❌ Ping failed for ${TARGET_URL}:${error.status} ${error.message}`);
+  //     }
+  //   });
 
-  } else {
-    console.error("❌ CRON task not started: TARGET_URL environment variable is missing.");
-  }
+  // } else {
+  //   console.error("❌ CRON task not started: TARGET_URL environment variable is missing.");
+  // }
 });
 
